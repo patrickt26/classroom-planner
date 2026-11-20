@@ -78,6 +78,91 @@ export type Database = {
           },
         ];
       };
+      lessons: {
+        Row: {
+          created_at: string;
+          duration_minutes: number;
+          id: string;
+          meeting_url: string | null;
+          modality: Database["public"]["Enums"]["lesson_modality"];
+          recurrence_id: string | null;
+          rescheduled_from_id: string | null;
+          starts_at: string;
+          status: Database["public"]["Enums"]["lesson_status"];
+          student_id: string;
+          subject_id: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          duration_minutes: number;
+          id?: string;
+          meeting_url?: string | null;
+          modality: Database["public"]["Enums"]["lesson_modality"];
+          recurrence_id?: string | null;
+          rescheduled_from_id?: string | null;
+          starts_at: string;
+          status?: Database["public"]["Enums"]["lesson_status"];
+          student_id: string;
+          subject_id: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          duration_minutes?: number;
+          id?: string;
+          meeting_url?: string | null;
+          modality?: Database["public"]["Enums"]["lesson_modality"];
+          recurrence_id?: string | null;
+          rescheduled_from_id?: string | null;
+          starts_at?: string;
+          status?: Database["public"]["Enums"]["lesson_status"];
+          student_id?: string;
+          subject_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lessons_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "lessons_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "lessons_workspace_id_student_id_recurrence_id_fkey";
+            columns: ["workspace_id", "student_id", "recurrence_id"];
+            isOneToOne: false;
+            referencedRelation: "recurrences";
+            referencedColumns: ["workspace_id", "student_id", "id"];
+          },
+          {
+            foreignKeyName: "lessons_workspace_id_student_id_rescheduled_from_id_fkey";
+            columns: ["workspace_id", "student_id", "rescheduled_from_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["workspace_id", "student_id", "id"];
+          },
+          {
+            foreignKeyName: "lessons_workspace_id_subject_id_fkey";
+            columns: ["workspace_id", "subject_id"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           role: Database["public"]["Enums"]["workspace_role"];
@@ -102,6 +187,77 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
+      recurrences: {
+        Row: {
+          created_at: string;
+          day_of_week: number;
+          duration_minutes: number;
+          end_date: string | null;
+          id: string;
+          meeting_url: string | null;
+          modality: Database["public"]["Enums"]["lesson_modality"];
+          start_date: string;
+          start_time: string;
+          student_id: string;
+          subject_id: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          day_of_week: number;
+          duration_minutes: number;
+          end_date?: string | null;
+          id?: string;
+          meeting_url?: string | null;
+          modality: Database["public"]["Enums"]["lesson_modality"];
+          start_date: string;
+          start_time: string;
+          student_id: string;
+          subject_id: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          day_of_week?: number;
+          duration_minutes?: number;
+          end_date?: string | null;
+          id?: string;
+          meeting_url?: string | null;
+          modality?: Database["public"]["Enums"]["lesson_modality"];
+          start_date?: string;
+          start_time?: string;
+          student_id?: string;
+          subject_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "recurrences_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "recurrences_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "recurrences_workspace_id_subject_id_fkey";
+            columns: ["workspace_id", "subject_id"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["workspace_id", "id"];
           },
         ];
       };
@@ -374,6 +530,14 @@ export type Database = {
       };
     };
     Enums: {
+      lesson_modality: "presencial" | "online";
+      lesson_status:
+        | "agendada"
+        | "confirmada"
+        | "realizada"
+        | "cancelada"
+        | "falta"
+        | "reposicao_pendente";
       workspace_role: "teacher" | "student" | "guardian";
     };
     CompositeTypes: {
@@ -505,6 +669,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      lesson_modality: ["presencial", "online"],
+      lesson_status: [
+        "agendada",
+        "confirmada",
+        "realizada",
+        "cancelada",
+        "falta",
+        "reposicao_pendente",
+      ],
       workspace_role: ["teacher", "student", "guardian"],
     },
   },
