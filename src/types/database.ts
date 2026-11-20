@@ -337,6 +337,14 @@ export type Database = {
         Returns: boolean;
       };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
+      remove_student_guardian: {
+        Args: {
+          target_guardian_id: string;
+          target_student_id: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
       save_student: {
         Args: {
           selected_subject_ids: string[];
@@ -348,6 +356,18 @@ export type Database = {
           student_notes?: string;
           student_school?: string;
           target_student_id?: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
+      save_student_guardian: {
+        Args: {
+          financial_guardian: boolean;
+          guardian_name: string;
+          guardian_phone?: string;
+          guardian_relationship: string;
+          target_guardian_id?: string;
+          target_student_id: string;
           target_workspace_id: string;
         };
         Returns: boolean;

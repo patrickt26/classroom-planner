@@ -135,7 +135,14 @@ export default async function StudentsPage({
                   {Array.from(student.name)[0]?.toLocaleUpperCase("pt-BR")}
                 </span>
                 <div className="min-w-0 flex-1 wrap-anywhere">
-                  <h2 className="font-bold">{student.name}</h2>
+                  <h2 className="font-bold">
+                    <Link
+                      href={`/alunos/${student.id}`}
+                      className="inline-flex min-h-11 items-center rounded-sm underline decoration-border underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      {student.name}
+                    </Link>
+                  </h2>
                   {details && (
                     <p className="mt-0.5 text-sm text-muted-foreground">
                       {details}
