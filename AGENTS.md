@@ -113,6 +113,7 @@ Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
    - tenha **todas** as issues da seção "Depende de" já fechadas;
    - ainda não tenha um PR aberto que a mencione (`Closes #N`).
 3. Antes de codar, responda em uma linha qual issue escolheu e por quê.
+   Se a issue tiver a etiqueta **`modelo-forte`**, **pare** antes de codar e avise: "Esta issue pede GPT-6.2 Astra com raciocínio High. Troque o modelo e mande `next issue` de novo." Siga só se a pessoa confirmar que já está nesse modelo.
 4. Crie um branch a partir da `main` atualizada, no formato `<tipo>/<N>-<resumo>` (ex.: `chore/2-supabase-local`).
 5. Resolva a issue seguindo todas as regras deste arquivo e abra o PR com `Closes #N`.
 
