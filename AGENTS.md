@@ -66,10 +66,13 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 11. Interface em **português do Brasil**; código (nomes de variáveis, funções, tabelas) em **inglês**.
 12. Acessibilidade: botões e links reais, `label` em todo campo, área de toque mínima de 44px, contraste mínimo 4,5:1.
 13. Não crie botões, telas ou números falsos. Se algo ainda não funciona, não aparece.
+14. **Responsivo:** toda tela nasce mobile-first, mas precisa funcionar bem em **375px** (celular), **768px** (tablet) e **1280px** (computador).
+    No computador, aproveite a largura (ex.: lista e detalhe lado a lado, conteúdo com largura máxima) em vez de esticar a tela do celular.
+    Inclua prints nas três larguras no PR de qualquer tela.
 
 ### Escopo
-14. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
-15. Leia a issue inteira (contexto, escopo, fora do escopo, critérios de aceite) antes de começar.
+15. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
+16. Leia a issue inteira (contexto, escopo, fora do escopo, critérios de aceite) antes de começar.
 
 ## Identidade visual
 
