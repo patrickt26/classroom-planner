@@ -9,6 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      grades: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "grades_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
+      guardians: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          phone: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          phone?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          phone?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guardians_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           role: Database["public"]["Enums"]["workspace_role"];
@@ -29,6 +98,200 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memberships_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
+      student_guardians: {
+        Row: {
+          created_at: string;
+          guardian_id: string;
+          is_financial_guardian: boolean;
+          relationship: string;
+          student_id: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          guardian_id: string;
+          is_financial_guardian?: boolean;
+          relationship: string;
+          student_id: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          guardian_id?: string;
+          is_financial_guardian?: boolean;
+          relationship?: string;
+          student_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_guardians_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "student_guardians_workspace_id_guardian_id_fkey";
+            columns: ["workspace_id", "guardian_id"];
+            isOneToOne: false;
+            referencedRelation: "guardians";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "student_guardians_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      student_subjects: {
+        Row: {
+          created_at: string;
+          student_id: string;
+          subject_id: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          student_id: string;
+          subject_id: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          student_id?: string;
+          subject_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_subjects_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "student_subjects_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "student_subjects_workspace_id_subject_id_fkey";
+            columns: ["workspace_id", "subject_id"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      students: {
+        Row: {
+          archived_at: string | null;
+          birth_date: string | null;
+          created_at: string;
+          grade_id: string | null;
+          hourly_rate: number;
+          id: string;
+          is_free: boolean;
+          name: string;
+          notes: string | null;
+          school: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          birth_date?: string | null;
+          created_at?: string;
+          grade_id?: string | null;
+          hourly_rate: number;
+          id?: string;
+          is_free?: boolean;
+          name: string;
+          notes?: string | null;
+          school?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          birth_date?: string | null;
+          created_at?: string;
+          grade_id?: string | null;
+          hourly_rate?: number;
+          id?: string;
+          is_free?: boolean;
+          name?: string;
+          notes?: string | null;
+          school?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "students_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "students_workspace_id_grade_id_fkey";
+            columns: ["workspace_id", "grade_id"];
+            isOneToOne: false;
+            referencedRelation: "grades";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      subjects: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subjects_workspace_id_fkey";
             columns: ["workspace_id"];
             isOneToOne: false;
             referencedRelation: "workspaces";
