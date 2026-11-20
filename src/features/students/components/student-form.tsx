@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { StudentFormState, StudentFormValues } from "../form-state";
@@ -64,9 +65,13 @@ export function StudentForm({
 
   return (
     <form action={formAction} noValidate className="grid gap-4">
-      <p role="status" className="text-sm text-destructive empty:hidden">
-        {state.message ?? (errors ? "Confira os campos destacados." : "")}
-      </p>
+      <Alert
+        variant="error"
+        message={
+          state.message ??
+          (errors ? "Confira os campos destacados." : undefined)
+        }
+      />
       <fieldset
         key={state.attempt}
         disabled={pending}
@@ -223,9 +228,7 @@ export function StudentStatusForm({
       >
         {archived ? "Reativar aluno" : "Arquivar aluno"}
       </Button>
-      <p role="status" className="text-sm text-destructive empty:hidden">
-        {message}
-      </p>
+      <Alert variant="error" message={message} />
     </form>
   );
 }

@@ -2,6 +2,7 @@ import { Pencil, Plus, Search, Users } from "lucide-react";
 import Form from "next/form";
 import Link from "next/link";
 import { z } from "zod";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatReais } from "@/features/students/form-state";
@@ -55,12 +56,7 @@ export default async function StudentsPage({
         {!emptyActiveList && addStudent}
       </header>
       {notice.success && (
-        <p
-          role="status"
-          className="rounded-lg bg-muted px-4 py-3 text-sm font-medium"
-        >
-          {notices[notice.data]}
-        </p>
+        <Alert variant="success" message={notices[notice.data]} />
       )}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">

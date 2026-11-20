@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Alert, type FormFeedback } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,11 +20,13 @@ export function AccountForm({
   fields,
   submit,
 }: {
-  action: (state: string, data: FormData) => Promise<string>;
+  action: (state: FormFeedback, data: FormData) => Promise<FormFeedback>;
   fields: Field[];
   submit: string;
 }) {
-  const [message, formAction, pending] = useActionState(action, "");
+  const [feedback, formAction, pending] = useActionState(action, null);
+  const error = feedback?.variant === "error" ? feedback : null;
+  const status = feedback?.variant !== "error" ? feedback : null;
   return (
     <form action={formAction} className="grid gap-5">
       {fields.map(({ label, optional, ...field }) => (
@@ -39,9 +42,8 @@ export function AccountForm({
       <Button type="submit" disabled={pending}>
         {submit}
       </Button>
-      <div role="status" className="text-sm empty:hidden">
-        {message}
-      </div>
+      <Alert variant="error" message={error?.message} />
+      <Alert variant={status?.variant ?? "info"} message={status?.message} />
     </form>
   );
 }
