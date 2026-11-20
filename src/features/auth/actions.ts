@@ -1,0 +1,70 @@
+"use server";
+
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import {
+  emailSchema,
+  loginSchema,
+  passwordSchema,
+  signupSchema,
+} from "./schema";
+
+async function confirmationUrl() {
+  const origin = (await headers()).get("origin");
+  if (!origin) throw new Error("Origem do formulário indisponível.");
+  return new URL("/confirmar", origin).href;
+}
+
+export async function login(_: string, form: FormData) {
+  const input = loginSchema.safeParse(Object.fromEntries(form));
+  if (!input.success) return "Informe um e-mail válido e sua senha.";
+  const client = await createClient();
+  const { error } = await client.auth.signInWithPassword(input.data);
+  if (error) return "Confira o e-mail, a senha e a confirmação do cadastro.";
+  redirect("/mais");
+}
+
+export async function signup(_: string, form: FormData) {
+  const input = signupSchema.safeParse(Object.fromEntries(form));
+  if (!input.success)
+    return "Informe um e-mail válido e uma senha de 8 a 72 bytes.";
+  const client = await createClient();
+  const { data, error } = await client.auth.signUp({
+    ...input.data,
+    options: { emailRedirectTo: await confirmationUrl() },
+  });
+  if (error) return "Não foi possível criar a conta. Tente novamente.";
+  if (data.session) redirect("/mais");
+  return "Confira seu e-mail para confirmar o cadastro.";
+}
+
+export async function recover(_: string, form: FormData) {
+  const email = emailSchema.safeParse(form.get("email"));
+  if (!email.success) return "Informe um e-mail válido.";
+  const client = await createClient();
+  const { error } = await client.auth.resetPasswordForEmail(email.data, {
+    redirectTo: await confirmationUrl(),
+  });
+  if (error)
+    return "Não foi possível solicitar a recuperação agora. Tente novamente.";
+  return "Se houver uma conta com esse e-mail, você receberá o link para redefinir a senha.";
+}
+
+export async function resetPassword(_: string, form: FormData) {
+  const password = passwordSchema.safeParse(form.get("password"));
+  if (!password.success)
+    return "Use uma senha de pelo menos 8 caracteres e até 72 bytes.";
+  const client = await createClient();
+  const { error } = await client.auth.updateUser({ password: password.data });
+  if (error)
+    return "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.";
+  redirect("/mais");
+}
+
+export async function logout() {
+  const client = await createClient();
+  const { error } = await client.auth.signOut({ scope: "local" });
+  if (error) throw new Error("Não foi possível sair. Tente novamente.");
+  redirect("/entrar");
+}

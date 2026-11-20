@@ -3,7 +3,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import type { Database } from "@/types/database";
 import { getSupabaseConfig } from "./config";
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+  requiresSession: boolean,
+) {
   const { url, publishableKey } = getSupabaseConfig();
   let response = NextResponse.next({ request });
 
@@ -27,7 +30,13 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  if (requiresSession && !data?.claims.sub) {
+    const login = NextResponse.redirect(new URL("/entrar", request.url));
+    for (const cookie of response.cookies.getAll()) login.cookies.set(cookie);
+    login.headers.set("Cache-Control", "private, no-store");
+    return login;
+  }
 
   return response;
 }

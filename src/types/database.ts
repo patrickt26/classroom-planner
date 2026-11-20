@@ -9,16 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never;
+      memberships: {
+        Row: {
+          role: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          role: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          role?: Database["public"]["Enums"]["workspace_role"];
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "memberships_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
+      workspaces: {
+        Row: {
+          brand: string;
+          name: string;
+          settings: NonNullable<Json>;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          brand?: string;
+          name?: string;
+          settings?: NonNullable<Json>;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Update: {
+          brand?: string;
+          name?: string;
+          settings?: NonNullable<Json>;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      has_role: {
+        Args: {
+          required_role: Database["public"]["Enums"]["workspace_role"];
+          ws: string;
+        };
+        Returns: boolean;
+      };
+      is_workspace_member: { Args: { ws: string }; Returns: boolean };
     };
     Enums: {
-      [_ in never]: never;
+      workspace_role: "teacher" | "student" | "guardian";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -148,6 +206,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      workspace_role: ["teacher", "student", "guardian"],
+    },
   },
 } as const;
