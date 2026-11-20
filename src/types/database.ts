@@ -501,6 +501,20 @@ export type Database = {
         };
         Returns: boolean;
       };
+      save_lesson: {
+        Args: {
+          lesson_duration_minutes: number;
+          lesson_meeting_url?: string;
+          lesson_modality: Database["public"]["Enums"]["lesson_modality"];
+          lesson_starts_at: string;
+          lesson_status: Database["public"]["Enums"]["lesson_status"];
+          lesson_student_id: string;
+          lesson_subject_id: string;
+          target_lesson_id?: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
       save_student: {
         Args: {
           selected_subject_ids: string[];

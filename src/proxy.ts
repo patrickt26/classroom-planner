@@ -6,6 +6,8 @@ export function proxy(request: NextRequest) {
   const requiresSession =
     pathname === "/alunos" ||
     pathname.startsWith("/alunos/") ||
+    pathname === "/agenda" ||
+    pathname.startsWith("/agenda/") ||
     pathname === "/mais" ||
     pathname.startsWith("/mais/") ||
     pathname === "/nova-senha" ||
