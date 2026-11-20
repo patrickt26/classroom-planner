@@ -3,8 +3,7 @@
 Plataforma web para professoras particulares do Ensino Fundamental organizarem alunos, agenda,
 planejamento de aulas, registro pós-aula, acompanhamento pedagógico e cobranças, pensada para o celular.
 
-> Projeto em construção. Este repositório está no "commit zero": regras do projeto e decisões iniciais.
-> O código começa a partir das issues do Marco 1.
+> Projeto em construção no Marco 1.
 
 ## Stack
 
@@ -28,4 +27,24 @@ Por que essa stack: [docs/decisions/0001-stack.md](docs/decisions/0001-stack.md)
 
 ## Rodando localmente
 
-> Será preenchido na issue de setup.
+Use Node.js 22 (a partir de 22.12), 24 ou 26+ e pnpm na versão indicada em `package.json`.
+Com o Corepack instalado, execute `corepack enable pnpm` para que o comando
+`pnpm` use a versão do projeto. Você também pode usar `corepack pnpm` no
+lugar de `pnpm`.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Abra [localhost:3000](http://localhost:3000) para ver a página inicial.
+
+```sh
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+O comando `pnpm lint` verifica lint e formatação com o Biome. Use
+`pnpm format` para aplicar a formatação.

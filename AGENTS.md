@@ -78,16 +78,16 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 
 ## Comandos
 
-> Serão preenchidos pela issue de setup. Mantenha esta seção atualizada.
+Use uma versão de Node.js compatível e a versão do pnpm definida em `package.json`.
 
 ```
-pnpm dev          # servidor local
-pnpm lint         # lint
-pnpm typecheck    # checagem de tipos
-pnpm test         # testes de unidade
-pnpm test:e2e     # testes ponta a ponta
-supabase start    # banco local
-supabase db reset # recria o banco local com migrações + seed
+pnpm install --frozen-lockfile # instala as dependências do lockfile
+pnpm dev                       # servidor local
+pnpm build                     # build de produção
+pnpm lint                      # lint e checagem de formatação com Biome
+pnpm format                    # aplica a formatação com Biome
+pnpm typecheck                 # checagem de tipos
+pnpm test                      # testes de unidade
 ```
 
 Antes de abrir um PR: `pnpm lint`, `pnpm typecheck` e `pnpm test` precisam passar.
