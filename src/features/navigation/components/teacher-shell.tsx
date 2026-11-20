@@ -6,12 +6,14 @@ import { type TeacherLinks, TeacherNavigation } from "./teacher-navigation";
 type TeacherShellProps = {
   children: ReactNode;
   workspaceName?: string;
+  workspaceBrand?: string;
   links?: TeacherLinks;
 };
 
 export function TeacherShell({
   children,
   workspaceName,
+  workspaceBrand,
   links,
 }: TeacherShellProps) {
   const hasNavigation = links && Object.values(links).some(Boolean);
@@ -44,9 +46,14 @@ export function TeacherShell({
                 aria-hidden="true"
                 className="h-6 w-1 shrink-0 rounded-full bg-mustard"
               />
-              <span className="min-w-0 font-semibold text-brown wrap-anywhere">
-                {workspaceName}
-              </span>
+              <div className="min-w-0 wrap-anywhere">
+                <p className="font-semibold text-brown">{workspaceName}</p>
+                {workspaceBrand?.trim() && (
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {workspaceBrand.trim()}
+                  </p>
+                )}
+              </div>
             </header>
           )}
           {hasNavigation && <TeacherNavigation links={links} />}

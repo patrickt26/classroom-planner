@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { Alert } from "@/components/ui/alert";
 import { login, recover, resetPassword, signup } from "../actions";
-import { AccountForm } from "./account-form";
+import { AccountForm, type FormFeedback } from "./account-form";
 
 const email = {
   name: "email",
@@ -54,13 +55,13 @@ export function AuthScreen({
   notice,
 }: {
   mode: keyof typeof screens;
-  notice?: string;
+  notice?: FormFeedback;
 }) {
   const { title, ...form } = screens[mode];
   return (
     <>
       <h1 className="text-3xl font-bold text-brown">{title}</h1>
-      {notice && <p role="alert">{notice}</p>}
+      {notice && <Alert {...notice} />}
       <AccountForm {...form} />
       <nav className="grid text-center text-sm font-medium underline underline-offset-4">
         {mode === "login" ? (

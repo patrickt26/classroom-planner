@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { FormFeedback } from "./components/account-form";
 import {
   emailSchema,
   loginSchema,
@@ -16,49 +17,95 @@ async function confirmationUrl() {
   return new URL("/confirmar", origin).href;
 }
 
-export async function login(_: string, form: FormData) {
+export async function login(
+  _: FormFeedback,
+  form: FormData,
+): Promise<FormFeedback> {
   const input = loginSchema.safeParse(Object.fromEntries(form));
-  if (!input.success) return "Informe um e-mail válido e sua senha.";
+  if (!input.success)
+    return {
+      variant: "error",
+      message: "Informe um e-mail válido e sua senha.",
+    };
   const client = await createClient();
   const { error } = await client.auth.signInWithPassword(input.data);
-  if (error) return "Confira o e-mail, a senha e a confirmação do cadastro.";
+  if (error)
+    return {
+      variant: "error",
+      message: "Confira o e-mail, a senha e a confirmação do cadastro.",
+    };
   redirect("/mais");
 }
 
-export async function signup(_: string, form: FormData) {
+export async function signup(
+  _: FormFeedback,
+  form: FormData,
+): Promise<FormFeedback> {
   const input = signupSchema.safeParse(Object.fromEntries(form));
   if (!input.success)
-    return "Informe um e-mail válido e uma senha de 8 a 72 bytes.";
+    return {
+      variant: "error",
+      message: "Informe um e-mail válido e uma senha de 8 a 72 bytes.",
+    };
   const client = await createClient();
   const { data, error } = await client.auth.signUp({
     ...input.data,
     options: { emailRedirectTo: await confirmationUrl() },
   });
-  if (error) return "Não foi possível criar a conta. Tente novamente.";
+  if (error)
+    return {
+      variant: "error",
+      message: "Não foi possível criar a conta. Tente novamente.",
+    };
   if (data.session) redirect("/mais");
-  return "Confira seu e-mail para confirmar o cadastro.";
+  return {
+    variant: "info",
+    message: "Confira seu e-mail para confirmar o cadastro.",
+  };
 }
 
-export async function recover(_: string, form: FormData) {
+export async function recover(
+  _: FormFeedback,
+  form: FormData,
+): Promise<FormFeedback> {
   const email = emailSchema.safeParse(form.get("email"));
-  if (!email.success) return "Informe um e-mail válido.";
+  if (!email.success)
+    return { variant: "error", message: "Informe um e-mail válido." };
   const client = await createClient();
   const { error } = await client.auth.resetPasswordForEmail(email.data, {
     redirectTo: await confirmationUrl(),
   });
   if (error)
-    return "Não foi possível solicitar a recuperação agora. Tente novamente.";
-  return "Se houver uma conta com esse e-mail, você receberá o link para redefinir a senha.";
+    return {
+      variant: "error",
+      message:
+        "Não foi possível solicitar a recuperação agora. Tente novamente.",
+    };
+  return {
+    variant: "info",
+    message:
+      "Se houver uma conta com esse e-mail, você receberá o link para redefinir a senha.",
+  };
 }
 
-export async function resetPassword(_: string, form: FormData) {
+export async function resetPassword(
+  _: FormFeedback,
+  form: FormData,
+): Promise<FormFeedback> {
   const password = passwordSchema.safeParse(form.get("password"));
   if (!password.success)
-    return "Use uma senha de pelo menos 8 caracteres e até 72 bytes.";
+    return {
+      variant: "error",
+      message: "Use uma senha de pelo menos 8 caracteres e até 72 bytes.",
+    };
   const client = await createClient();
   const { error } = await client.auth.updateUser({ password: password.data });
   if (error)
-    return "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.";
+    return {
+      variant: "error",
+      message:
+        "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.",
+    };
   redirect("/mais");
 }
 

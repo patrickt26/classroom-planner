@@ -11,6 +11,7 @@ export default async function TeacherLayout({
   return (
     <TeacherShell
       workspaceName={workspace.name}
+      workspaceBrand={workspace.brand}
       links={{ students: "/alunos", more: "/mais" }}
     >
       {children}
