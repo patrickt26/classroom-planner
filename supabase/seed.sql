@@ -1,0 +1,1 @@
+-- Apenas dados fictícios podem ser adicionados a este arquivo.
