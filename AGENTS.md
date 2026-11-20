@@ -100,6 +100,11 @@ Antes de abrir um PR: `pnpm lint`, `pnpm typecheck` e `pnpm test` precisam passa
 
 Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
 
+0. **Sincronize o repositório local** antes de qualquer coisa:
+   - Se `git status` mostrar alterações não commitadas, **pare** e pergunte o que fazer com elas.
+   - `git switch main && git pull --ff-only && git fetch --prune`
+   - Apague os branches locais cujo branch remoto já foi removido (PRs mesclados):
+     `git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D`
 1. Liste as issues abertas do repositório pela API pública do GitHub:
    `curl -s "https://api.github.com/repos/patrickt26/classroom-planner/issues?state=open&per_page=100"`
    (ignore itens com o campo `pull_request`, que são PRs).
@@ -108,7 +113,8 @@ Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
    - tenha **todas** as issues da seção "Depende de" já fechadas;
    - ainda não tenha um PR aberto que a mencione (`Closes #N`).
 3. Antes de codar, responda em uma linha qual issue escolheu e por quê.
-4. Resolva a issue seguindo todas as regras deste arquivo e abra o PR com `Closes #N`.
+4. Crie um branch a partir da `main` atualizada, no formato `<tipo>/<N>-<resumo>` (ex.: `chore/2-supabase-local`).
+5. Resolva a issue seguindo todas as regras deste arquivo e abra o PR com `Closes #N`.
 
 Se não conseguir acessar a API do GitHub, ou se nenhuma issue cumprir os critérios, **não adivinhe**: pare e peça o número da issue.
 
