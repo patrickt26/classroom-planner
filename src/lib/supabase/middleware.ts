@@ -27,7 +27,13 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims.sub) {
+    const login = NextResponse.redirect(new URL("/entrar", request.url));
+    for (const cookie of response.cookies.getAll()) login.cookies.set(cookie);
+    login.headers.set("Cache-Control", "private, no-store");
+    return login;
+  }
 
   return response;
 }
