@@ -1,4 +1,4 @@
-import type { FormFeedback } from "@/features/auth/components/account-form";
+import type { FormFeedback } from "@/components/ui/alert";
 import { AuthScreen } from "@/features/auth/components/auth-screen";
 export default async function Page({
   searchParams,

@@ -1,11 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import { Alert, type AlertVariant } from "@/components/ui/alert";
+import { Alert, type FormFeedback } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-export type FormFeedback = { variant: AlertVariant; message: string } | null;
 
 type Field = {
   name: string;

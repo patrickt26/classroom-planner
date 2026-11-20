@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Alert } from "@/components/ui/alert";
+import { Alert, type FormFeedback } from "@/components/ui/alert";
 import { login, recover, resetPassword, signup } from "../actions";
-import { AccountForm, type FormFeedback } from "./account-form";
+import { AccountForm } from "./account-form";
 
 const email = {
   name: "email",

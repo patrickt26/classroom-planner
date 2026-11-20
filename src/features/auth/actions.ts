@@ -2,8 +2,8 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { FormFeedback } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
-import type { FormFeedback } from "./components/account-form";
 import {
   emailSchema,
   loginSchema,

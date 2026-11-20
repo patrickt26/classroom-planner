@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { FormFeedback } from "@/features/auth/components/account-form";
+import type { FormFeedback } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeacherWorkspace } from "./queries";
 
