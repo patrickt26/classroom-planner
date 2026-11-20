@@ -202,6 +202,7 @@ export type Database = {
           start_date: string;
           start_time: string;
           student_id: string;
+          subject_id: string;
           updated_at: string;
           workspace_id: string;
         };
@@ -217,6 +218,7 @@ export type Database = {
           start_date: string;
           start_time: string;
           student_id: string;
+          subject_id: string;
           updated_at?: string;
           workspace_id: string;
         };
@@ -231,6 +233,7 @@ export type Database = {
           start_date?: string;
           start_time?: string;
           student_id?: string;
+          subject_id?: string;
           updated_at?: string;
           workspace_id?: string;
         };
@@ -247,6 +250,13 @@ export type Database = {
             columns: ["workspace_id", "student_id"];
             isOneToOne: false;
             referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "recurrences_workspace_id_subject_id_fkey";
+            columns: ["workspace_id", "subject_id"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
             referencedColumns: ["workspace_id", "id"];
           },
         ];

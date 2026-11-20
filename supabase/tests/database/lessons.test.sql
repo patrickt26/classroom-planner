@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(30);
+select plan(34);
 
 insert into auth.users (id) values
   ('09000000-0000-4000-8000-000000000001'),
@@ -9,6 +9,7 @@ insert into auth.users (id) values
 select workspace_id as ws_a from memberships where user_id = '09000000-0000-4000-8000-000000000001' \gset
 select workspace_id as ws_b from memberships where user_id = '09000000-0000-4000-8000-000000000002' \gset
 \set other_student '09000000-0000-4000-8000-000000000003'
+\set other_subject '09000000-0000-4000-8000-000000000004'
 
 insert into students (workspace_id, id, name, hourly_rate) values
   (:'ws_a', :'ws_a', 'Aluno A', 5000),
@@ -16,11 +17,12 @@ insert into students (workspace_id, id, name, hourly_rate) values
   (:'ws_a', :'other_student', 'Aluno C', 5000);
 insert into subjects (workspace_id, id, name) values
   (:'ws_a', :'ws_a', 'Disciplina de teste da agenda'),
-  (:'ws_b', :'ws_b', 'Disciplina de teste da agenda');
+  (:'ws_b', :'ws_b', 'Disciplina de teste da agenda'),
+  (:'ws_a', :'other_subject', 'Outra disciplina de teste da agenda');
 
-create function pg_temp.add_recurrence(ws uuid) returns void language sql as $$
-  insert into public.recurrences (workspace_id, id, student_id, day_of_week, start_time, duration_minutes, modality, meeting_url, start_date)
-  values (ws, ws, ws, 1, time '14:00', 60, 'online', 'https://meet.google.com/abc-defg-hij', date '2026-11-23');
+create function pg_temp.add_recurrence(ws uuid, subject uuid) returns void language sql as $$
+  insert into public.recurrences (workspace_id, student_id, subject_id, day_of_week, start_time, duration_minutes, modality, meeting_url, start_date)
+  values (ws, ws, subject, 1, time '14:00', 60, 'online', 'https://meet.google.com/abc-defg-hij', date '2026-11-23');
 $$;
 
 create function pg_temp.add_lesson(ws uuid) returns void language sql as $$
@@ -30,15 +32,17 @@ $$;
 
 set local role authenticated;
 set local request.jwt.claim.sub = '09000000-0000-4000-8000-000000000002';
-select pg_temp.add_recurrence(:'ws_b');
+select pg_temp.add_recurrence(:'ws_b', :'ws_b');
 select pg_temp.add_lesson(:'ws_b');
 set local request.jwt.claim.sub = '09000000-0000-4000-8000-000000000001';
 
-select lives_ok(format('select pg_temp.add_recurrence(%L)', :'ws_a'), 'A professora cria recorrência no próprio espaço');
+select lives_ok(format('select pg_temp.add_recurrence(%1$L, %1$L)', :'ws_a'), 'A professora cria recorrência no próprio espaço');
+select id as recurrence_a from recurrences \gset
 select lives_ok(format('select pg_temp.add_lesson(%L)', :'ws_a'), 'A professora cria aula no próprio espaço');
 select results_eq('select workspace_id from recurrences', format('values (%L::uuid)', :'ws_a'), 'Recorrências isoladas por espaço');
 select results_eq('select workspace_id from lessons', format('values (%L::uuid)', :'ws_a'), 'Aulas isoladas por espaço');
-select throws_ok(format('select pg_temp.add_recurrence(%L)', :'ws_b'), '42501', null, 'Bloqueia inserir recorrência em outro espaço');
+select throws_ok(format('select pg_temp.add_recurrence(%1$L, %1$L)', :'ws_b'), '42501', null, 'Bloqueia inserir recorrência em outro espaço');
+select throws_ok(format('select pg_temp.add_recurrence(%L, %L)', :'ws_a', :'ws_b'), '23503', null, 'Recusa criar recorrência com disciplina de outro espaço');
 select throws_ok(format('select pg_temp.add_lesson(%L)', :'ws_b'), '42501', null, 'Bloqueia inserir aula em outro espaço');
 
 with changed as (update recurrences set duration_minutes = 50 where workspace_id = :'ws_b' returning id)
@@ -49,7 +53,11 @@ select is(count(*), 0::bigint, 'A professora não altera aulas de outro espaço'
 select is((select status from lessons), 'agendada'::lesson_status, 'O status inicial é agendada');
 select lives_ok('update lessons set status = ''confirmada''', 'A professora atualiza o status de sua aula');
 select lives_ok('update recurrences set end_date = start_date', 'A recorrência pode terminar no dia em que começa');
-select lives_ok(format('update lessons set recurrence_id = %L', :'ws_a'), 'A aula pode ser vinculada à recorrência do aluno');
+select lives_ok(format('update lessons set recurrence_id = %L', :'recurrence_a'), 'A aula pode ser vinculada à recorrência do aluno');
+with changed as (update recurrences set subject_id = :'other_subject' returning subject_id)
+select is((select subject_id from changed), :'other_subject'::uuid, 'A professora troca a disciplina da recorrência no próprio espaço');
+select throws_ok('update recurrences set subject_id = null', '23502', null, 'A disciplina da recorrência é obrigatória');
+select throws_ok(format('update recurrences set subject_id = %L', :'ws_b'), '23503', null, 'Recusa trocar a disciplina da recorrência por uma de outro espaço');
 
 select throws_ok(format('update recurrences set student_id = %L', :'ws_b'), '23503', null, 'Aluno da recorrência deve pertencer ao espaço');
 select throws_ok(format('update lessons set student_id = %L, recurrence_id = null', :'ws_b'), '23503', null, 'Aluno da aula deve pertencer ao espaço');

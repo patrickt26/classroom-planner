@@ -8,6 +8,7 @@ export const lessonStatusSchema = z.enum(Constants.public.Enums.lesson_status);
 
 const scheduleFields = {
   student_id: z.uuid(),
+  subject_id: z.uuid(),
   duration_minutes: z.int32().positive(),
   modality: lessonModalitySchema,
   meeting_url: z
@@ -35,7 +36,6 @@ export const recurrenceSchema = z
 
 export const lessonSchema = z.object({
   ...scheduleFields,
-  subject_id: z.uuid(),
   starts_at: z.iso.datetime({ offset: true }),
   recurrence_id: z.uuid().nullish(),
   status: lessonStatusSchema.default("agendada"),

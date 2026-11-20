@@ -3,13 +3,13 @@ import { lessonSchema, recurrenceSchema } from "./schema";
 
 const schedule = {
   student_id: "09000000-0000-4000-8000-000000000001",
+  subject_id: "09000000-0000-4000-8000-000000000002",
   duration_minutes: 60,
   modality: "online",
 };
 
 const lesson = {
   ...schedule,
-  subject_id: "09000000-0000-4000-8000-000000000002",
   starts_at: "2026-11-23T14:00:00-03:00",
 };
 
@@ -44,6 +44,17 @@ describe("lessonSchema", () => {
 });
 
 describe("recurrenceSchema", () => {
+  it.each([undefined, "matematica"])(
+    "requires a subject UUID (%s)",
+    (value) => {
+      const result = recurrenceSchema.safeParse({
+        ...recurrence,
+        subject_id: value,
+      });
+      expect(result.error?.issues[0]?.path).toEqual(["subject_id"]);
+    },
+  );
+
   it("accepts open-ended and single-day date ranges", () => {
     expect(recurrenceSchema.safeParse(recurrence).success).toBe(true);
     expect(
