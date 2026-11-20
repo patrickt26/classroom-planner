@@ -48,3 +48,33 @@ pnpm build
 
 O comando `pnpm lint` verifica lint e formatação com o Biome. Use
 `pnpm format` para aplicar a formatação.
+
+### Banco local
+
+Com o Docker em execução, inicie o Supabase local pela CLI instalada no projeto.
+Na primeira execução, a CLI baixa as imagens dos serviços.
+O Studio fica desativado devido a um erro de inicialização na imagem usada
+pela CLI 3.2.0. O Analytics também fica desativado no ambiente local.
+Use a CLI para operar o banco local.
+
+```sh
+pnpm exec supabase start
+cp .env.example .env.local
+```
+
+Em `.env.local`, preencha `NEXT_PUBLIC_SUPABASE_URL` com `API_URL` e
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` com `PUBLISHABLE_KEY`. Os dois valores
+aparecem na saída de `pnpm exec supabase status`.
+
+Depois de adicionar uma migração, recrie o banco local, rode o pgTAP e regenere
+os tipos a partir do schema `public`. O comando de geração aplica a formatação
+do Biome. O reset descarta os dados locais.
+
+```sh
+pnpm exec supabase db reset
+pnpm exec supabase test db
+pnpm db:types
+```
+
+Versione a migração e o arquivo gerado `src/types/database.ts` juntos.
+Para encerrar os serviços, use `pnpm exec supabase stop`.
