@@ -43,6 +43,9 @@ test.each([
   "/alunos",
   "/alunos/novo",
   "/alunos/id/editar",
+  "/agenda",
+  "/agenda/nova",
+  "/agenda/id/editar",
 ])("requires authentication for %s", async (path) => {
   expect(unstable_doesMiddlewareMatch({ config, url: path })).toBe(true);
   const anonymous = await proxy(request(path));
