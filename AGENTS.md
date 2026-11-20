@@ -92,6 +92,22 @@ supabase db reset # recria o banco local com migrações + seed
 
 Antes de abrir um PR: `pnpm lint`, `pnpm typecheck` e `pnpm test` precisam passar.
 
+## Comando "next issue"
+
+Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
+
+1. Liste as issues abertas do repositório pela API pública do GitHub:
+   `curl -s "https://api.github.com/repos/patrickt26/classroom-planner/issues?state=open&per_page=100"`
+   (ignore itens com o campo `pull_request`, que são PRs).
+2. Escolha a issue aberta de **menor número** que:
+   - pertença ao milestone aberto mais antigo (hoje, o Marco 1);
+   - tenha **todas** as issues da seção "Depende de" já fechadas;
+   - ainda não tenha um PR aberto que a mencione (`Closes #N`).
+3. Antes de codar, responda em uma linha qual issue escolheu e por quê.
+4. Resolva a issue seguindo todas as regras deste arquivo e abra o PR com `Closes #N`.
+
+Se não conseguir acessar a API do GitHub, ou se nenhuma issue cumprir os critérios, **não adivinhe**: pare e peça o número da issue.
+
 ## Pull requests
 
 - Título: `<tipo>: <resumo>` (tipos: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`).
