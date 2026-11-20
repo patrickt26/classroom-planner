@@ -18,6 +18,7 @@ alunos, agenda, planejamento de aulas, registro pós-aula, acompanhamento pedag�
 | --- | --- |
 | Front + backend | Next.js (App Router) + TypeScript, regras de negócio em Server Actions e Route Handlers |
 | UI | Tailwind CSS + shadcn/ui |
+| Lint e formatação | Biome (sem ESLint e sem Prettier) |
 | Banco | Supabase Postgres (migrações SQL versionadas em `supabase/migrations`) |
 | Login | Supabase Auth com `@supabase/ssr` |
 | Autorização | Row Level Security (RLS) por `workspace_id` |
