@@ -40,3 +40,67 @@ export const studentSubjectSchema = z.object({
   student_id: z.uuid(),
   subject_id: z.uuid(),
 });
+
+const hourlyRateInReais = z
+  .string()
+  .trim()
+  .regex(/^\d{1,8}(?:[,.]\d{1,2})?$/, "Informe um valor em reais, como 80,50.")
+  .transform((value) => {
+    const [reais, cents = ""] = value.split(/[,.]/);
+    return Number(reais) * 100 + Number(cents.padEnd(2, "0"));
+  })
+  .pipe(
+    z
+      .number()
+      .int()
+      .positive("Informe um valor maior que zero.")
+      .max(2147483647, "Informe um valor de até R$ 21.474.836,47."),
+  );
+
+export const studentFormSchema = z
+  .object({
+    name: z.string().trim().min(1, "Informe o nome do aluno."),
+    birth_date: z.union([z.literal(""), z.iso.date()], {
+      error: "Informe uma data de nascimento válida.",
+    }),
+    grade_id: z.union([z.literal(""), z.uuid()], {
+      error: "Selecione um ano válido.",
+    }),
+    school: z.string().trim(),
+    hourly_rate: z.string(),
+    is_free: z.boolean(),
+    notes: z.string().trim(),
+    subject_ids: z.array(z.uuid(), { error: "Selecione disciplinas válidas." }),
+  })
+  .transform(
+    (
+      input,
+      ctx,
+    ): { student: z.input<typeof studentSchema>; subject_ids: string[] } => {
+      const hourlyRate = input.is_free
+        ? { success: true as const, data: 0 }
+        : hourlyRateInReais.safeParse(input.hourly_rate);
+      if (!hourlyRate.success) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["hourly_rate"],
+          message: hourlyRate.error.issues[0].message,
+        });
+        return z.NEVER;
+      }
+
+      return {
+        student: {
+          name: input.name,
+          birth_date: input.birth_date || null,
+          grade_id: input.grade_id || null,
+          school: input.school || null,
+          hourly_rate: hourlyRate.data,
+          is_free: input.is_free,
+          notes: input.notes || null,
+        },
+        subject_ids: input.subject_ids,
+      };
+    },
+  )
+  .pipe(z.object({ student: studentSchema, subject_ids: z.array(z.uuid()) }));

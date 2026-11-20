@@ -337,6 +337,21 @@ export type Database = {
         Returns: boolean;
       };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
+      save_student: {
+        Args: {
+          selected_subject_ids: string[];
+          student_birth_date?: string;
+          student_grade_id?: string;
+          student_hourly_rate: number;
+          student_is_free: boolean;
+          student_name: string;
+          student_notes?: string;
+          student_school?: string;
+          target_student_id?: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       workspace_role: "teacher" | "student" | "guardian";
