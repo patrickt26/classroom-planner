@@ -5,26 +5,21 @@ declare
   ws uuid;
 begin
   insert into auth.users (
-    id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data,
+    id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data,
     raw_user_meta_data, confirmation_token, recovery_token, email_change,
     email_change_token_new, created_at, updated_at
   ) values (
     teacher_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-    'professora.exemplo@example.test', now(), '{"provider":"email","providers":["email"]}',
+    'professora.exemplo@example.test', extensions.crypt('senha-de-teste', extensions.gen_salt('bf')),
+    now(), '{"provider":"email","providers":["email"]}',
     '{}', '', '', '', '', now(), now()
   );
-  insert into auth.identities (user_id, provider_id, provider, identity_data)
+  insert into auth.identities (user_id, provider_id, provider, identity_data, created_at, updated_at)
   values (teacher_id, teacher_id::text, 'email',
-    jsonb_build_object('sub', teacher_id, 'email', 'professora.exemplo@example.test'));
+    jsonb_build_object('sub', teacher_id, 'email', 'professora.exemplo@example.test'), now(), now());
 
   select workspace_id into strict ws from public.memberships where user_id = teacher_id;
   update public.workspaces set name = 'Espaço de exemplo' where workspace_id = ws;
-
-  insert into public.grades (workspace_id, name)
-  select ws, year_number || 'º ano' from generate_series(1, 9) as year_number;
-
-  insert into public.subjects (workspace_id, name)
-  select ws, unnest(array['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia']);
 
   insert into public.students (workspace_id, name, grade_id, hourly_rate, is_free)
   select ws, sample.name, grades.id, sample.rate, sample.is_free

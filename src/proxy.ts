@@ -4,6 +4,8 @@ import { updateSession } from "./lib/supabase/middleware";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requiresSession =
+    pathname === "/alunos" ||
+    pathname.startsWith("/alunos/") ||
     pathname === "/mais" ||
     pathname.startsWith("/mais/") ||
     pathname === "/nova-senha" ||

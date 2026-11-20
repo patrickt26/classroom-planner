@@ -76,5 +76,8 @@ pnpm exec supabase test db
 pnpm db:types
 ```
 
+Para ver os alunos fictícios, acesse [Entrar](http://localhost:3000/entrar) com o e-mail
+`professora.exemplo@example.test` e a senha local `senha-de-teste`. Depois, selecione **Alunos** no menu.
+
 Versione a migração e o arquivo gerado `src/types/database.ts` juntos.
 Para encerrar os serviços, use `pnpm exec supabase stop`.

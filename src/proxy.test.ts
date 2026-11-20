@@ -36,19 +36,23 @@ test.each([
   expect(response.headers.get("x-middleware-next")).toBe("1");
 });
 
-test.each(["/mais", "/mais/perfil", "/nova-senha"])(
-  "requires authentication for %s",
-  async (path) => {
-    expect(unstable_doesMiddlewareMatch({ config, url: path })).toBe(true);
-    const anonymous = await proxy(request(path));
-    expect(anonymous.headers.get("location")).toBe(
-      "http://localhost:3000/entrar",
-    );
-    getClaims.mockResolvedValue({ data: { claims: { sub: "teacher" } } });
-    const authenticated = await proxy(request(path));
-    expect(authenticated.headers.get("x-middleware-next")).toBe("1");
-  },
-);
+test.each([
+  "/mais",
+  "/mais/perfil",
+  "/nova-senha",
+  "/alunos",
+  "/alunos/novo",
+  "/alunos/id/editar",
+])("requires authentication for %s", async (path) => {
+  expect(unstable_doesMiddlewareMatch({ config, url: path })).toBe(true);
+  const anonymous = await proxy(request(path));
+  expect(anonymous.headers.get("location")).toBe(
+    "http://localhost:3000/entrar",
+  );
+  getClaims.mockResolvedValue({ data: { claims: { sub: "teacher" } } });
+  const authenticated = await proxy(request(path));
+  expect(authenticated.headers.get("x-middleware-next")).toBe("1");
+});
 
 test.each([
   "/_next/static/chunks/app.js",

@@ -9,7 +9,10 @@ export default async function TeacherLayout({
 }) {
   const workspace = await requireTeacherWorkspace();
   return (
-    <TeacherShell workspaceName={workspace.name} links={{ more: "/mais" }}>
+    <TeacherShell
+      workspaceName={workspace.name}
+      links={{ students: "/alunos", more: "/mais" }}
+    >
       {children}
     </TeacherShell>
   );
