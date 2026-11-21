@@ -106,3 +106,25 @@ export async function cancelLesson(id: string, _: string): Promise<string> {
     ),
   );
 }
+
+export async function deleteLesson(id: string, _: string): Promise<string> {
+  const lessonId = z.uuid().safeParse(id);
+  if (!lessonId.success) return "Aula inválida.";
+  const workspace = await requireTeacherWorkspace();
+
+  const client = await createClient();
+  const { data: startsAt, error } = await client.rpc("delete_lesson", {
+    target_workspace_id: workspace.workspace_id,
+    target_lesson_id: lessonId.data,
+  });
+
+  if (error) return "Não foi possível excluir a aula. Tente novamente.";
+  if (!startsAt) return "Esta aula não está mais disponível para exclusão.";
+
+  const date = localLessonDateTime(
+    new Date(startsAt),
+    workspace.time_zone,
+  ).slice(0, 10);
+  revalidatePath("/agenda");
+  redirect(agendaHref(date, "excluida"));
+}

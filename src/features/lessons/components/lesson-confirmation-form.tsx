@@ -13,25 +13,45 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function CancelLessonForm({
+const messages = {
+  cancel: {
+    trigger: "Cancelar aula",
+    title: "Cancelar esta aula?",
+    description: "A aula ficará na agenda com a situação Cancelada.",
+    confirm: "Confirmar cancelamento",
+    pending: "Cancelando…",
+  },
+  delete: {
+    trigger: "Excluir aula",
+    title: "Excluir esta aula?",
+    description:
+      "Excluir apaga a aula como se nunca tivesse existido. Para registrar que a aula não vai acontecer, use Cancelar.",
+    confirm: "Confirmar exclusão",
+    pending: "Excluindo…",
+  },
+};
+
+export function LessonConfirmationForm({
   action,
+  operation,
 }: {
+  operation: keyof typeof messages;
   action: (previous: string) => Promise<string>;
 }) {
   const [error, submit, pending] = useActionState(action, "");
+
+  const copy = messages[operation];
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button type="button" variant="destructive">
-          Cancelar aula
+          {copy.trigger}
         </Button>
       </DialogTrigger>
       <DialogContent showCloseButton={false} className="sm:max-w-md">
-        <DialogTitle>Cancelar esta aula?</DialogTitle>
-        <DialogDescription>
-          A aula ficará na agenda com a situação Cancelada.
-        </DialogDescription>
+        <DialogTitle>{copy.title}</DialogTitle>
+        <DialogDescription>{copy.description}</DialogDescription>
         <Alert variant="error" message={error} />
         <form action={submit}>
           <DialogFooter>
@@ -41,7 +61,7 @@ export function CancelLessonForm({
               </Button>
             </DialogClose>
             <Button type="submit" variant="destructive" disabled={pending}>
-              {pending ? "Cancelando…" : "Confirmar cancelamento"}
+              {pending ? copy.pending : copy.confirm}
             </Button>
           </DialogFooter>
         </form>

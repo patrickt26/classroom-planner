@@ -77,7 +77,16 @@ export async function getEditableLesson(id: string) {
     .maybeSingle();
   if (error) throw new Error("Não foi possível carregar a aula.");
   if (!data || !canEditLesson(data)) notFound();
-  return data;
+  const { data: canDelete, error: eligibilityError } = await client.rpc(
+    "can_delete_lesson",
+    {
+      target_workspace_id: workspace.workspace_id,
+      target_lesson_id: lessonId.data,
+    },
+  );
+  if (eligibilityError)
+    throw new Error("Não foi possível verificar se a aula pode ser excluída.");
+  return { ...data, canDelete };
 }
 
 export async function getLessonOptions(currentStudentId?: string) {
