@@ -12,6 +12,8 @@ import {
 } from "@/features/lessons/calendar";
 import { WeeklyAgenda } from "@/features/lessons/components/weekly-agenda";
 import { listWeekLessons } from "@/features/lessons/queries";
+import { PendingMakeups } from "@/features/recurrences/pending-makeups";
+import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 const weekFormatter = new Intl.DateTimeFormat("pt-BR", {
   day: "numeric",
@@ -20,11 +22,12 @@ const weekFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
 });
 const notices = {
+  reposicao: "Reposição agendada.",
   salva: "Aula salva.",
   conflito: "Aula salva. Há outra aula no mesmo horário.",
   cancelada: "Aula cancelada.",
 };
-const noticeSchema = z.enum(["salva", "conflito", "cancelada"]);
+const noticeSchema = z.enum(["salva", "conflito", "cancelada", "reposicao"]);
 
 export const metadata = { title: "Agenda | Planejamento de aulas" };
 
@@ -36,8 +39,9 @@ export default async function AgendaPage({
     aviso?: string | string[];
   }>;
 }) {
+  const { time_zone } = await requireTeacherWorkspace();
   const params = await searchParams;
-  const today = localLessonDateTime(new Date()).slice(0, 10);
+  const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
   const week = weekStart(agendaDateSchema.catch(today).parse(params.semana));
   const currentWeek = week === weekStart(today);
   const weekEnd = addDays(week, 6);
@@ -50,11 +54,16 @@ export default async function AgendaPage({
     <div className="grid gap-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-brown">Agenda</h1>
-        <Button asChild className="px-4">
-          <Link href={`/agenda/nova?data=${currentWeek ? today : week}`}>
-            <Plus aria-hidden="true" /> Nova aula
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href="/agenda/recorrencias">Recorrências</Link>
+          </Button>
+          <Button asChild className="px-4">
+            <Link href={`/agenda/nova?data=${currentWeek ? today : week}`}>
+              <Plus aria-hidden="true" /> Nova aula
+            </Link>
+          </Button>
+        </div>
       </header>
       {notice.success && (
         <Alert
@@ -95,7 +104,13 @@ export default async function AgendaPage({
           </Button>
         )}
       </nav>
-      <WeeklyAgenda week={week} today={today} lessons={lessons} />
+      <WeeklyAgenda
+        timeZone={time_zone}
+        week={week}
+        today={today}
+        lessons={lessons}
+      />
+      <PendingMakeups timeZone={time_zone} today={today} />
     </div>
   );
 }

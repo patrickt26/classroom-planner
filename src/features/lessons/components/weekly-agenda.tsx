@@ -2,6 +2,8 @@ import { Video } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ActionForm } from "@/features/recurrences/action-form";
+import { changeOccurrence } from "@/features/recurrences/actions";
 import { cn } from "@/lib/utils";
 import {
   addDays,
@@ -12,16 +14,22 @@ import {
 import { lessonModalityLabels, lessonStatusLabels } from "../form-state";
 import { canEditLesson, type WeekLesson } from "../queries";
 
-function LessonCard({ lesson }: { lesson: WeekLesson }) {
+function LessonCard({
+  lesson,
+  timeZone,
+}: {
+  lesson: WeekLesson;
+  timeZone: string;
+}) {
   const startsAt = new Date(lesson.starts_at);
   const endsAt = new Date(
     startsAt.getTime() + lesson.duration_minutes * 60_000,
   );
-  const start = formatLessonTime(startsAt);
-  const end = formatLessonTime(endsAt);
+  const start = formatLessonTime(startsAt, timeZone);
+  const end = formatLessonTime(endsAt, timeZone);
   const nextDay =
-    localLessonDateTime(endsAt).slice(0, 10) !==
-    localLessonDateTime(startsAt).slice(0, 10);
+    localLessonDateTime(endsAt, timeZone).slice(0, 10) !==
+    localLessonDateTime(startsAt, timeZone).slice(0, 10);
   const cancelled = lesson.status === "cancelada";
   const student = lesson.students?.name ?? "Aluno";
   const editable = canEditLesson(lesson);
@@ -83,6 +91,50 @@ function LessonCard({ lesson }: { lesson: WeekLesson }) {
           </Button>
         )}
       </div>
+      {lesson.rescheduled_from_id && (
+        <p className="px-2 pb-2 text-xs">Aula de reposição</p>
+      )}
+      {(lesson.status === "falta" || cancelled) && !lesson.hasMakeup && (
+        <div className="p-1">
+          <ActionForm
+            action={changeOccurrence.bind(null, lesson.id)}
+            label="Solicitar reposição"
+          >
+            <input type="hidden" name="status" value="reposicao_pendente" />
+          </ActionForm>
+        </div>
+      )}
+      {!editable &&
+        (lesson.status === "agendada" || lesson.status === "confirmada") && (
+          <details className="px-2 pb-2">
+            <summary className="min-h-11 cursor-pointer py-2 text-sm">
+              Alterar situação
+            </summary>
+            <ActionForm
+              action={changeOccurrence.bind(null, lesson.id)}
+              label="Aplicar"
+            >
+              <label className="text-sm">
+                Situação
+                <select
+                  className="min-h-11 w-full rounded border bg-card"
+                  name="status"
+                  defaultValue=""
+                  required
+                >
+                  <option value="">Selecione</option>
+                  {(
+                    ["confirmada", "realizada", "falta", "cancelada"] as const
+                  ).map((s) => (
+                    <option value={s} key={s}>
+                      {lessonStatusLabels[s]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </ActionForm>
+          </details>
+        )}
     </li>
   );
 }
@@ -91,13 +143,15 @@ export function WeeklyAgenda({
   week,
   today,
   lessons,
+  timeZone,
 }: {
   week: string;
   today: string;
   lessons: WeekLesson[];
+  timeZone: string;
 }) {
   const byDay = Map.groupBy(lessons, ({ starts_at }) =>
-    localLessonDateTime(new Date(starts_at)).slice(0, 10),
+    localLessonDateTime(new Date(starts_at), timeZone).slice(0, 10),
   );
 
   return (
@@ -139,7 +193,11 @@ export function WeeklyAgenda({
             {dayLessons.length ? (
               <ul className="grid gap-2 px-2 pb-2 lg:px-1.5">
                 {dayLessons.map((lesson) => (
-                  <LessonCard key={lesson.id} lesson={lesson} />
+                  <LessonCard
+                    timeZone={timeZone}
+                    key={lesson.id}
+                    lesson={lesson}
+                  />
                 ))}
               </ul>
             ) : (

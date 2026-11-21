@@ -6,6 +6,7 @@ import {
   getEditableLesson,
   getLessonOptions,
 } from "@/features/lessons/queries";
+import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export const metadata = { title: "Editar aula | Agenda" };
 
@@ -14,18 +15,21 @@ export default async function EditLessonPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { time_zone } = await requireTeacherWorkspace();
   const { id } = await params;
   const lesson = await getEditableLesson(id);
   const options = await getLessonOptions(lesson.student_id);
-  const [date, time] = localLessonDateTime(new Date(lesson.starts_at)).split(
-    "T",
-  );
+  const [date, time] = localLessonDateTime(
+    new Date(lesson.starts_at),
+    time_zone,
+  ).split("T");
 
   return (
     <div className="max-w-2xl">
       <h1 className="mb-5 text-3xl font-bold text-brown">Editar aula</h1>
       <div className="rounded-xl border bg-card p-4 sm:p-6">
         <LessonForm
+          timeZone={time_zone}
           {...options}
           editing
           action={saveLesson.bind(null, id)}

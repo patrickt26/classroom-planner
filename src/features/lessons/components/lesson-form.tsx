@@ -23,6 +23,7 @@ type LessonFormProps = {
   students: Option[];
   subjects: Option[];
   backHref: string;
+  timeZone: string;
   editing?: boolean;
 };
 
@@ -62,6 +63,7 @@ export function LessonForm({
   subjects,
   backHref,
   editing,
+  timeZone,
 }: LessonFormProps) {
   const [state, submit, pending] = useActionState(action, {
     values: initialValues,
@@ -135,7 +137,7 @@ export function LessonForm({
         </Field>
         <Field
           name="time"
-          label="Horário de início (São Paulo)"
+          label={`Horário de início (${timeZone})`}
           error={errors?.time?.[0]}
         >
           <Input

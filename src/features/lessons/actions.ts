@@ -30,14 +30,14 @@ export async function saveLesson(
     status: id ? readText(form, "status") : "agendada",
   };
   const state = { values, attempt: previous.attempt + 1 };
-  const parsed = lessonFormSchema.safeParse(values);
+  const workspace = await requireTeacherWorkspace();
+  const parsed = lessonFormSchema(workspace.time_zone).safeParse(values);
   if (!parsed.success)
     return { ...state, errors: z.flattenError(parsed.error).fieldErrors };
 
   const lessonId = z.uuid().nullable().safeParse(id);
   if (!lessonId.success) return { ...state, message: "Aula inválida." };
 
-  const workspace = await requireTeacherWorkspace();
   const client = await createClient();
   const lesson = parsed.data;
   const { data: conflict, error } = await client.rpc("save_lesson", {
@@ -77,8 +77,8 @@ export async function saveLesson(
 export async function cancelLesson(id: string, _: string): Promise<string> {
   const lessonId = z.uuid().safeParse(id);
   if (!lessonId.success) return "Aula inválida.";
-
   const workspace = await requireTeacherWorkspace();
+
   const client = await createClient();
   const { data, error } = await client
     .from("lessons")
@@ -98,7 +98,10 @@ export async function cancelLesson(id: string, _: string): Promise<string> {
   revalidatePath("/agenda");
   redirect(
     agendaHref(
-      localLessonDateTime(new Date(data.starts_at)).slice(0, 10),
+      localLessonDateTime(new Date(data.starts_at), workspace.time_zone).slice(
+        0,
+        10,
+      ),
       "cancelada",
     ),
   );
