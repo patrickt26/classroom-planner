@@ -20,14 +20,15 @@ insert into subjects (workspace_id, id, name) values
   (:'ws_b', :'ws_b', 'Disciplina de teste da agenda'),
   (:'ws_a', :'other_subject', 'Outra disciplina de teste da agenda');
 
+-- Keep this policy fixture outside the rolling generation horizon.
 create function pg_temp.add_recurrence(ws uuid, subject uuid) returns void language sql as $$
   insert into public.recurrences (workspace_id, student_id, subject_id, day_of_week, start_time, duration_minutes, modality, meeting_url, start_date)
-  values (ws, ws, subject, 1, time '14:00', 60, 'online', 'https://meet.google.com/abc-defg-hij', date '2026-11-23');
+  values (ws, ws, subject, 1, time '14:00', 60, 'online', 'https://meet.google.com/abc-defg-hij', current_date + 365);
 $$;
 
 create function pg_temp.add_lesson(ws uuid) returns void language sql as $$
   insert into public.lessons (workspace_id, id, student_id, subject_id, starts_at, duration_minutes, modality)
-  values (ws, ws, ws, ws, timestamptz '2026-11-23 14:00:00-03', 60, 'presencial');
+  values (ws, ws, ws, ws, now() - interval '1 day', 60, 'presencial');
 $$;
 
 set local role authenticated;

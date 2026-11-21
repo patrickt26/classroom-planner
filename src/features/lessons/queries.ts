@@ -22,8 +22,8 @@ export function canEditLesson(
 export async function listWeekLessons(week: string) {
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
-  const start = calendarDayStart(week);
-  const end = calendarDayStart(addDays(week, 7));
+  const start = calendarDayStart(week, workspace.time_zone);
+  const end = calendarDayStart(addDays(week, 7), workspace.time_zone);
   const query = client
     .from("lessons")
     .select(
@@ -35,12 +35,28 @@ export async function listWeekLessons(week: string) {
     .order("starts_at")
     .order("id");
 
-  const pageSize = 500;
+  const pageSize = 100;
   const lessons = [];
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await query.range(offset, offset + pageSize - 1);
     if (error) throw new Error("Não foi possível carregar as aulas da semana.");
-    lessons.push(...data);
+    const originals = data
+      .filter(({ status }) => status === "falta" || status === "cancelada")
+      .map(({ id }) => id);
+    const replaced = new Set<string>();
+    if (originals.length) {
+      const { data: makeups, error } = await client
+        .from("lessons")
+        .select("rescheduled_from_id")
+        .eq("workspace_id", workspace.workspace_id)
+        .in("rescheduled_from_id", originals);
+      if (error) throw new Error("Não foi possível carregar as reposições.");
+      for (const row of makeups)
+        if (row.rescheduled_from_id) replaced.add(row.rescheduled_from_id);
+    }
+    lessons.push(
+      ...data.map((row) => ({ ...row, hasMakeup: replaced.has(row.id) })),
+    );
     if (data.length < pageSize) return lessons;
   }
 }

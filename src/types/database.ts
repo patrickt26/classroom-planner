@@ -85,6 +85,7 @@ export type Database = {
           id: string;
           meeting_url: string | null;
           modality: Database["public"]["Enums"]["lesson_modality"];
+          pending_reason: Database["public"]["Enums"]["lesson_status"] | null;
           recurrence_id: string | null;
           rescheduled_from_id: string | null;
           starts_at: string;
@@ -101,6 +102,7 @@ export type Database = {
           id?: string;
           meeting_url?: string | null;
           modality: Database["public"]["Enums"]["lesson_modality"];
+          pending_reason?: Database["public"]["Enums"]["lesson_status"] | null;
           recurrence_id?: string | null;
           rescheduled_from_id?: string | null;
           starts_at: string;
@@ -116,6 +118,7 @@ export type Database = {
           id?: string;
           meeting_url?: string | null;
           modality?: Database["public"]["Enums"]["lesson_modality"];
+          pending_reason?: Database["public"]["Enums"]["lesson_status"] | null;
           recurrence_id?: string | null;
           rescheduled_from_id?: string | null;
           starts_at?: string;
@@ -196,6 +199,7 @@ export type Database = {
           day_of_week: number;
           duration_minutes: number;
           end_date: string | null;
+          ended_at: string | null;
           id: string;
           meeting_url: string | null;
           modality: Database["public"]["Enums"]["lesson_modality"];
@@ -212,6 +216,7 @@ export type Database = {
           day_of_week: number;
           duration_minutes: number;
           end_date?: string | null;
+          ended_at?: string | null;
           id?: string;
           meeting_url?: string | null;
           modality: Database["public"]["Enums"]["lesson_modality"];
@@ -227,6 +232,7 @@ export type Database = {
           day_of_week?: number;
           duration_minutes?: number;
           end_date?: string | null;
+          ended_at?: string | null;
           id?: string;
           meeting_url?: string | null;
           modality?: Database["public"]["Enums"]["lesson_modality"];
@@ -460,6 +466,7 @@ export type Database = {
           brand: string;
           name: string;
           settings: NonNullable<Json>;
+          time_zone: string;
           updated_at: string;
           workspace_id: string;
         };
@@ -468,6 +475,7 @@ export type Database = {
           brand?: string;
           name?: string;
           settings?: NonNullable<Json>;
+          time_zone?: string;
           updated_at?: string;
           workspace_id?: string;
         };
@@ -475,6 +483,7 @@ export type Database = {
           brand?: string;
           name?: string;
           settings?: NonNullable<Json>;
+          time_zone?: string;
           updated_at?: string;
           workspace_id?: string;
         };
@@ -485,6 +494,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      generate_recurrence: {
+        Args: {
+          r: Omit<
+            Database["public"]["Tables"]["recurrences"]["Row"],
+            Database["public"]["Tables"]["recurrences"]["ComputedFields"]
+          >;
+          weeks: number;
+        };
+        Returns: undefined;
+      };
+      generate_recurring_lessons: {
+        Args: { weeks?: number };
+        Returns: undefined;
+      };
       has_role: {
         Args: {
           required_role: Database["public"]["Enums"]["workspace_role"];
@@ -538,6 +561,14 @@ export type Database = {
           guardian_relationship: string;
           target_guardian_id?: string;
           target_student_id: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
+      schedule_makeup: {
+        Args: {
+          new_start: string;
+          original_id: string;
           target_workspace_id: string;
         };
         Returns: boolean;

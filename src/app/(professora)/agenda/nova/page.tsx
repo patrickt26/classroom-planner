@@ -5,6 +5,7 @@ import { agendaDateSchema } from "@/features/lessons/agenda-schema";
 import { agendaHref, localLessonDateTime } from "@/features/lessons/calendar";
 import { LessonForm } from "@/features/lessons/components/lesson-form";
 import { getLessonOptions } from "@/features/lessons/queries";
+import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export const metadata = { title: "Nova aula | Agenda" };
 
@@ -13,9 +14,10 @@ export default async function NewLessonPage({
 }: {
   searchParams: Promise<{ data?: string | string[] }>;
 }) {
+  const { time_zone } = await requireTeacherWorkspace();
   const params = await searchParams;
   const date = agendaDateSchema
-    .catch(localLessonDateTime(new Date()).slice(0, 10))
+    .catch(localLessonDateTime(new Date(), time_zone).slice(0, 10))
     .parse(params.data);
   const options = await getLessonOptions();
   const backHref = agendaHref(date);
@@ -26,6 +28,7 @@ export default async function NewLessonPage({
       <div className="space-y-4 rounded-xl border bg-card p-4 sm:p-6">
         {options.students.length > 0 && options.subjects.length > 0 ? (
           <LessonForm
+            timeZone={time_zone}
             {...options}
             action={saveLesson.bind(null, null)}
             backHref={backHref}

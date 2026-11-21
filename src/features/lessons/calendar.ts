@@ -1,22 +1,30 @@
-const timeZone = "America/Sao_Paulo";
-const localDateTime = new Intl.DateTimeFormat("sv-SE", {
-  timeZone,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
+import { cache } from "react";
 
-export function localLessonDateTime(date: Date) {
-  return localDateTime
+const localDateTime = cache(
+  (timeZone: string) =>
+    new Intl.DateTimeFormat("sv-SE", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+);
+
+export function localLessonDateTime(date: Date, timeZone: string) {
+  return localDateTime(timeZone)
     .format(date)
     .replace(/^\d+/, (year) => year.padStart(4, "0"))
     .replace(" ", "T");
 }
 
-export function lessonStartInstant(date: string, time: string) {
+export function lessonStartInstant(
+  date: string,
+  time: string,
+  timeZone: string,
+) {
   const wallTime = new Date(`${date}T${time}Z`);
   const timestamp = wallTime.getTime();
   const wallTimeText = wallTime.toISOString().slice(0, 19);
@@ -25,12 +33,14 @@ export function lessonStartInstant(date: string, time: string) {
   const wholeSecond = Math.floor(timestamp / 1_000) * 1_000;
   const offsets = [-24, 24].map((hours) => {
     const sample = new Date(wholeSecond + hours * 3_600_000);
-    return Date.parse(`${localLessonDateTime(sample)}Z`) - sample.getTime();
+    return (
+      Date.parse(`${localLessonDateTime(sample, timeZone)}Z`) - sample.getTime()
+    );
   });
 
-  for (const offset of offsets.sort((a, b) => b - a)) {
+  for (const offset of offsets.sort((a, b) => a - b)) {
     const instant = new Date(timestamp - offset);
-    if (localLessonDateTime(instant) === wallTimeText) return instant;
+    if (localLessonDateTime(instant, timeZone) === wallTimeText) return instant;
   }
   return null;
 }
@@ -46,10 +56,11 @@ export function weekStart(date: string) {
   return addDays(date, -((weekday + 6) % 7));
 }
 
-export function calendarDayStart(date: string) {
+export function calendarDayStart(date: string, timeZone: string) {
   // In older weeks, the switch to summer time skipped local midnight.
   const midnight =
-    lessonStartInstant(date, "00:00") ?? lessonStartInstant(date, "01:00");
+    lessonStartInstant(date, "00:00", timeZone) ??
+    lessonStartInstant(date, "01:00", timeZone);
   if (!midnight) throw new RangeError("Data inválida para a agenda.");
   return midnight.toISOString();
 }
@@ -64,8 +75,8 @@ export function formatCalendarDay(
   }).format(new Date(`${date}T00:00:00Z`));
 }
 
-export function formatLessonTime(date: Date) {
-  return localLessonDateTime(date).slice(11, 16);
+export function formatLessonTime(date: Date, timeZone: string) {
+  return localLessonDateTime(date, timeZone).slice(11, 16);
 }
 
 export function agendaHref(date: string, notice?: string) {

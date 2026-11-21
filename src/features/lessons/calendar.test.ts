@@ -9,10 +9,15 @@ import {
 } from "./calendar";
 
 test("uses the São Paulo date even when it is already Monday in UTC", () => {
-  const local = localLessonDateTime(new Date("2026-11-23T01:30:00Z"));
+  const local = localLessonDateTime(
+    new Date("2026-11-23T01:30:00Z"),
+    "America/Sao_Paulo",
+  );
   expect(local).toBe("2026-11-22T22:30:00");
   expect(weekStart(local.slice(0, 10))).toBe("2026-11-16");
-  expect(calendarDayStart("2026-11-23")).toBe("2026-11-23T03:00:00.000Z");
+  expect(calendarDayStart("2026-11-23", "America/Sao_Paulo")).toBe(
+    "2026-11-23T03:00:00.000Z",
+  );
 });
 
 test("navigates weeks across a year boundary", () => {
@@ -22,11 +27,19 @@ test("navigates weeks across a year boundary", () => {
 });
 
 test("uses the historical São Paulo offset and skips nonexistent local times", () => {
-  expect(lessonStartInstant("2018-12-01", "09:15")?.toISOString()).toBe(
-    "2018-12-01T11:15:00.000Z",
+  expect(
+    lessonStartInstant(
+      "2018-12-01",
+      "09:15",
+      "America/Sao_Paulo",
+    )?.toISOString(),
+  ).toBe("2018-12-01T11:15:00.000Z");
+  expect(
+    lessonStartInstant("2018-11-04", "00:30", "America/Sao_Paulo"),
+  ).toBeNull();
+  expect(calendarDayStart("2018-11-04", "America/Sao_Paulo")).toBe(
+    "2018-11-04T03:00:00.000Z",
   );
-  expect(lessonStartInstant("2018-11-04", "00:30")).toBeNull();
-  expect(calendarDayStart("2018-11-04")).toBe("2018-11-04T03:00:00.000Z");
 });
 
 test("validates Meet links and positive duration on the server", () => {
@@ -41,19 +54,38 @@ test("validates Meet links and positive duration on the server", () => {
     meeting_url: "https://meet.google.com/abc-defg-hij",
   };
 
-  expect(lessonFormSchema.parse(input).starts_at).toBe(
+  expect(lessonFormSchema("America/Sao_Paulo").parse(input).starts_at).toBe(
     "2026-11-23T01:30:00.000Z",
   );
   expect(
-    lessonFormSchema.safeParse({ ...input, duration_minutes: "0" }).success,
+    lessonFormSchema("America/Sao_Paulo").safeParse({
+      ...input,
+      duration_minutes: "0",
+    }).success,
   ).toBe(false);
   expect(
-    lessonFormSchema.safeParse({
+    lessonFormSchema("America/Sao_Paulo").safeParse({
       ...input,
       meeting_url: "https://meet.google.com.example.test/abc",
     }).success,
   ).toBe(false);
   expect(
-    lessonFormSchema.parse({ ...input, modality: "presencial" }).meeting_url,
+    lessonFormSchema("America/Sao_Paulo").parse({
+      ...input,
+      modality: "presencial",
+    }).meeting_url,
   ).toBeNull();
+});
+
+test("uses workspace time across UTC dates and resolves repeated times like PostgreSQL", () => {
+  expect(calendarDayStart("2026-11-23", "Asia/Tokyo")).toBe(
+    "2026-11-22T15:00:00.000Z",
+  );
+  expect(
+    lessonStartInstant(
+      "2026-11-01",
+      "01:30",
+      "America/New_York",
+    )?.toISOString(),
+  ).toBe("2026-11-01T06:30:00.000Z");
 });
