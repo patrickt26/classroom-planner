@@ -1,6 +1,10 @@
-import { cancelLesson, saveLesson } from "@/features/lessons/actions";
+import {
+  cancelLesson,
+  deleteLesson,
+  saveLesson,
+} from "@/features/lessons/actions";
 import { agendaHref, localLessonDateTime } from "@/features/lessons/calendar";
-import { CancelLessonForm } from "@/features/lessons/components/cancel-lesson-form";
+import { LessonConfirmationForm } from "@/features/lessons/components/lesson-confirmation-form";
 import { LessonForm } from "@/features/lessons/components/lesson-form";
 import {
   getEditableLesson,
@@ -45,8 +49,17 @@ export default async function EditLessonPage({
             status: lesson.status,
           }}
         />
-        <div className="mt-5 border-t pt-5">
-          <CancelLessonForm action={cancelLesson.bind(null, id)} />
+        <div className="mt-5 flex flex-wrap gap-2 border-t pt-5">
+          <LessonConfirmationForm
+            operation="cancel"
+            action={cancelLesson.bind(null, id)}
+          />
+          {lesson.canDelete && (
+            <LessonConfirmationForm
+              operation="delete"
+              action={deleteLesson.bind(null, id)}
+            />
+          )}
         </div>
       </div>
     </div>

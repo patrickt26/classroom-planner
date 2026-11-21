@@ -494,6 +494,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      can_delete_lesson: {
+        Args: { target_lesson_id: string; target_workspace_id: string };
+        Returns: boolean;
+      };
+      delete_lesson: {
+        Args: { target_lesson_id: string; target_workspace_id: string };
+        Returns: string;
+      };
       generate_recurrence: {
         Args: {
           r: Omit<

@@ -26,8 +26,15 @@ const notices = {
   salva: "Aula salva.",
   conflito: "Aula salva. Há outra aula no mesmo horário.",
   cancelada: "Aula cancelada.",
+  excluida: "Aula excluída.",
 };
-const noticeSchema = z.enum(["salva", "conflito", "cancelada", "reposicao"]);
+const noticeSchema = z.enum([
+  "salva",
+  "conflito",
+  "cancelada",
+  "reposicao",
+  "excluida",
+]);
 
 export const metadata = { title: "Agenda | Planejamento de aulas" };
 
