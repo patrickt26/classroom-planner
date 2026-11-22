@@ -77,12 +77,25 @@ begin
   from (values
     ('Aluno A', -8, time '14:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno A', -6, time '14:00', 60, 'presencial', null, 'realizada', null),
+    ('Aluno A', -4, time '10:00', 60, 'presencial', null, 'falta', null),
     ('Aluno C', -5, time '16:00', 45, 'online', example_meeting_url, 'falta', null),
     ('Aluno B', -3, time '15:00', 60, 'presencial', null, 'cancelada', null),
     ('Aluno A', -2, time '10:00', 60, 'presencial', null, 'reposicao_pendente', 'falta'),
     ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null)
   ) as sample(student_name, day_offset, start_time, duration_minutes, modality, meeting_url, status, pending_reason)
   join public.students on students.workspace_id = ws and students.name = sample.student_name;
+
+  -- An absence with a completed replacement for the student's timeline.
+  insert into public.lessons (
+    workspace_id, student_id, subject_id, starts_at, duration_minutes,
+    modality, status, rescheduled_from_id
+  )
+  select ws, original.student_id, original.subject_id,
+    (current_week_start - 1 + time '10:00') at time zone workspace_time_zone,
+    original.duration_minutes, original.modality, 'realizada', original.id
+  from public.lessons as original
+  where original.workspace_id = ws and original.status = 'falta'
+    and original.starts_at = (current_week_start - 4 + time '10:00') at time zone workspace_time_zone;
 
   insert into public.lesson_plans (workspace_id, lesson_id, objective, content, activities, materials)
   select ws, lessons.id,

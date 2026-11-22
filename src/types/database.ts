@@ -589,7 +589,20 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      student_timeline: {
+        Row: {
+          event_type: string | null;
+          lesson_id: string | null;
+          occurred_at: string | null;
+          status: Database["public"]["Enums"]["lesson_status"] | null;
+          student_id: string | null;
+          subject_name: string | null;
+          summary: string | null;
+          workspace_id: string | null;
+        };
+        ComputedFields: never;
+        Relationships: [];
+      };
     };
     Functions: {
       can_delete_lesson: {
