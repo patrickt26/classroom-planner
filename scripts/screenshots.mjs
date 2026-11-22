@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const baseUrl = "http://127.0.0.1:3000";
+const baseUrl = "http://localhost:3000";
 const widths = [375, 768, 1280];
 const height = 900;
 
@@ -32,6 +32,15 @@ async function captureScreenshots([issue, ...routes]) {
     throw new Error("Use um nome diferente para cada rota.");
   }
 
+  const loginUrl = `${baseUrl}/entrar`;
+  await fetch(loginUrl, {
+    method: "HEAD",
+    redirect: "manual",
+    signal: AbortSignal.timeout(10_000),
+  }).catch((cause) => {
+    throw new Error("Inicie `pnpm dev` e rode de novo", { cause });
+  });
+
   const directory = fileURLToPath(
     new URL(`../docs/screenshots/issue-${issue}/`, import.meta.url),
   );
@@ -40,7 +49,7 @@ async function captureScreenshots([issue, ...routes]) {
     const page = await browser.newPage({
       viewport: { width: widths[0], height },
     });
-    await page.goto(`${baseUrl}/entrar`);
+    await page.goto(loginUrl);
     // Conta fictícia de supabase/seed.sql.
     await page
       .getByLabel("E-mail", { exact: true })
