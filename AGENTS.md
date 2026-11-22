@@ -46,6 +46,16 @@ tests/e2e/             Playwright
 
 Organize por **funcionalidade** (`features/students`, `features/lessons`...), não por tipo de arquivo.
 
+## Mapa do código
+
+- As **telas autenticadas** ficam em `src/app/(professora)/` e usam o shell e o menu de `src/features/navigation/components/`. O login fica em `src/app/(auth)/`.
+- Cada **funcionalidade** em `src/features/<area>/` usa `actions.ts` para Server Actions de escrita, `queries.ts` para leituras, `schema.ts` para validação com Zod e `components/` para a UI da área. Para um CRUD, siga o exemplo de `src/features/students/`.
+- Use os **clientes Supabase** de `src/lib/supabase/`. A escolha do workspace da professora fica em `src/features/workspace/queries.ts`.
+- Para **RPCs transacionais**, siga `supabase/migrations/20261122170000_confirm_lesson_day_conflicts.sql`. Valide o papel com `public.has_role(...)` e declare `set search_path = ''`, qualificando os objetos com o schema.
+- Nomeie as **migrações** como `supabase/migrations/<timestamp>_<descrição>.sql`. Inclua RLS, policies explícitas, grants de escrita por coluna e testes pgTAP em `supabase/tests/` no mesmo PR. Use FKs compostas `(workspace_id, id)` para vínculos entre tabelas com workspace. A migração `20261120020000_students.sql` exemplifica o padrão.
+- Acrescente exemplos fictícios ao **seed** em `supabase/seed.sql` para novas tabelas ou fluxos. Após mudar o schema, rode `pnpm db:types` para regenerar `src/types/database.ts`.
+- Reutilize os **componentes de UI** de `src/components/ui/`. Para retorno de formulário, use `Alert` e o tipo `FormFeedback` de `src/components/ui/alert.tsx`.
+
 ## Regras obrigatórias
 
 ### Privacidade e dados
@@ -70,7 +80,7 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 13. Não crie botões, telas ou números falsos. Se algo ainda não funciona, não aparece.
 14. **Responsivo:** toda tela nasce mobile-first, mas precisa funcionar bem em **375px** (celular), **768px** (tablet) e **1280px** (computador).
     No computador, aproveite a largura (ex.: lista e detalhe lado a lado, conteúdo com largura máxima) em vez de esticar a tela do celular.
-    Em todo PR que mexer em uma tela, salve os prints das três larguras em `docs/screenshots/issue-<N>/<tela>-<largura>.png`.
+    Em todo PR que mexer em uma tela, gere os prints das três larguras com `pnpm screenshots <N> <nome>=<rota> ...`.
     Commite os arquivos no PR e exiba os prints no corpo usando caminhos do repositório.
     Nunca salve esses prints em `test-results/` nem use links para commits.
 
@@ -96,13 +106,23 @@ pnpm lint                      # lint e checagem de formatação com Biome
 pnpm format                    # aplica a formatação com Biome
 pnpm typecheck                 # checagem de tipos
 pnpm test                      # testes de unidade
+pnpm screenshots <N> <nome>=<rota> ... # prints em 375, 768 e 1280px
 ```
 
-Antes de abrir um PR: `pnpm lint`, `pnpm typecheck` e `pnpm test` precisam passar.
+### Prints de tela
+
+Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o Supabase local populado pelo seed e `pnpm dev` rodando na porta 3000, execute `pnpm screenshots 78 hoje=/ alunos=/alunos`. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`. Use sempre `scripts/screenshots.mjs` para os prints de PR.
+
+## Política de verificação
+
+- Antes de abrir um PR, rode `pnpm lint`, `pnpm typecheck` e `pnpm test`.
+- Rode `supabase db reset` e, em seguida, `supabase test db` apenas em issues que alterem `supabase/`.
+- Deixe `pnpm build` a cargo do CI.
+- Consulte apenas os trechos de arquivo necessários para a tarefa. Reuse o resultado de uma checagem que já passou enquanto os arquivos e as condições relevantes estiverem iguais.
 
 ## Comando "next issue"
 
-Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
+Quando a mensagem for **"next issue"** (ou "próxima issue"), siga os passos abaixo. Quando a mensagem já informar o número (`issue N`), use a issue indicada, pule os passos 1 e 2 e leia a issue inteira antes de codar.
 
 0. **Sincronize o repositório local** antes de qualquer coisa:
    - Se `git status` mostrar alterações não commitadas, **pare** e pergunte o que fazer com elas.
@@ -116,7 +136,7 @@ Quando a mensagem for apenas **"next issue"** (ou "próxima issue"):
    - pertença ao milestone aberto mais antigo (hoje, o Marco 1);
    - tenha **todas** as issues da seção "Depende de" já fechadas;
    - ainda não tenha um PR aberto que a mencione (`Closes #N`).
-3. Antes de codar, responda em uma linha qual issue escolheu e por quê.
+3. Antes de codar, responda em uma linha qual issue vai resolver e por quê.
    Se a issue tiver a etiqueta **`modelo-forte`**, **pare** antes de codar e avise: "Esta issue pede GPT-6.2 Astra com raciocínio High. Troque o modelo e mande `next issue` de novo." Siga só se a pessoa confirmar que já está nesse modelo.
 4. Crie um branch a partir da `main` atualizada, no formato `<tipo>/<N>-<resumo>` (ex.: `chore/2-supabase-local`).
 5. Resolva a issue seguindo todas as regras deste arquivo e abra o PR com `Closes #N`.
