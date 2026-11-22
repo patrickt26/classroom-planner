@@ -776,6 +776,16 @@ export type Database = {
         Returns: boolean;
       };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
+      link_existing_student_guardian: {
+        Args: {
+          financial_guardian: boolean;
+          guardian_relationship: string;
+          target_guardian_id: string;
+          target_student_id: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
       record_payment: {
         Args: {
           lesson_ids: string[];

@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
-import { type GuardianFormState, guardianFormSchema } from "./schema";
+import {
+  type GuardianFormState,
+  type GuardianLinkState,
+  guardianFormSchema,
+  guardianLinkSchema,
+} from "./schema";
 
 const guardianTarget = z.object({
   studentId: z.uuid(),
@@ -80,4 +85,43 @@ export async function removeGuardian(
   if (error || !data)
     return "Não foi possível remover o responsável. Tente novamente.";
   redirect(`/alunos/${target.data.studentId}?aviso=removido#responsaveis`);
+}
+
+export async function linkGuardian(
+  studentId: string,
+  guardianId: string,
+  previous: GuardianLinkState,
+  form: FormData,
+): Promise<GuardianLinkState> {
+  const values = {
+    relationship: readText(form, "relationship"),
+    financial: form.get("financial") === "on",
+  };
+  const state = { values, attempt: previous.attempt + 1 };
+  const input = guardianLinkSchema.safeParse(values);
+  if (!input.success) {
+    return { ...state, errors: z.flattenError(input.error).fieldErrors };
+  }
+  const target = guardianTarget.safeParse({ studentId, guardianId });
+  if (!target.success) return { ...state, message: "Vínculo inválido." };
+
+  const workspace = await requireTeacherWorkspace();
+  const client = await createClient();
+  const { data, error } = await client.rpc("link_existing_student_guardian", {
+    target_workspace_id: workspace.workspace_id,
+    target_student_id: target.data.studentId,
+    target_guardian_id: target.data.guardianId,
+    guardian_relationship: input.data.relationship,
+    financial_guardian: input.data.financial,
+  });
+
+  if (error || !data) {
+    return {
+      ...state,
+      message: error
+        ? "Não foi possível vincular o responsável. Tente novamente."
+        : "Este responsável não está mais disponível para vínculo.",
+    };
+  }
+  redirect(`/alunos/${target.data.studentId}?aviso=vinculado#responsaveis`);
 }
