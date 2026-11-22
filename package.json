@@ -13,6 +13,7 @@
     "format": "biome format --write",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
+    "screenshots": "node scripts/screenshots.mjs",
     "db:types": "node scripts/generate-database-types.mjs"
   },
   "dependencies": {
@@ -35,6 +36,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "playwright": "1.61.1",
     "supabase": "3.2.0",
     "tailwindcss": "4.3.5",
     "typescript": "~5.9.3",
