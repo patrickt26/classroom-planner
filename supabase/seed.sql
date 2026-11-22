@@ -140,5 +140,16 @@ begin
 
   -- Future lessons use the new rate. The charge above keeps its original amount.
   update public.students set hourly_rate = 8500 where workspace_id = ws and name = 'Aluno A';
+  -- Two completed lessons settled together. The other charges remain available for selection.
+  perform set_config('request.jwt.claim.sub', teacher_id::text, true);
+  perform public.record_payment(ws, student_id, array_agg(id),
+    (now() at time zone workspace_time_zone)::date, 'pix', 'Pagamento de duas aulas.')
+  from public.lessons
+  where workspace_id = ws and status = 'realizada'
+    and starts_at in (
+      (current_week_start - 8 + time '14:00') at time zone workspace_time_zone,
+      (current_week_start - 6 + time '14:00') at time zone workspace_time_zone
+    )
+  group by student_id;
 end;
 $$;
