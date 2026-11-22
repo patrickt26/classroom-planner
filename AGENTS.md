@@ -70,7 +70,9 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 13. Não crie botões, telas ou números falsos. Se algo ainda não funciona, não aparece.
 14. **Responsivo:** toda tela nasce mobile-first, mas precisa funcionar bem em **375px** (celular), **768px** (tablet) e **1280px** (computador).
     No computador, aproveite a largura (ex.: lista e detalhe lado a lado, conteúdo com largura máxima) em vez de esticar a tela do celular.
-    Inclua prints nas três larguras no PR de qualquer tela.
+    Em todo PR que mexer em uma tela, salve os prints das três larguras em `docs/screenshots/issue-<N>/<tela>-<largura>.png`.
+    Commite os arquivos no PR e exiba os prints no corpo usando caminhos do repositório.
+    Nunca salve esses prints em `test-results/` nem use links para commits.
 
 ### Escopo
 15. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
@@ -127,6 +129,7 @@ Se não conseguir acessar a API do GitHub, ou se nenhuma issue cumprir os crité
 - Corpo: preencha **todas** as seções do template (`.github/pull_request_template.md`): **O quê**, **Onde**, **Por quê**, **Como testar**.
 - O "Por quê" explica a decisão e as alternativas descartadas, em linguagem que alguém aprendendo a stack entenda.
 - Inclua `Closes #<número>` para fechar a issue.
+- Depois de abrir o PR, encerre a tarefa. A revisão confere o CI. Não acompanhe nem espere o resultado do CI.
 - Decisão de arquitetura nova (biblioteca, padrão, mudança de modelo)? Crie um ADR em `docs/decisions/` no mesmo PR.
 
 ## Documentação de referência
