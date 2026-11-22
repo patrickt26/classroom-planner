@@ -27,11 +27,12 @@ export async function listWeekLessons(week: string) {
   const query = client
     .from("lessons")
     .select(
-      "id, starts_at, duration_minutes, modality, meeting_url, status, recurrence_id, rescheduled_from_id, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name)",
+      "id, starts_at, duration_minutes, modality, meeting_url, status, recurrence_id, rescheduled_from_id, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_notes(id)",
     )
     .eq("workspace_id", workspace.workspace_id)
     .gte("starts_at", start)
     .lt("starts_at", end)
+    .limit(1, { referencedTable: "lesson_notes" })
     .order("starts_at")
     .order("id");
 
@@ -55,7 +56,11 @@ export async function listWeekLessons(week: string) {
         if (row.rescheduled_from_id) replaced.add(row.rescheduled_from_id);
     }
     lessons.push(
-      ...data.map((row) => ({ ...row, hasMakeup: replaced.has(row.id) })),
+      ...data.map(({ lesson_notes, ...row }) => ({
+        ...row,
+        hasNote: lesson_notes.length > 0,
+        hasMakeup: replaced.has(row.id),
+      })),
     );
     if (data.length < pageSize) return lessons;
   }

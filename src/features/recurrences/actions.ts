@@ -101,6 +101,7 @@ export async function changeOccurrence(id: string, _: string, form: FormData) {
     .maybeSingle();
   if (error || !data) return "Não foi possível alterar a situação da aula.";
   revalidatePath("/agenda", "layout");
+  if (status.data === "realizada") redirect(`/agenda/${data.id}/registro`);
   return "";
 }
 

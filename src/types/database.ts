@@ -78,6 +78,55 @@ export type Database = {
           },
         ];
       };
+      lesson_notes: {
+        Row: {
+          created_at: string;
+          difficulties: string;
+          id: number;
+          lesson_id: string;
+          next_steps: string;
+          supersedes_id: number | null;
+          worked_on: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          difficulties?: string;
+          id?: never;
+          lesson_id: string;
+          next_steps?: string;
+          supersedes_id?: number | null;
+          worked_on: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          difficulties?: string;
+          id?: never;
+          lesson_id?: string;
+          next_steps?: string;
+          supersedes_id?: number | null;
+          worked_on?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_notes_workspace_id_lesson_id_fkey";
+            columns: ["workspace_id", "lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "lesson_notes_workspace_id_lesson_id_supersedes_id_fkey";
+            columns: ["workspace_id", "lesson_id", "supersedes_id"];
+            isOneToOne: true;
+            referencedRelation: "lesson_notes";
+            referencedColumns: ["workspace_id", "lesson_id", "id"];
+          },
+        ];
+      };
       lesson_plans: {
         Row: {
           activities: string;
@@ -614,6 +663,17 @@ export type Database = {
           lesson_student_id: string;
           lesson_subject_id: string;
           target_lesson_id?: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
+      save_lesson_note: {
+        Args: {
+          note_difficulties: string;
+          note_next_steps: string;
+          note_worked_on: string;
+          previous_note_id?: number;
+          target_lesson_id: string;
           target_workspace_id: string;
         };
         Returns: boolean;
