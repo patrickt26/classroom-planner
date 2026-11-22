@@ -57,6 +57,11 @@ export default async function NewLessonPage({
                   <Link href="/alunos/novo">Cadastrar aluno</Link>
                 </Button>
               )}
+              {options.subjects.length === 0 && (
+                <Button asChild>
+                  <Link href="/configuracoes#materias">Cadastrar matéria</Link>
+                </Button>
+              )}
               <Button asChild variant="outline">
                 <Link href={backHref}>Voltar para a agenda</Link>
               </Button>

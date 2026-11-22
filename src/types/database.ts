@@ -57,6 +57,7 @@ export type Database = {
       };
       grades: {
         Row: {
+          archived_at: string | null;
           created_at: string;
           id: string;
           name: string;
@@ -65,6 +66,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          archived_at?: string | null;
           created_at?: string;
           id?: string;
           name: string;
@@ -72,6 +74,7 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          archived_at?: string | null;
           created_at?: string;
           id?: string;
           name?: string;
@@ -646,6 +649,7 @@ export type Database = {
       };
       subjects: {
         Row: {
+          archived_at: string | null;
           created_at: string;
           id: string;
           name: string;
@@ -654,6 +658,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          archived_at?: string | null;
           created_at?: string;
           id?: string;
           name: string;
@@ -661,6 +666,7 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          archived_at?: string | null;
           created_at?: string;
           id?: string;
           name?: string;

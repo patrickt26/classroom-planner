@@ -1,15 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { logout } from "@/features/auth/actions";
 import { AccountForm } from "@/features/auth/components/account-form";
+import { CatalogSection } from "@/features/catalog/components/catalog-section";
+import { listCatalogItems } from "@/features/catalog/queries";
 import { saveWorkspace } from "@/features/workspace/actions";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export default async function SettingsPage() {
-  const workspace = await requireTeacherWorkspace();
+  const [workspace, subjects, grades] = await Promise.all([
+    requireTeacherWorkspace(),
+    listCatalogItems("subjects"),
+    listCatalogItems("grades"),
+  ]);
   return (
     <>
       <h1 className="mb-7 text-3xl font-bold text-brown">Configurações</h1>
-      <div className="grid items-start gap-5 lg:grid-cols-[2fr_1fr]">
+      <div className="grid items-start gap-5 lg:grid-cols-2">
         <section className="grid gap-5 rounded-xl border bg-card p-5 sm:p-7">
           <h2 className="text-xl font-semibold">Configurações do espaço</h2>
           <AccountForm
@@ -32,7 +38,9 @@ export default async function SettingsPage() {
             submit="Salvar alterações"
           />
         </section>
-        <section className="grid gap-4 rounded-xl border bg-card p-5 sm:p-7">
+        <CatalogSection table="subjects" items={subjects} />
+        <CatalogSection table="grades" items={grades} />
+        <section className="grid gap-4 rounded-xl border bg-card p-5 sm:p-7 lg:col-start-2 lg:row-start-1">
           <h2 className="text-xl font-semibold">Conta</h2>
           <form action={logout}>
             <Button variant="outline">Sair</Button>

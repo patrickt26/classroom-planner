@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { getCatalogOptions } from "@/features/catalog/queries";
 import { localLessonDateTime } from "@/features/lessons/calendar";
-import { getLessonOptions } from "@/features/lessons/queries";
 import { ActionForm } from "@/features/recurrences/action-form";
 import { endRecurrence } from "@/features/recurrences/actions";
 import { getActiveRecurrence } from "@/features/recurrences/queries";
@@ -24,7 +24,10 @@ export default async function EditSeriesPage({
   const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
   const row = await getActiveRecurrence(id.data, today);
   if (!row) notFound();
-  const { subjects } = await getLessonOptions(row.student_id);
+  const subjects = await getCatalogOptions(
+    "subjects",
+    row.subject_id ? [row.subject_id] : [],
+  );
 
   return (
     <div className="grid max-w-2xl gap-5">

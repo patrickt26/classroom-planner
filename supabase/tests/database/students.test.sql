@@ -9,11 +9,14 @@ insert into auth.users (id) values
 select workspace_id as ws_a from memberships where user_id = '06000000-0000-4000-8000-000000000001' \gset
 select workspace_id as ws_b from memberships where user_id = '06000000-0000-4000-8000-000000000002' \gset
 
+insert into grades (workspace_id, id, name)
+values (:'ws_a', :'ws_a', 'Ano de teste'), (:'ws_b', :'ws_b', 'Ano de teste');
+insert into subjects (workspace_id, id, name)
+values (:'ws_a', :'ws_a', 'Disciplina de teste'), (:'ws_b', :'ws_b', 'Disciplina de teste');
+
 -- Reutiliza o UUID de cada workspace como ID dos registros de teste desse espaço.
 create function pg_temp.fill_workspace(ws uuid) returns void language plpgsql as $$
 begin
-  insert into grades (workspace_id, id, name) values (ws, ws, 'Ano de teste');
-  insert into subjects (workspace_id, id, name) values (ws, ws, 'Disciplina de teste');
   insert into students (workspace_id, id, name, grade_id, hourly_rate) values (ws, ws, 'Aluno A', ws, 8050);
   insert into guardians (workspace_id, id, name) values (ws, ws, 'Responsável A');
   insert into student_guardians (workspace_id, student_id, guardian_id, relationship, is_financial_guardian)

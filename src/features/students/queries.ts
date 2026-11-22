@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { getCatalogOptions } from "@/features/catalog/queries";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,26 +50,14 @@ export async function listStudents(input: Record<string, unknown>) {
   };
 }
 
-export async function getStudentOptions() {
-  const workspace = await requireTeacherWorkspace();
-  const client = await createClient();
-  const [
-    { data: grades, error: gradeError },
-    { data: subjects, error: subjectError },
-  ] = await Promise.all([
-    client
-      .from("grades")
-      .select("id, name")
-      .eq("workspace_id", workspace.workspace_id)
-      .order("name"),
-    client
-      .from("subjects")
-      .select("id, name")
-      .eq("workspace_id", workspace.workspace_id)
-      .order("name"),
+export async function getStudentOptions(
+  currentGradeId?: string | null,
+  currentSubjectIds?: string[],
+) {
+  const [grades, subjects] = await Promise.all([
+    getCatalogOptions("grades", currentGradeId ? [currentGradeId] : []),
+    getCatalogOptions("subjects", currentSubjectIds),
   ]);
-  if (gradeError || subjectError)
-    throw new Error("Não foi possível carregar os anos e as disciplinas.");
   return { grades, subjects };
 }
 
