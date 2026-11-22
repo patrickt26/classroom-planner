@@ -21,18 +21,22 @@ export function PaymentForm({
   name,
   charges,
   today,
+  month,
 }: {
   id: string;
   name: string;
   charges: PendingCharge[];
   today: string;
+  month?: string;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [error, submit, pending] = useActionState(
-    recordPayment.bind(null, id),
+    recordPayment.bind(null, id, month),
     "",
   );
   const chosen = charges.filter((charge) => selected.includes(charge.lessonId));
+  const allSelected = chosen.length === charges.length;
+  const partiallySelected = chosen.length > 0 && !allSelected;
   const total = chosen.reduce((sum, charge) => sum + charge.amount, 0);
   return (
     <Dialog>
@@ -51,6 +55,26 @@ export function PaymentForm({
             <legend className="mb-1 font-semibold">
               Selecione as aulas pagas
             </legend>
+            {charges.length > 1 && (
+              <label className="flex min-h-12 items-center gap-3 border-b py-2 font-medium">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  ref={(input) => {
+                    if (input) input.indeterminate = partiallySelected;
+                  }}
+                  onChange={(event) =>
+                    setSelected(
+                      event.target.checked
+                        ? charges.map((charge) => charge.lessonId)
+                        : [],
+                    )
+                  }
+                  className="size-5 shrink-0 accent-navy"
+                />
+                Selecionar todas
+              </label>
+            )}
             {charges.map((charge) => (
               <label
                 key={charge.lessonId}

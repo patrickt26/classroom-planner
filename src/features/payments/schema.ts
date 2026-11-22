@@ -1,6 +1,10 @@
 import { z } from "zod";
 import type { Enums } from "@/types/database";
 
+export const paymentMonthSchema = z
+  .string()
+  .regex(/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/);
+
 export const methodLabels = {
   pix: "Pix",
   cash: "Dinheiro",

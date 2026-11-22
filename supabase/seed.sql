@@ -6,6 +6,9 @@ declare
   workspace_time_zone text;
   current_week_start date;
   current_local_date date;
+  previous_month_start date;
+  previous_month_paid_lesson uuid;
+  previous_month_payer uuid;
   math_subject_id uuid;
   previous_note_id bigint;
   example_meeting_url constant text := 'https://meet.google.com/exemplo-agenda';
@@ -29,6 +32,7 @@ begin
   returning time_zone into strict workspace_time_zone;
   current_week_start := date_trunc('week', now() at time zone workspace_time_zone)::date;
   current_local_date := (now() at time zone workspace_time_zone)::date;
+  previous_month_start := (date_trunc('month', current_local_date) - interval '1 month')::date;
 
   select id into strict math_subject_id from public.subjects
   where workspace_id = ws and name = 'Matemática';
@@ -174,5 +178,26 @@ begin
       (current_week_start - 6 + time '14:00') at time zone workspace_time_zone
     )
   group by student_id;
+
+  -- A previous month with both a pending charge and a recorded payment.
+  insert into public.lessons (
+    workspace_id, student_id, subject_id, starts_at, duration_minutes, modality, status
+  )
+  select ws, id, math_subject_id,
+    (previous_month_start + time '09:00') at time zone workspace_time_zone,
+    60, 'presencial', 'realizada'
+  from public.students where workspace_id = ws and name = 'Aluno A';
+
+  insert into public.lessons (
+    workspace_id, student_id, subject_id, starts_at, duration_minutes, modality, status
+  )
+  select ws, id, math_subject_id,
+    (previous_month_start + time '11:00') at time zone workspace_time_zone,
+    60, 'presencial', 'realizada'
+  from public.students where workspace_id = ws and name = 'Aluno C'
+  returning id, student_id into strict previous_month_paid_lesson, previous_month_payer;
+
+  perform public.record_payment(ws, previous_month_payer, array[previous_month_paid_lesson],
+    previous_month_start + 1, 'pix', 'Pagamento do mês anterior.');
 end;
 $$;

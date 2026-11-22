@@ -1,5 +1,13 @@
-import { Banknote, Clock3 } from "lucide-react";
+import {
+  Banknote,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  TimerOff,
+} from "lucide-react";
+import Link from "next/link";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import { getPendingCharges } from "@/features/charges/queries";
 import {
   formatCalendarDay,
@@ -8,15 +16,15 @@ import {
 import { PaymentForm } from "@/features/payments/components/payment-form";
 import { ReversePayment } from "@/features/payments/components/reverse-payment";
 import { getPaymentHistory } from "@/features/payments/queries";
-import { methodLabels } from "@/features/payments/schema";
-import { monthlyTotals } from "@/features/payments/summary";
+import { methodLabels, paymentMonthSchema } from "@/features/payments/schema";
+import { monthlyTotals, shiftMonth } from "@/features/payments/summary";
 import { formatReais } from "@/features/students/form-state";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export default async function ChargesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ aviso?: string | string[] }>;
+  searchParams: Promise<{ aviso?: string | string[]; mes?: string | string[] }>;
 }) {
   const ws = await requireTeacherWorkspace();
   const [groups, history, params] = await Promise.all([
@@ -26,8 +34,16 @@ export default async function ChargesPage({
   ]);
   const notice = z.enum(["registrado", "estornado"]).safeParse(params.aviso);
   const today = localLessonDateTime(new Date(), ws.time_zone).slice(0, 10);
+  const currentMonth = today.slice(0, 7);
+  const monthParam = paymentMonthSchema.safeParse(params.mes).data;
+  const selectedMonth = monthParam ?? currentMonth;
+  const previous = paymentMonthSchema.safeParse(
+    shiftMonth(selectedMonth, -1),
+  ).data;
+  const next = paymentMonthSchema.safeParse(shiftMonth(selectedMonth, 1)).data;
   const totals = monthlyTotals(
-    today.slice(0, 7),
+    currentMonth,
+    selectedMonth,
     groups.flatMap((group) => group.charges),
     history,
   );
@@ -35,10 +51,6 @@ export default async function ChargesPage({
     <div className="grid gap-7">
       <header>
         <h1 className="text-3xl font-bold text-brown">Cobranças</h1>
-        <p className="mt-1 text-muted-foreground">
-          Resumo de{" "}
-          {formatCalendarDay(today, { month: "long", year: "numeric" })}
-        </p>
       </header>
       {notice.success && (
         <p
@@ -50,14 +62,54 @@ export default async function ChargesPage({
             : "Pagamento estornado. As cobranças voltaram para as pendências."}
         </p>
       )}
-      <dl className="grid grid-cols-2 gap-3">
+      <nav
+        aria-label="Meses dos recebimentos"
+        className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-2 sm:px-3"
+      >
+        <div className="flex flex-1 items-center justify-between gap-2 sm:justify-start">
+          {previous && (
+            <Button asChild variant="outline" size="icon">
+              <Link
+                href={`/cobrancas?mes=${previous}`}
+                aria-label="Mês anterior"
+              >
+                <ChevronLeft aria-hidden />
+              </Link>
+            </Button>
+          )}
+          <p className="text-center text-sm font-semibold sm:min-w-40">
+            {formatCalendarDay(`${selectedMonth}-01`, {
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+          {next && (
+            <Button asChild variant="outline" size="icon">
+              <Link href={`/cobrancas?mes=${next}`} aria-label="Próximo mês">
+                <ChevronRight aria-hidden />
+              </Link>
+            </Button>
+          )}
+        </div>
+        {selectedMonth !== currentMonth && (
+          <Button
+            asChild
+            variant="outline"
+            className="basis-full sm:basis-auto"
+          >
+            <Link href="/cobrancas">Mês atual</Link>
+          </Button>
+        )}
+      </nav>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
-          { label: "Recebido", value: totals.received, icon: Banknote },
+          { label: "Recebido no mês", value: totals.received, icon: Banknote },
           { label: "A receber", value: totals.receivable, icon: Clock3 },
+          { label: "Em atraso", value: totals.overdue, icon: TimerOff },
         ].map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="grid min-w-0 gap-2 rounded-xl border bg-card p-4 sm:p-5"
+            className="grid min-w-0 gap-2 rounded-xl border bg-card p-4 first:col-span-2 sm:p-5 sm:first:col-span-1"
           >
             <dt className="flex items-center gap-2 text-sm font-medium">
               <Icon aria-hidden className="size-5 text-brown" />
@@ -104,6 +156,7 @@ export default async function ChargesPage({
                 name={name}
                 charges={charges}
                 today={today}
+                month={monthParam}
               />
             </article>
           ))}
@@ -148,6 +201,7 @@ export default async function ChargesPage({
                 ) : (
                   <ReversePayment
                     id={payment.id}
+                    month={monthParam}
                     description={`Pagamento de ${amount} de ${payment.students.name} em ${day}.`}
                   />
                 )}

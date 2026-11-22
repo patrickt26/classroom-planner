@@ -5,10 +5,22 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
-import { paymentSchema } from "./schema";
+import { paymentMonthSchema, paymentSchema } from "./schema";
+
+function redirectToCharges(
+  notice: "registrado" | "estornado",
+  month?: string,
+): never {
+  const query = new URLSearchParams({ aviso: notice });
+  const selectedMonth = paymentMonthSchema.safeParse(month);
+  if (selectedMonth.success) query.set("mes", selectedMonth.data);
+  revalidatePath("/cobrancas");
+  return redirect(`/cobrancas?${query}`);
+}
 
 export async function recordPayment(
   studentId: string,
+  month: string | undefined,
   _: string,
   form: FormData,
 ) {
@@ -37,11 +49,14 @@ export async function recordPayment(
   if (error?.code === "P0001")
     return "As cobranças pendentes mudaram. Atualize a página e confira a seleção.";
   if (error) return "Não foi possível registrar o pagamento. Tente novamente.";
-  revalidatePath("/cobrancas");
-  redirect("/cobrancas?aviso=registrado");
+  return redirectToCharges("registrado", month);
 }
 
-export async function reversePayment(paymentId: string, _: string) {
+export async function reversePayment(
+  paymentId: string,
+  month: string | undefined,
+  _: string,
+) {
   if (!z.uuid().safeParse(paymentId).success) return "Pagamento inválido.";
   const ws = await requireTeacherWorkspace();
   const client = await createClient();
@@ -51,6 +66,5 @@ export async function reversePayment(paymentId: string, _: string) {
   });
   if (error || !data)
     return "Não foi possível estornar este pagamento. Atualize a página e confira o histórico.";
-  revalidatePath("/cobrancas");
-  redirect("/cobrancas?aviso=estornado");
+  return redirectToCharges("estornado", month);
 }

@@ -16,13 +16,15 @@ import { reversePayment } from "../actions";
 
 export function ReversePayment({
   id,
+  month,
   description,
 }: {
   id: string;
+  month?: string;
   description: string;
 }) {
   const [error, submit, pending] = useActionState(
-    reversePayment.bind(null, id),
+    reversePayment.bind(null, id, month),
     "",
   );
   return (
