@@ -6,7 +6,12 @@ import { useActionState, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { StudentFormState, StudentFormValues } from "../form-state";
+import {
+  initialStudentGuardian,
+  type StudentFormState,
+  type StudentFormValues,
+} from "../form-state";
+import { RegistrationGuardian } from "./registration-guardian";
 
 type Option = { id: string; name: string };
 
@@ -40,6 +45,7 @@ export function StudentForm({
   grades,
   subjects,
   listHref,
+  requireGuardian = false,
 }: {
   action: (
     state: StudentFormState,
@@ -49,6 +55,7 @@ export function StudentForm({
   grades: Option[];
   subjects: Option[];
   listHref: string;
+  requireGuardian?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, {
     values: initialValues,
@@ -72,117 +79,120 @@ export function StudentForm({
           (errors ? "Confira os campos destacados." : undefined)
         }
       />
-      <fieldset
-        key={state.attempt}
-        disabled={pending}
-        className="grid min-w-0 gap-5"
-      >
-        <div className="grid gap-5 sm:grid-cols-2">
-          {textFields.map(({ name, label, type }) => (
-            <div className="grid min-w-0 gap-2" key={name}>
-              <label htmlFor={name} className="text-sm font-semibold">
-                {label}
+      <fieldset disabled={pending} className="grid min-w-0 gap-5">
+        <div key={state.attempt} className="grid min-w-0 gap-5">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {textFields.map(({ name, label, type }) => (
+              <div className="grid min-w-0 gap-2" key={name}>
+                <label htmlFor={name} className="text-sm font-semibold">
+                  {label}
+                </label>
+                <Input
+                  id={name}
+                  name={name}
+                  type={type}
+                  defaultValue={values[name]}
+                  required={name === "name"}
+                  {...errorProps(name)}
+                />
+                <FieldError name={name} errors={errors?.[name]} />
+              </div>
+            ))}
+            <div className="grid gap-2">
+              <label htmlFor="grade_id" className="text-sm font-semibold">
+                Ano escolar
+              </label>
+              <select
+                id="grade_id"
+                name="grade_id"
+                className={fieldClassName}
+                defaultValue={values.grade_id}
+                {...errorProps("grade_id")}
+              >
+                <option value="">Selecione o ano</option>
+                {grades.map(({ id, name }) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <FieldError name="grade_id" errors={errors?.grade_id} />
+            </div>
+          </div>
+
+          <fieldset className="min-w-0" {...errorProps("subject_ids")}>
+            <legend className="mb-1 text-sm font-semibold">Disciplinas</legend>
+            <div className="flex flex-wrap gap-x-4">
+              {subjects.map(({ id, name }) => (
+                <label
+                  key={id}
+                  className="flex min-h-11 min-w-11 items-center gap-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    name="subject_ids"
+                    value={id}
+                    defaultChecked={values.subject_ids.includes(id)}
+                    className="size-4 accent-primary"
+                  />
+                  {name}
+                </label>
+              ))}
+            </div>
+            <FieldError name="subject_ids" errors={errors?.subject_ids} />
+          </fieldset>
+
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+            <div className="grid min-w-0 gap-2">
+              <label htmlFor="hourly_rate" className="text-sm font-semibold">
+                Valor por hora (R$)
               </label>
               <Input
-                id={name}
-                name={name}
-                type={type}
-                defaultValue={values[name]}
-                required={name === "name"}
-                {...errorProps(name)}
+                id="hourly_rate"
+                name="hourly_rate"
+                inputMode="decimal"
+                placeholder="80,50"
+                defaultValue={values.hourly_rate}
+                disabled={isFree}
+                required={!isFree}
+                {...(!isFree && errorProps("hourly_rate"))}
               />
-              <FieldError name={name} errors={errors?.[name]} />
+              {!isFree && (
+                <FieldError name="hourly_rate" errors={errors?.hourly_rate} />
+              )}
             </div>
-          ))}
+            <label className="flex min-h-11 min-w-11 items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="is_free"
+                checked={isFree}
+                onChange={(event) => setIsFree(event.target.checked)}
+                className="size-4 accent-primary"
+              />
+              Aula gratuita
+            </label>
+          </div>
+
           <div className="grid gap-2">
-            <label htmlFor="grade_id" className="text-sm font-semibold">
-              Ano escolar
+            <label htmlFor="notes" className="text-sm font-semibold">
+              Observações
             </label>
-            <select
-              id="grade_id"
-              name="grade_id"
+            <textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              defaultValue={values.notes}
               className={fieldClassName}
-              defaultValue={values.grade_id}
-              {...errorProps("grade_id")}
-            >
-              <option value="">Selecione o ano</option>
-              {grades.map(({ id, name }) => (
-                <option key={id} value={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <FieldError name="grade_id" errors={errors?.grade_id} />
+              {...errorProps("notes")}
+            />
+            <FieldError name="notes" errors={errors?.notes} />
           </div>
         </div>
-
-        <fieldset className="min-w-0" {...errorProps("subject_ids")}>
-          <legend className="mb-1 text-sm font-semibold">Disciplinas</legend>
-          <div className="flex flex-wrap gap-x-4">
-            {subjects.map(({ id, name }) => (
-              <label
-                key={id}
-                className="flex min-h-11 min-w-11 items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  name="subject_ids"
-                  value={id}
-                  defaultChecked={values.subject_ids.includes(id)}
-                  className="size-4 accent-primary"
-                />
-                {name}
-              </label>
-            ))}
-          </div>
-          <FieldError name="subject_ids" errors={errors?.subject_ids} />
-        </fieldset>
-
-        <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
-          <div className="grid min-w-0 gap-2">
-            <label htmlFor="hourly_rate" className="text-sm font-semibold">
-              Valor por hora (R$)
-            </label>
-            <Input
-              id="hourly_rate"
-              name="hourly_rate"
-              inputMode="decimal"
-              placeholder="80,50"
-              defaultValue={values.hourly_rate}
-              disabled={isFree}
-              required={!isFree}
-              {...(!isFree && errorProps("hourly_rate"))}
-            />
-            {!isFree && (
-              <FieldError name="hourly_rate" errors={errors?.hourly_rate} />
-            )}
-          </div>
-          <label className="flex min-h-11 min-w-11 items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="is_free"
-              checked={isFree}
-              onChange={(event) => setIsFree(event.target.checked)}
-              className="size-4 accent-primary"
-            />
-            Aula gratuita
-          </label>
-        </div>
-
-        <div className="grid gap-2">
-          <label htmlFor="notes" className="text-sm font-semibold">
-            Observações
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={3}
-            defaultValue={values.notes}
-            className={fieldClassName}
-            {...errorProps("notes")}
+        {requireGuardian && (
+          <RegistrationGuardian
+            state={state.guardian ?? initialStudentGuardian}
           />
-          <FieldError name="notes" errors={errors?.notes} />
-        </div>
+        )}
         <div className="flex flex-wrap gap-3">
           <Button type="submit">
             {pending ? "Salvando…" : "Salvar aluno"}

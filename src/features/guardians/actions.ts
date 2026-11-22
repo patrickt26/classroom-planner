@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
+import { searchAvailableGuardians } from "./queries";
 import {
   type GuardianFormState,
   type GuardianLinkState,
@@ -82,6 +83,12 @@ export async function removeGuardian(
     target_guardian_id: target.data.guardianId,
   });
 
+  if (
+    error?.code === "23514" &&
+    error.message === "student_guardian_required"
+  ) {
+    return "Vincule outro responsável antes de remover o único responsável do aluno.";
+  }
   if (error || !data)
     return "Não foi possível remover o responsável. Tente novamente.";
   redirect(`/alunos/${target.data.studentId}?aviso=removido#responsaveis`);
@@ -124,4 +131,30 @@ export async function linkGuardian(
     };
   }
   redirect(`/alunos/${target.data.studentId}?aviso=vinculado#responsaveis`);
+}
+
+export async function searchGuardiansForRegistration(
+  search: string,
+  page: number,
+) {
+  const input = z
+    .object({
+      search: z.string().trim().min(1).max(120),
+      page: z.int().min(1).max(999999),
+    })
+    .safeParse({ search, page });
+  if (!input.success) return null;
+  const results = await searchAvailableGuardians(
+    null,
+    input.data.search,
+    input.data.page,
+  );
+  return {
+    guardians: results.guardians.map(({ id, name, phone }) => ({
+      id,
+      name,
+      phone,
+    })),
+    hasNext: results.hasNext,
+  };
 }

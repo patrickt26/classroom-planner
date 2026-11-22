@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(11);
+select plan(20);
 
 insert into auth.users (id) values
   ('07000000-0000-4000-8000-000000000001'),
@@ -10,6 +10,8 @@ select workspace_id as ws_a from memberships where user_id = '07000000-0000-4000
 select workspace_id as ws_b from memberships where user_id = '07000000-0000-4000-8000-000000000002' \gset
 select id as math_a from subjects where workspace_id = :'ws_a' and name = 'Matemática' \gset
 select id as math_b from subjects where workspace_id = :'ws_b' and name = 'Matemática' \gset
+insert into guardians (workspace_id, name) values (:'ws_b', 'Responsável de outro espaço')
+returning id as guardian_b \gset
 
 delete from grades where workspace_id = :'ws_b' and name = '1º ano';
 insert into grades (workspace_id, name) values (:'ws_b', 'Ano personalizado');
@@ -32,12 +34,63 @@ select results_eq(
   'select name from unnest(array[''Língua Portuguesa'', ''Matemática'', ''Ciências'', ''História'', ''Geografia'']) name order by name',
   'A nova professora vê as disciplinas padrão do seu espaço'
 );
-select is(save_student(:'ws_a', 'Aluno A', 8050, false, array[:'math_a'::uuid]), true, 'Cadastra aluno com disciplina');
+select throws_ok(
+  format('select save_student(%L, ''Sem responsável'', 100, false, ''{}'')', :'ws_a'),
+  '23514', 'student_guardian_required', 'A RPC recusa novo aluno sem responsável'
+);
+select throws_ok(
+  format(
+    'do $test$ begin insert into students (workspace_id, name, hourly_rate) values (%L, ''Sem responsável'', 100); set constraints student_requires_guardian immediate; end $test$',
+    :'ws_a'
+  ),
+  '23514', 'student_guardian_required', 'Uma gravação direta também exige responsável antes do commit'
+);
+select ok(
+  save_student(
+    :'ws_a', 'Aluno A', 8050, false, array[:'math_a'::uuid],
+    guardian_name => 'Responsável A', guardian_phone => '+5511999900010',
+    guardian_relationship => 'Mãe', financial_guardian => true
+  ),
+  'Cadastra aluno com disciplina e novo responsável'
+);
 select id as student_a from students where workspace_id = :'ws_a' and name = 'Aluno A' \gset
 select is(
   (select subject_id from student_subjects where student_id = :'student_a'), :'math_a'::uuid,
   'A disciplina fica vinculada ao aluno'
 );
+
+select id as guardian_a from guardians where workspace_id = :'ws_a' and name = 'Responsável A' \gset
+select ok(
+  (select is_financial_guardian from student_guardians where student_id = :'student_a' and guardian_id = :'guardian_a'),
+  'O novo contato é vinculado como responsável financeiro'
+);
+select ok(
+  save_student(:'ws_a', 'Aluno B', 8000, false, '{}'::uuid[], existing_guardian_id => :'guardian_a', guardian_relationship => 'Mãe'),
+  'Cadastra outro aluno reaproveitando o mesmo contato'
+);
+select id as student_b from students where workspace_id = :'ws_a' and name = 'Aluno B' \gset
+select is(
+  (select guardian_id from student_guardians where student_id = :'student_b'),
+  :'guardian_a'::uuid, 'O novo vínculo reaproveita o contato existente'
+);
+select throws_ok(
+  format(
+    'select save_student(%L, ''Aluno inválido'', 8000, false, ''{}'', existing_guardian_id => %L, guardian_relationship => ''Tutor'')',
+    :'ws_a', :'guardian_b'
+  ),
+  '23503', 'student_guardian_unavailable', 'Recusa um contato de outro espaço'
+);
+select is_empty('select 1 from students where name = ''Aluno inválido''', 'A falha não deixa aluno sem vínculo');
+select throws_ok(
+  format(
+    'select save_student(%L, ''Aluno inválido'', 8000, false, array[%L::uuid], guardian_name => ''Responsável inválido'', guardian_relationship => ''Tutor'')',
+    :'ws_a', :'math_b'
+  ),
+  '23503', null, 'Uma disciplina inválida desfaz toda a criação'
+);
+select is_empty('select 1 from guardians where name = ''Responsável inválido''', 'A falha não deixa contato órfão');
+set constraints student_requires_guardian immediate;
+set constraints student_requires_guardian deferred;
 
 select throws_ok(
   format('select save_student(%L, ''Nome alterado'', 100, false, array[%L::uuid], %L)', :'ws_a', :'math_b', :'student_a'),
@@ -54,7 +107,10 @@ select is(
 );
 select is_empty('select 1 from student_subjects', 'Remover a seleção remove os vínculos anteriores');
 select throws_ok(
-  format('select save_student(%L, ''Aluno B'', 100, false, ''{}'')', :'ws_b'),
+  format(
+    'select save_student(%L, ''Aluno B'', 100, false, ''{}'', guardian_name => ''Responsável B'', guardian_relationship => ''Tutor'')',
+    :'ws_b'
+  ),
   '42501', null, 'A função respeita a RLS na criação de aluno'
 );
 

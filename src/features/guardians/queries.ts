@@ -20,23 +20,24 @@ export async function listStudentGuardians(studentId: string) {
   );
 }
 
-async function availableGuardians(studentId: string) {
+async function availableGuardians(studentId: string | null) {
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
+  const query = client
+    .from("guardians")
+    .select("id, name, phone, links:student_guardians()")
+    .eq("workspace_id", workspace.workspace_id);
   return {
-    query: client
-      .from("guardians")
-      .select("id, name, phone, links:student_guardians()")
-      .eq("workspace_id", workspace.workspace_id)
-      .eq("links.student_id", studentId)
-      .is("links", null),
+    query: studentId
+      ? query.eq("links.student_id", studentId).is("links", null)
+      : query,
   };
 }
 
 const pageSize = 10;
 
 export async function searchAvailableGuardians(
-  studentId: string,
+  studentId: string | null,
   search: string,
   page: number,
 ) {

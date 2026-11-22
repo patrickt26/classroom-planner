@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(25);
+select plan(29);
 
 insert into auth.users (id) values
   ('08000000-0000-4000-8000-000000000001'),
@@ -113,10 +113,27 @@ select is(
   (select student_id from student_guardians where guardian_id = :'guardian_b'), :'student_b'::uuid,
   'Preserva o vínculo do outro aluno'
 );
-select ok(remove_student_guardian(:'ws_a', :'student_b', :'guardian_b'), 'Remove o último vínculo');
+select ok(remove_student_guardian(:'ws_a', :'student_b', :'guardian_b'), 'Remove o último vínculo do contato, mantendo o outro responsável do aluno');
 select is(
   (select count(*) from guardians where id = :'guardian_b'), 0::bigint,
   'Apaga o contato quando não está mais vinculado a nenhum aluno'
+);
+
+select throws_ok(
+  format('select remove_student_guardian(%L, %L, %L)', :'ws_a', :'student_a', :'guardian_a'),
+  '23514', 'student_guardian_required', 'Recusa a remoção do último responsável pela RPC'
+);
+select throws_ok(
+  format('delete from student_guardians where student_id = %L and guardian_id = %L', :'student_a', :'guardian_a'),
+  '23514', 'student_guardian_required', 'Recusa também a remoção direta do último vínculo'
+);
+select throws_ok(
+  format('delete from guardians where id = %L', :'guardian_a'),
+  '23514', 'student_guardian_required', 'Apagar o contato por cascata preserva o último responsável'
+);
+select is(
+  (select count(*) from student_guardians where guardian_id = :'guardian_a'), 2::bigint,
+  'Os vínculos permanecem após as tentativas de remoção'
 );
 
 select * from finish();

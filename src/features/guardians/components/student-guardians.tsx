@@ -45,7 +45,8 @@ export async function StudentGuardians({
   const adding = panel?.acao === "cadastrar";
   const linking = panel?.acao === "vincular";
   const editing = panel?.acao === "editar" && selected;
-  const removing = panel?.acao === "remover" && selected;
+  const canRemove = guardians.length > 1;
+  const removing = panel?.acao === "remover" && canRemove && selected;
   const baseHref = `/alunos/${studentId}`;
   const sectionHref = `${baseHref}#responsaveis`;
   const notice = noticeSchema.safeParse(params.aviso);
@@ -129,6 +130,13 @@ export async function StudentGuardians({
         </div>
       )}
 
+      {guardians.length === 1 && (
+        <p className="text-sm text-muted-foreground">
+          Vincule outro responsável antes de remover o único responsável do
+          aluno.
+        </p>
+      )}
+
       {guardians.length > 0 && (
         <ul className="grid gap-3">
           {guardians.map(
@@ -189,14 +197,16 @@ export async function StudentGuardians({
                         <Pencil aria-hidden="true" /> Editar
                       </Link>
                     </Button>
-                    <Button asChild variant="ghost">
-                      <Link
-                        href={`${baseHref}?acao=remover&responsavel=${id}#responsaveis`}
-                        aria-label={`Remover ${guardian.name}`}
-                      >
-                        <Trash2 aria-hidden="true" /> Remover
-                      </Link>
-                    </Button>
+                    {canRemove && (
+                      <Button asChild variant="ghost">
+                        <Link
+                          href={`${baseHref}?acao=remover&responsavel=${id}#responsaveis`}
+                          aria-label={`Remover ${guardian.name}`}
+                        >
+                          <Trash2 aria-hidden="true" /> Remover
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </li>
               );
