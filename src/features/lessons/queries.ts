@@ -55,7 +55,28 @@ export function canEditLesson(
   );
 }
 
-export async function listWeekLessons(week: string) {
+export async function listAgendaStudents() {
+  const workspace = await requireTeacherWorkspace();
+  const client = await createClient();
+  const query = client
+    .from("students")
+    .select("id, name, archived_at")
+    .eq("workspace_id", workspace.workspace_id)
+    .order("name")
+    .order("id");
+
+  const pageSize = 100;
+  const students = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await query.range(offset, offset + pageSize - 1);
+    if (error)
+      throw new Error("Não foi possível carregar os alunos da agenda.");
+    students.push(...data);
+    if (data.length < pageSize) return students;
+  }
+}
+
+export async function listWeekLessons(week: string, studentId?: string) {
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
   const start = calendarDayStart(week, workspace.time_zone);
@@ -71,6 +92,7 @@ export async function listWeekLessons(week: string) {
     .limit(1, { referencedTable: "lesson_notes" })
     .order("starts_at")
     .order("id");
+  if (studentId) query.eq("student_id", studentId);
 
   const pageSize = 100;
   const lessons = [];

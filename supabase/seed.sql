@@ -104,7 +104,9 @@ begin
     ('Aluno C', -5, time '16:00', 45, 'online', example_meeting_url, 'falta', null),
     ('Aluno B', -3, time '15:00', 60, 'presencial', null, 'cancelada', null),
     ('Aluno A', -2, time '10:00', 60, 'presencial', null, 'reposicao_pendente', 'falta'),
-    ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null)
+    ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null),
+    -- A different student shares the same day in the next week's agenda.
+    ('Aluno C', 8, time '16:00', 45, 'presencial', null, 'agendada', null)
   ) as sample(student_name, day_offset, start_time, duration_minutes, modality, meeting_url, status, pending_reason)
   join public.students on students.workspace_id = ws and students.name = sample.student_name;
 

@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import Form from "next/form";
 import Link from "next/link";
 import { z } from "zod";
 import { Alert } from "@/components/ui/alert";
@@ -11,7 +12,10 @@ import {
   weekStart,
 } from "@/features/lessons/calendar";
 import { WeeklyAgenda } from "@/features/lessons/components/weekly-agenda";
-import { listWeekLessons } from "@/features/lessons/queries";
+import {
+  listAgendaStudents,
+  listWeekLessons,
+} from "@/features/lessons/queries";
 import { PendingMakeups } from "@/features/recurrences/pending-makeups";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
@@ -54,6 +58,7 @@ export default async function AgendaPage({
   searchParams: Promise<{
     semana?: string | string[];
     aviso?: string | string[];
+    aluno?: string | string[];
   }>;
 }) {
   const { time_zone } = await requireTeacherWorkspace();
@@ -64,7 +69,11 @@ export default async function AgendaPage({
   const weekEnd = addDays(week, 6);
   const previous = addDays(week, -7);
   const next = addDays(week, 7);
-  const lessons = await listWeekLessons(week);
+  const studentFilter = z.uuid().safeParse(params.aluno);
+  const requestedStudent = studentFilter.data?.toLowerCase();
+  const students = await listAgendaStudents();
+  const studentId = students.find(({ id }) => id === requestedStudent)?.id;
+  const lessons = await listWeekLessons(week, studentId);
   const notice = noticeSchema.safeParse(params.aviso);
 
   return (
@@ -90,7 +99,10 @@ export default async function AgendaPage({
         <div className="flex flex-1 items-center justify-between gap-2 sm:justify-start">
           {agendaDateSchema.safeParse(previous).success && (
             <Button asChild variant="outline" size="icon">
-              <Link href={agendaHref(previous)} aria-label="Semana anterior">
+              <Link
+                href={agendaHref(previous, undefined, studentId)}
+                aria-label="Semana anterior"
+              >
                 <ChevronLeft aria-hidden="true" />
               </Link>
             </Button>
@@ -100,7 +112,10 @@ export default async function AgendaPage({
           </p>
           {agendaDateSchema.safeParse(next).success && (
             <Button asChild variant="outline" size="icon">
-              <Link href={agendaHref(next)} aria-label="Próxima semana">
+              <Link
+                href={agendaHref(next, undefined, studentId)}
+                aria-label="Próxima semana"
+              >
                 <ChevronRight aria-hidden="true" />
               </Link>
             </Button>
@@ -112,10 +127,38 @@ export default async function AgendaPage({
             variant="outline"
             className="basis-full sm:basis-auto"
           >
-            <Link href="/agenda">Semana atual</Link>
+            <Link href={agendaHref(undefined, undefined, studentId)}>
+              Semana atual
+            </Link>
           </Button>
         )}
       </nav>
+      <Form action="/agenda" className="grid gap-2 sm:max-w-sm">
+        <input type="hidden" name="semana" value={week} />
+        <label htmlFor="agenda-student" className="text-sm font-semibold">
+          Filtrar por aluno
+        </label>
+        <div className="flex gap-2">
+          <select
+            key={`${week}:${studentId ?? ""}`}
+            id="agenda-student"
+            name="aluno"
+            defaultValue={studentId ?? ""}
+            className="min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
+          >
+            <option value="">Todos os alunos</option>
+            {students.map(({ id, name, archived_at }) => (
+              <option key={id} value={id}>
+                {name}
+                {archived_at && " (arquivado)"}
+              </option>
+            ))}
+          </select>
+          <Button type="submit" variant="outline">
+            Filtrar
+          </Button>
+        </div>
+      </Form>
       <WeeklyAgenda
         timeZone={time_zone}
         week={week}
