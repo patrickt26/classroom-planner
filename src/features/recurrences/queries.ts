@@ -1,18 +1,34 @@
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
-export async function listRecurrences(today: string) {
+export async function listStudentRecurrences(studentId: string, today: string) {
   const ws = await requireTeacherWorkspace();
   const client = await createClient();
   const { data, error } = await client
     .from("recurrences")
-    .select("*,students(name),subjects(name)")
+    .select("id,day_of_week,start_time,subjects(name)")
     .eq("workspace_id", ws.workspace_id)
+    .eq("student_id", studentId)
     .is("ended_at", null)
     .or(`end_date.is.null,end_date.gte.${today}`)
     .order("day_of_week")
     .order("start_time");
   if (error) throw new Error("Não foi possível carregar as recorrências.");
+  return data;
+}
+
+export async function getActiveRecurrence(id: string, today: string) {
+  const ws = await requireTeacherWorkspace();
+  const client = await createClient();
+  const { data, error } = await client
+    .from("recurrences")
+    .select("*,students(name)")
+    .eq("workspace_id", ws.workspace_id)
+    .eq("id", id)
+    .is("ended_at", null)
+    .or(`end_date.is.null,end_date.gte.${today}`)
+    .maybeSingle();
+  if (error) throw new Error("Não foi possível carregar a série.");
   return data;
 }
 

@@ -3,9 +3,13 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { StudentGuardians } from "@/features/guardians/components/student-guardians";
+import { localLessonDateTime } from "@/features/lessons/calendar";
+import { listStudentRecurrences } from "@/features/recurrences/queries";
+import { weeklySchedule } from "@/features/recurrences/schedule";
 import { BackToStudents } from "@/features/students/components/student-form";
 import { formatReais } from "@/features/students/form-state";
 import { getStudent } from "@/features/students/queries";
+import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export const metadata = { title: "Ficha do aluno | Planejamento de aulas" };
 
@@ -31,6 +35,9 @@ export default async function StudentPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const student = await getStudent((await params).id);
+  const { time_zone } = await requireTeacherWorkspace();
+  const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
+  const series = await listStudentRecurrences(student.id, today);
   const subjects = student.student_subjects
     .flatMap(({ subjects }) => (subjects ? [subjects.name] : []))
     .sort((a, b) => a.localeCompare(b, "pt-BR"));
@@ -92,7 +99,34 @@ export default async function StudentPage({
           </dl>
         </section>
 
-        <StudentGuardians studentId={student.id} params={await searchParams} />
+        <div className="grid gap-6">
+          <section className="grid gap-2 rounded-xl border bg-card p-4 sm:p-5">
+            <h2 className="text-xl font-bold text-brown">Séries ativas</h2>
+            {series.length ? (
+              <ul className="divide-y">
+                {series.map((row) => (
+                  <li key={row.id}>
+                    <Link
+                      className="flex min-h-11 items-center py-2 text-sm font-semibold underline"
+                      href={`/agenda/series/${row.id}/editar`}
+                    >
+                      {weeklySchedule(row.day_of_week, row.start_time)}
+                      {row.subjects && ` · ${row.subjects.name}`}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma série ativa.
+              </p>
+            )}
+          </section>
+          <StudentGuardians
+            studentId={student.id}
+            params={await searchParams}
+          />
+        </div>
       </div>
     </div>
   );

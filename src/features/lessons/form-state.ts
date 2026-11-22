@@ -7,6 +7,8 @@ export type LessonFormValues = {
   modality: string;
   meeting_url: string;
   status: string;
+  repeat_weekly: string;
+  end_date: string;
 };
 
 export type LessonFormState = {

@@ -27,6 +27,9 @@ const notices = {
   conflito: "Aula salva. Há outra aula no mesmo horário.",
   cancelada: "Aula cancelada.",
   excluida: "Aula excluída.",
+  "serie-salva": "Série salva.",
+  "serie-conflito": "Série salva. A primeira aula coincide com outra aula.",
+  "serie-encerrada": "Série encerrada.",
 };
 const noticeSchema = z.enum([
   "salva",
@@ -34,6 +37,9 @@ const noticeSchema = z.enum([
   "cancelada",
   "reposicao",
   "excluida",
+  "serie-salva",
+  "serie-conflito",
+  "serie-encerrada",
 ]);
 
 export const metadata = { title: "Agenda | Planejamento de aulas" };
@@ -61,20 +67,19 @@ export default async function AgendaPage({
     <div className="grid gap-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-brown">Agenda</h1>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link href="/agenda/recorrencias">Recorrências</Link>
-          </Button>
-          <Button asChild className="px-4">
-            <Link href={`/agenda/nova?data=${currentWeek ? today : week}`}>
-              <Plus aria-hidden="true" /> Nova aula
-            </Link>
-          </Button>
-        </div>
+        <Button asChild className="px-4">
+          <Link href={`/agenda/nova?data=${currentWeek ? today : week}`}>
+            <Plus aria-hidden="true" /> Nova aula
+          </Link>
+        </Button>
       </header>
       {notice.success && (
         <Alert
-          variant={notice.data === "conflito" ? "info" : "success"}
+          variant={
+            notice.data === "conflito" || notice.data === "serie-conflito"
+              ? "info"
+              : "success"
+          }
           message={notices[notice.data]}
         />
       )}

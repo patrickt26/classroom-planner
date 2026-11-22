@@ -41,6 +41,8 @@ export default async function NewLessonPage({
               modality: "presencial",
               meeting_url: "",
               status: "agendada",
+              repeat_weekly: "",
+              end_date: "",
             }}
           />
         ) : (

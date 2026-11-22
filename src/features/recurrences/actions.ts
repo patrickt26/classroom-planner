@@ -4,18 +4,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { agendaDateSchema } from "@/features/lessons/agenda-schema";
-import { agendaHref, lessonStartInstant } from "@/features/lessons/calendar";
-import { recurrenceSchema } from "@/features/lessons/schema";
+import {
+  agendaHref,
+  lessonStartInstant,
+  localLessonDateTime,
+} from "@/features/lessons/calendar";
+import { recurrenceSettingsSchema } from "@/features/lessons/schema";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
-export async function saveRecurrence(
-  id: string | null,
-  _: string,
-  form: FormData,
-) {
+export async function saveRecurrence(id: string, _: string, form: FormData) {
   const values = Object.fromEntries(form);
-  const parsed = recurrenceSchema.safeParse({
+  const parsed = recurrenceSettingsSchema.safeParse({
     ...values,
     day_of_week: z
       .string()
@@ -28,27 +28,29 @@ export async function saveRecurrence(
     meeting_url:
       values.modality === "online" ? values.meeting_url || null : null,
   });
-  if (!z.uuid().nullable().safeParse(id).success || !parsed.success)
-    return "Confira os dados da recorrência, o intervalo de datas e o link do Meet.";
+  if (!z.uuid().safeParse(id).success || !parsed.success)
+    return "Confira os dados da série, a data final e o link do Meet.";
   const ws = await requireTeacherWorkspace();
   const client = await createClient();
-  const table = client.from("recurrences");
-  const query = id
-    ? table
-        .update(parsed.data)
-        .eq("workspace_id", ws.workspace_id)
-        .eq("id", id)
-        .eq("student_id", parsed.data.student_id)
-        .is("ended_at", null)
-    : table.insert({ ...parsed.data, workspace_id: ws.workspace_id });
-  const { data, error } = await query.select("id").maybeSingle();
-  if (error || !data) return "Não foi possível salvar a recorrência.";
+  const today = localLessonDateTime(new Date(), ws.time_zone).slice(0, 10);
+  const { data, error } = await client
+    .from("recurrences")
+    .update(parsed.data)
+    .eq("workspace_id", ws.workspace_id)
+    .eq("id", id)
+    .is("ended_at", null)
+    .or(`end_date.is.null,end_date.gte.${today}`)
+    .select("student_id")
+    .maybeSingle();
+  if (error || !data)
+    return "Não foi possível salvar a série. Confira a data final.";
+  revalidatePath(`/alunos/${data.student_id}`);
   revalidatePath("/agenda", "layout");
-  redirect("/agenda/recorrencias?aviso=salva");
+  redirect(agendaHref(today, "serie-salva"));
 }
 
 export async function endRecurrence(id: string, _: string) {
-  if (!z.uuid().safeParse(id).success) return "Recorrência inválida.";
+  if (!z.uuid().safeParse(id).success) return "Série inválida.";
   const ws = await requireTeacherWorkspace();
   const client = await createClient();
   const { data, error } = await client
@@ -57,11 +59,17 @@ export async function endRecurrence(id: string, _: string) {
     .eq("workspace_id", ws.workspace_id)
     .eq("id", id)
     .is("ended_at", null)
-    .select("id")
+    .select("student_id")
     .maybeSingle();
-  if (error || !data) return "Não foi possível encerrar a recorrência.";
+  if (error || !data) return "Não foi possível encerrar a série.";
+  revalidatePath(`/alunos/${data.student_id}`);
   revalidatePath("/agenda", "layout");
-  redirect("/agenda/recorrencias?aviso=encerrada");
+  redirect(
+    agendaHref(
+      localLessonDateTime(new Date(), ws.time_zone).slice(0, 10),
+      "serie-encerrada",
+    ),
+  );
 }
 
 export async function changeOccurrence(id: string, _: string, form: FormData) {
@@ -92,7 +100,7 @@ export async function changeOccurrence(id: string, _: string, form: FormData) {
     .select("id")
     .maybeSingle();
   if (error || !data) return "Não foi possível alterar a situação da aula.";
-  revalidatePath("/agenda");
+  revalidatePath("/agenda", "layout");
   return "";
 }
 

@@ -2,65 +2,30 @@ import { Input } from "@/components/ui/input";
 import type { Tables } from "@/types/database";
 import { ActionForm } from "./action-form";
 import { saveRecurrence } from "./actions";
+import { weekdays } from "./schedule";
 
-export const weekdays = [
-  "Domingo",
-  "Segunda-feira",
-  "Terça-feira",
-  "Quarta-feira",
-  "Quinta-feira",
-  "Sexta-feira",
-  "Sábado",
-];
 type Option = { id: string; name: string };
 const selectClass =
   "block min-h-11 w-full min-w-0 rounded-lg border bg-card px-2";
 export function RecurrenceForm({
   row,
-  students,
   subjects,
-  today,
   timeZone,
 }: {
-  row?: Tables<"recurrences">;
-  students: Option[];
+  row: Tables<"recurrences">;
   subjects: Option[];
-  today: string;
   timeZone: string;
 }) {
   return (
-    <ActionForm
-      action={saveRecurrence.bind(null, row?.id ?? null)}
-      label="Salvar recorrência"
-    >
+    <ActionForm action={saveRecurrence.bind(null, row.id)} label="Salvar série">
       <div className="grid gap-3 sm:grid-cols-2 [&_label]:min-w-0 [&_label]:text-sm [&_label]:font-medium">
-        {row ? (
-          <input type="hidden" name="student_id" value={row.student_id} />
-        ) : (
-          <label>
-            Aluno
-            <select
-              className={selectClass}
-              required
-              name="student_id"
-              defaultValue=""
-            >
-              <option value="">Selecione um aluno</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
         <label>
           Disciplina
           <select
             className={selectClass}
             required
             name="subject_id"
-            defaultValue={row?.subject_id ?? ""}
+            defaultValue={row.subject_id}
           >
             <option value="">Selecione uma disciplina</option>
             {subjects.map((s) => (
@@ -75,7 +40,7 @@ export function RecurrenceForm({
           <select
             className={selectClass}
             name="day_of_week"
-            defaultValue={row?.day_of_week ?? 1}
+            defaultValue={row.day_of_week}
           >
             {weekdays.map((d, i) => (
               <option key={d} value={i}>
@@ -84,45 +49,36 @@ export function RecurrenceForm({
             ))}
           </select>
         </label>
-        <label htmlFor={`${row?.id ?? "new"}-start_time`}>
+        <label htmlFor="series-time">
           Horário ({timeZone})
           <Input
-            id={`${row?.id ?? "new"}-start_time`}
+            id="series-time"
             type="time"
             step="any"
             name="start_time"
             required
-            defaultValue={row?.start_time ?? "09:00"}
+            defaultValue={row.start_time}
           />
         </label>
-        <label htmlFor={`${row?.id ?? "new"}-duration_minutes`}>
+        <label htmlFor="series-duration">
           Duração em minutos
           <Input
-            id={`${row?.id ?? "new"}-duration_minutes`}
+            id="series-duration"
             type="number"
             name="duration_minutes"
             min={1}
             required
-            defaultValue={row?.duration_minutes ?? 60}
+            defaultValue={row.duration_minutes}
           />
         </label>
-        <label htmlFor={`${row?.id ?? "new"}-start_date`}>
-          Data inicial
+        <label htmlFor="series-end">
+          Repetir até (opcional)
           <Input
-            id={`${row?.id ?? "new"}-start_date`}
-            type="date"
-            name="start_date"
-            required
-            defaultValue={row?.start_date ?? today}
-          />
-        </label>
-        <label htmlFor={`${row?.id ?? "new"}-end_date`}>
-          Data final (opcional)
-          <Input
-            id={`${row?.id ?? "new"}-end_date`}
+            id="series-end"
             type="date"
             name="end_date"
-            defaultValue={row?.end_date ?? ""}
+            min={row.start_date}
+            defaultValue={row.end_date ?? ""}
           />
         </label>
         <label>
@@ -130,19 +86,19 @@ export function RecurrenceForm({
           <select
             className={selectClass}
             name="modality"
-            defaultValue={row?.modality ?? "presencial"}
+            defaultValue={row.modality}
           >
             <option value="presencial">Presencial</option>
             <option value="online">Online</option>
           </select>
         </label>
-        <label htmlFor={`${row?.id ?? "new"}-meeting_url`}>
+        <label htmlFor="series-meeting">
           Google Meet para aula online (opcional)
           <Input
-            id={`${row?.id ?? "new"}-meeting_url`}
+            id="series-meeting"
             name="meeting_url"
             type="url"
-            defaultValue={row?.meeting_url ?? ""}
+            defaultValue={row.meeting_url ?? ""}
           />
         </label>
       </div>

@@ -5,6 +5,7 @@ import { type ReactNode, useActionState, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { weeklySchedule } from "@/features/recurrences/schedule";
 import { editableLessonStatusSchema } from "../agenda-schema";
 import {
   type LessonFormState,
@@ -70,7 +71,11 @@ export function LessonForm({
     attempt: 0,
   });
   const [modality, setModality] = useState(initialValues.modality);
+  const [repeatWeekly, setRepeatWeekly] = useState(false);
+  const [date, setDate] = useState(initialValues.date);
+  const [time, setTime] = useState(initialValues.time);
   const { values, errors } = state;
+  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
   function field(name: keyof LessonFormValues) {
     return {
       id: name,
@@ -133,6 +138,7 @@ export function LessonForm({
             type="date"
             required
             defaultValue={values.date}
+            onChange={(event) => setDate(event.target.value)}
           />
         </Field>
         <Field
@@ -146,6 +152,7 @@ export function LessonForm({
             step="any"
             required
             defaultValue={values.time}
+            onChange={(event) => setTime(event.target.value)}
           />
         </Field>
         <Field
@@ -203,6 +210,48 @@ export function LessonForm({
               ))}
             </select>
           </Field>
+        )}
+        {!editing && (
+          <div className="grid gap-3 border-t pt-2 sm:col-span-2">
+            <label className="flex min-h-11 w-fit cursor-pointer items-center gap-3 font-semibold">
+              <input
+                {...field("repeat_weekly")}
+                className="size-5 accent-primary"
+                type="checkbox"
+                checked={repeatWeekly}
+                onChange={(event) => setRepeatWeekly(event.target.checked)}
+              />
+              Repetir toda semana
+            </label>
+            {errors?.repeat_weekly && (
+              <p id="repeat_weekly-erro" className="text-sm text-destructive">
+                {errors.repeat_weekly[0]}
+              </p>
+            )}
+            {repeatWeekly && (
+              <>
+                <p aria-live="polite" className="text-sm text-muted-foreground">
+                  {Number.isFinite(weekday) && time
+                    ? weeklySchedule(weekday, time)
+                    : "Escolha a data e o horário da primeira aula."}
+                </p>
+                <div className="sm:max-w-64">
+                  <Field
+                    name="end_date"
+                    label="Repetir até (opcional)"
+                    error={errors?.end_date?.[0]}
+                  >
+                    <Input
+                      {...field("end_date")}
+                      type="date"
+                      min={date || undefined}
+                      defaultValue={values.end_date}
+                    />
+                  </Field>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </fieldset>
       <div className="flex flex-wrap gap-2">

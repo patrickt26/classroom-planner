@@ -498,6 +498,20 @@ export type Database = {
         Args: { target_lesson_id: string; target_workspace_id: string };
         Returns: boolean;
       };
+      create_weekly_lesson: {
+        Args: {
+          first_date: string;
+          first_time: string;
+          last_date?: string;
+          lesson_duration_minutes: number;
+          lesson_meeting_url?: string;
+          lesson_modality: Database["public"]["Enums"]["lesson_modality"];
+          lesson_student_id: string;
+          lesson_subject_id: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
       delete_lesson: {
         Args: { target_lesson_id: string; target_workspace_id: string };
         Returns: string;
@@ -515,6 +529,15 @@ export type Database = {
       generate_recurring_lessons: {
         Args: { weeks?: number };
         Returns: undefined;
+      };
+      has_lesson_conflict: {
+        Args: {
+          excluded_lesson_id?: string;
+          lesson_duration_minutes: number;
+          lesson_starts_at: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
       };
       has_role: {
         Args: {

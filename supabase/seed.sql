@@ -53,15 +53,16 @@ begin
   -- The recurrence trigger generates lessons for the next eight weeks.
   insert into public.recurrences (
     workspace_id, student_id, subject_id, day_of_week, start_time, duration_minutes,
-    modality, meeting_url, start_date
+    modality, meeting_url, start_date, end_date
   )
   select ws, students.id, math_subject_id, sample.weekday, sample.start_time,
     sample.duration_minutes, sample.modality::public.lesson_modality, sample.meeting_url,
-    current_week_start
+    current_week_start + sample.start_offset, current_week_start + sample.end_offset
   from (values
-    ('Aluno A', 2, time '14:00', 60, 'presencial', null),
-    ('Aluno C', 4, time '16:00', 45, 'online', example_meeting_url)
-  ) as sample(student_name, weekday, start_time, duration_minutes, modality, meeting_url)
+    ('Aluno A', 2, time '14:00', 60, 'presencial', null, 0, null),
+    ('Aluno C', 4, time '16:00', 45, 'online', example_meeting_url, 0, null),
+    ('Aluno B', 6, time '11:00', 50, 'presencial', null, 12, 26)
+  ) as sample(student_name, weekday, start_time, duration_minutes, modality, meeting_url, start_offset, end_offset)
   join public.students on students.workspace_id = ws and students.name = sample.student_name;
 
   insert into public.lessons (

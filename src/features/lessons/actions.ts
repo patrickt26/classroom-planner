@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
-import { lessonFormSchema } from "./agenda-schema";
+import { lessonFormSchema, weeklyLessonSchema } from "./agenda-schema";
 import { agendaHref, localLessonDateTime } from "./calendar";
 import type { LessonFormState, LessonFormValues } from "./form-state";
 
@@ -28,6 +28,8 @@ export async function saveLesson(
     modality: readText(form, "modality"),
     meeting_url: readText(form, "meeting_url"),
     status: id ? readText(form, "status") : "agendada",
+    repeat_weekly: id ? "" : readText(form, "repeat_weekly"),
+    end_date: readText(form, "end_date"),
   };
   const state = { values, attempt: previous.attempt + 1 };
   const workspace = await requireTeacherWorkspace();
@@ -35,11 +37,41 @@ export async function saveLesson(
   if (!parsed.success)
     return { ...state, errors: z.flattenError(parsed.error).fieldErrors };
 
+  const weekly = weeklyLessonSchema.safeParse(values);
+  if (!weekly.success)
+    return { ...state, errors: z.flattenError(weekly.error).fieldErrors };
+
   const lessonId = z.uuid().nullable().safeParse(id);
   if (!lessonId.success) return { ...state, message: "Aula inválida." };
 
   const client = await createClient();
   const lesson = parsed.data;
+  if (weekly.data.repeat_weekly === "on") {
+    const { data: conflict, error } = await client.rpc("create_weekly_lesson", {
+      target_workspace_id: workspace.workspace_id,
+      lesson_student_id: lesson.student_id,
+      lesson_subject_id: lesson.subject_id,
+      first_date: weekly.data.date,
+      first_time: values.time,
+      lesson_duration_minutes: lesson.duration_minutes,
+      lesson_modality: lesson.modality,
+      lesson_meeting_url: lesson.meeting_url ?? undefined,
+      last_date: weekly.data.end_date || undefined,
+    });
+    if (error)
+      return {
+        ...state,
+        message:
+          "Não foi possível salvar a série. Confira os dados e tente novamente.",
+      };
+
+    revalidatePath(`/alunos/${lesson.student_id}`);
+    revalidatePath("/agenda");
+    redirect(
+      agendaHref(values.date, conflict ? "serie-conflito" : "serie-salva"),
+    );
+  }
+
   const { data: conflict, error } = await client.rpc("save_lesson", {
     target_workspace_id: workspace.workspace_id,
     target_lesson_id: lessonId.data ?? undefined,
