@@ -19,7 +19,10 @@ export type LessonFieldErrors = Partial<
 export type LessonFormState = {
   message?: string;
   studentError?: string;
-  days?: Record<string, { message?: string; fields?: LessonFieldErrors }>;
+  days?: Record<
+    string,
+    { conflict?: boolean; message?: string; fields?: LessonFieldErrors }
+  >;
 };
 
 export const lessonStatusLabels = {

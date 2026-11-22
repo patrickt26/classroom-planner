@@ -25,6 +25,7 @@ const notices = {
   reposicao: "Reposição agendada.",
   salva: "Aula salva.",
   "dias-salvos": "Todos os dias foram agendados.",
+  "dias-conflito": "Todos os dias foram agendados. Há aulas no mesmo horário.",
   conflito: "Aula salva. Há outra aula no mesmo horário.",
   cancelada: "Aula cancelada.",
   excluida: "Aula excluída.",
@@ -35,6 +36,7 @@ const notices = {
 const noticeSchema = z.enum([
   "salva",
   "dias-salvos",
+  "dias-conflito",
   "conflito",
   "cancelada",
   "reposicao",
@@ -77,11 +79,7 @@ export default async function AgendaPage({
       </header>
       {notice.success && (
         <Alert
-          variant={
-            notice.data === "conflito" || notice.data === "serie-conflito"
-              ? "info"
-              : "success"
-          }
+          variant={notice.data.endsWith("conflito") ? "info" : "success"}
           message={notices[notice.data]}
         />
       )}

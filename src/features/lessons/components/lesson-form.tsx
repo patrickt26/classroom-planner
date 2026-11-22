@@ -207,13 +207,18 @@ export function LessonForm({
   const [studentId, setStudentId] = useState(initialValues.student_id);
   const [keys, setKeys] = useState([0]);
   const nextKey = useRef(1);
+  const [dismissedConflict, setDismissedConflict] = useState<LessonFormState>();
+  const dismissConflict = () => setDismissedConflict(state);
   return (
     <form
       action={submit}
+      onChange={dismissConflict}
       // Success redirects. On validation errors the teacher can correct just one day.
       onReset={(event) => event.preventDefault()}
       className="space-y-5"
     >
+      {/* Enter in a field always submits without confirming a conflict. */}
+      <button type="submit" hidden disabled={pending} />
       <Alert variant="error" message={state.message} />
       <fieldset disabled={pending} className="grid min-w-0 gap-5">
         <Field id="student_id" label="Aluno" error={state.studentError}>
@@ -258,13 +263,31 @@ export function LessonForm({
                     type="button"
                     variant="ghost"
                     aria-label={`Remover dia ${index + 1}`}
-                    onClick={() => setKeys(keys.filter((item) => item !== key))}
+                    onClick={() => {
+                      dismissConflict();
+                      setKeys(keys.filter((item) => item !== key));
+                    }}
                   >
                     <Trash2 aria-hidden="true" /> Remover
                   </Button>
                 </div>
               )}
               <Alert variant="error" message={state.days?.[key]?.message} />
+              {state.days?.[key]?.conflict && dismissedConflict !== state && (
+                <div className="mb-4 grid justify-items-start gap-2">
+                  <Alert
+                    variant="error"
+                    message={
+                      keys.length > 1
+                        ? "Há outra aula nesse horário. Ao confirmar, todos os dias serão salvos."
+                        : "Há outra aula nesse horário."
+                    }
+                  />
+                  <Button type="submit" name="allow_conflicts" value="true">
+                    Salvar mesmo assim
+                  </Button>
+                </div>
+              )}
               <DayFields
                 dayKey={key}
                 initialValues={initialValues}
@@ -281,7 +304,10 @@ export function LessonForm({
             className="w-fit"
             type="button"
             variant="outline"
-            onClick={() => setKeys([...keys, nextKey.current++])}
+            onClick={() => {
+              dismissConflict();
+              setKeys([...keys, nextKey.current++]);
+            }}
           >
             <Plus aria-hidden="true" /> Adicionar outro dia
           </Button>

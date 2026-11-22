@@ -92,24 +92,41 @@ export async function saveLesson(
   const client = await createClient();
   const first = blocks[0];
   if (!id) {
-    const { error } = await client.rpc("create_lesson_days", {
+    const confirmation = z
+      .enum(["true", "false"])
+      .safeParse(form.get("allow_conflicts") ?? "false");
+    if (!confirmation.success) return { message: "Confirmação inválida." };
+    const { data: conflict, error } = await client.rpc("create_lesson_days", {
+      allow_conflicts: confirmation.data === "true",
       target_workspace_id: workspace.workspace_id,
       lesson_student_id: student.data,
       lesson_days: blocks.map((block) => block.schedule),
     });
     if (error) {
       const key = keys.data[Number(error.details) - 1];
-      const message =
-        error.code === "23P01"
-          ? "Há outra aula nesse horário. Escolha outra data ou horário."
-          : "Confira os dados deste dia e tente novamente.";
+      const isConflict =
+        error.code === "23P01" && error.message === "lesson_day_conflict";
       return {
         message: "Nenhuma aula foi salva.",
-        days: key ? { [key]: { message } } : undefined,
+        days: key
+          ? {
+              [key]: isConflict
+                ? { conflict: true }
+                : { message: "Confira os dados deste dia e tente novamente." },
+            }
+          : undefined,
       };
     }
     revalidatePath(`/alunos/${student.data}`);
     revalidatePath("/agenda");
+    if (conflict) {
+      redirect(
+        agendaHref(
+          first.date,
+          blocks.length > 1 ? "dias-conflito" : "conflito",
+        ),
+      );
+    }
     redirect(
       agendaHref(
         first.date,

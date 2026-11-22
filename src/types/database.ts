@@ -729,11 +729,12 @@ export type Database = {
       };
       create_lesson_days: {
         Args: {
+          allow_conflicts?: boolean;
           lesson_days: Json;
           lesson_student_id: string;
           target_workspace_id: string;
         };
-        Returns: undefined;
+        Returns: boolean;
       };
       create_weekly_lesson: {
         Args: {
