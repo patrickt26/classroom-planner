@@ -2,6 +2,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { PreviousLessonNote } from "@/features/lesson-notes/components/previous-lesson-note";
 import { saveLessonPlan } from "@/features/lesson-plans/actions";
 import { LessonPlanForm } from "@/features/lesson-plans/components/lesson-plan-form";
 import { getLessonPlanning } from "@/features/lesson-plans/queries";
@@ -20,10 +21,8 @@ export default async function LessonPlanningPage({
   }>;
 }) {
   const [{ id }, { copiar, salvo }] = await Promise.all([params, searchParams]);
-  const { lesson, previousLessons, copy, timeZone } = await getLessonPlanning(
-    id,
-    copiar,
-  );
+  const { lesson, previousLessons, copy, previousNote, timeZone } =
+    await getLessonPlanning(id, copiar);
   const plan = lesson.lesson_plans;
   const formatter = new Intl.DateTimeFormat("pt-BR", {
     timeZone,
@@ -54,6 +53,7 @@ export default async function LessonPlanningPage({
       {salvo === "1" && plan && (
         <Alert variant="success" message="Plano salvo." />
       )}
+      {previousNote && <PreviousLessonNote note={previousNote} />}
       {!!previousLessons.length && (
         <Form
           action={`/agenda/${id}/planejamento`}

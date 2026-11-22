@@ -75,6 +75,7 @@ begin
     sample.duration_minutes, sample.modality::public.lesson_modality, sample.meeting_url,
     sample.status::public.lesson_status, sample.pending_reason::public.lesson_status
   from (values
+    ('Aluno A', -8, time '14:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno A', -6, time '14:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno C', -5, time '16:00', 45, 'online', example_meeting_url, 'falta', null),
     ('Aluno B', -3, time '15:00', 60, 'presencial', null, 'cancelada', null),
@@ -110,5 +111,15 @@ begin
     'Começar com desenhos e depois comparar duas frações com o mesmo denominador.',
     previous_note_id
   from public.lesson_notes where id = previous_note_id;
+
+  -- This older lesson's note is entered later to exercise continuity ordering.
+  insert into public.lesson_notes (workspace_id, lesson_id, worked_on, difficulties, next_steps)
+  select ws, lesson.id,
+    'Dividimos figuras em partes iguais.',
+    'Precisou de apoio para repartir uma figura em três partes iguais.',
+    'Praticar divisões com dobraduras.'
+  from public.lessons as lesson
+  where lesson.workspace_id = ws
+    and lesson.starts_at = (current_week_start - 8 + time '14:00') at time zone workspace_time_zone;
 end;
 $$;

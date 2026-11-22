@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { getPreviousLessonNote } from "@/features/lesson-notes/queries";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,7 +13,7 @@ export async function getLessonPlanning(id: string, source: unknown) {
   const { data: lesson, error } = await client
     .from("lessons")
     .select(
-      "starts_at, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans(objective, content, activities, materials)",
+      "student_id, starts_at, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans(objective, content, activities, materials)",
     )
     .eq("workspace_id", workspace.workspace_id)
     .eq("id", parsedId.data)
@@ -61,5 +62,16 @@ export async function getLessonPlanning(id: string, source: unknown) {
       copy = data;
     }
   }
-  return { lesson, previousLessons, copy, timeZone: workspace.time_zone };
+  const previousNote = await getPreviousLessonNote(
+    client,
+    workspace.workspace_id,
+    lesson,
+  );
+  return {
+    lesson,
+    previousLessons,
+    copy,
+    previousNote,
+    timeZone: workspace.time_zone,
+  };
 }
