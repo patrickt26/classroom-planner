@@ -3,6 +3,10 @@ do $$
 declare
   teacher_id uuid := '60000000-0000-4000-8000-000000000001';
   ws uuid;
+  workspace_time_zone text;
+  current_week_start date;
+  math_subject_id uuid;
+  example_meeting_url constant text := 'https://meet.google.com/exemplo-agenda';
 begin
   insert into auth.users (
     id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data,
@@ -19,7 +23,12 @@ begin
     jsonb_build_object('sub', teacher_id, 'email', 'professora.exemplo@example.test'), now(), now());
 
   select workspace_id into strict ws from public.memberships where user_id = teacher_id;
-  update public.workspaces set name = 'Espaço de exemplo' where workspace_id = ws;
+  update public.workspaces set name = 'Espaço de exemplo' where workspace_id = ws
+  returning time_zone into strict workspace_time_zone;
+  current_week_start := date_trunc('week', now() at time zone workspace_time_zone)::date;
+
+  select id into strict math_subject_id from public.subjects
+  where workspace_id = ws and name = 'Matemática';
 
   insert into public.students (workspace_id, name, grade_id, hourly_rate, is_free)
   select ws, sample.name, grades.id, sample.rate, sample.is_free
@@ -40,5 +49,36 @@ begin
   select ws, students.id, guardians.id, 'Mãe', true from public.students
   join public.guardians using (workspace_id)
   where students.workspace_id = ws and students.name = 'Aluno A' and guardians.name = 'Responsável A';
+
+  -- The recurrence trigger generates lessons for the next eight weeks.
+  insert into public.recurrences (
+    workspace_id, student_id, subject_id, day_of_week, start_time, duration_minutes,
+    modality, meeting_url, start_date
+  )
+  select ws, students.id, math_subject_id, sample.weekday, sample.start_time,
+    sample.duration_minutes, sample.modality::public.lesson_modality, sample.meeting_url,
+    current_week_start
+  from (values
+    ('Aluno A', 2, time '14:00', 60, 'presencial', null),
+    ('Aluno C', 4, time '16:00', 45, 'online', example_meeting_url)
+  ) as sample(student_name, weekday, start_time, duration_minutes, modality, meeting_url)
+  join public.students on students.workspace_id = ws and students.name = sample.student_name;
+
+  insert into public.lessons (
+    workspace_id, student_id, subject_id, starts_at, duration_minutes,
+    modality, meeting_url, status, pending_reason
+  )
+  select ws, students.id, math_subject_id,
+    (current_week_start + sample.day_offset + sample.start_time) at time zone workspace_time_zone,
+    sample.duration_minutes, sample.modality::public.lesson_modality, sample.meeting_url,
+    sample.status::public.lesson_status, sample.pending_reason::public.lesson_status
+  from (values
+    ('Aluno A', -6, time '14:00', 60, 'presencial', null, 'realizada', null),
+    ('Aluno C', -5, time '16:00', 45, 'online', example_meeting_url, 'falta', null),
+    ('Aluno B', -3, time '15:00', 60, 'presencial', null, 'cancelada', null),
+    ('Aluno A', -2, time '10:00', 60, 'presencial', null, 'reposicao_pendente', 'falta'),
+    ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null)
+  ) as sample(student_name, day_offset, start_time, duration_minutes, modality, meeting_url, status, pending_reason)
+  join public.students on students.workspace_id = ws and students.name = sample.student_name;
 end;
 $$;
