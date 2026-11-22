@@ -67,6 +67,14 @@ function LessonCard({
         </Badge>
       </div>
       <div className="flex flex-wrap gap-x-1 px-1 lg:gap-x-0">
+        <Button asChild variant="link" className="underline lg:px-1">
+          <Link
+            href={`/agenda/${lesson.id}/planejamento`}
+            aria-label={`Planejamento da aula de ${student} às ${start}`}
+          >
+            Plano
+          </Link>
+        </Button>
         {(editable || lesson.recurrence_id) && (
           <Button asChild variant="link" className="underline lg:px-1">
             <Link
