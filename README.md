@@ -32,6 +32,8 @@ Com o Corepack instalado, execute `corepack enable pnpm` para que o comando
 `pnpm` use a versão do projeto. Você também pode usar `corepack pnpm` no
 lugar de `pnpm`.
 
+O projeto usa quebras de linha LF, e o `.gitattributes` garante esse formato no Windows.
+
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
