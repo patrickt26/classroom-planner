@@ -16,7 +16,8 @@ export default async function TeacherLayout({
         today: "/",
         students: "/alunos",
         calendar: "/agenda",
-        more: "/mais",
+        billing: "/cobrancas",
+        settings: "/configuracoes",
       }}
     >
       {children}

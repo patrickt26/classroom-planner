@@ -13,6 +13,8 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/agenda/") ||
     pathname === "/mais" ||
     pathname.startsWith("/mais/") ||
+    pathname === "/configuracoes" ||
+    pathname.startsWith("/configuracoes/") ||
     pathname === "/nova-senha" ||
     pathname === "/nova-senha/";
 
