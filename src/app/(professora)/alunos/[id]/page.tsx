@@ -9,6 +9,7 @@ import { weeklySchedule } from "@/features/recurrences/schedule";
 import { BackToStudents } from "@/features/students/components/student-form";
 import { formatReais } from "@/features/students/form-state";
 import { getStudent } from "@/features/students/queries";
+import { StudentTimeline } from "@/features/timeline/components/student-timeline";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export const metadata = { title: "Ficha do aluno | Planejamento de aulas" };
@@ -35,6 +36,7 @@ export default async function StudentPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const student = await getStudent((await params).id);
+  const filters = await searchParams;
   const { time_zone } = await requireTeacherWorkspace();
   const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
   const series = await listStudentRecurrences(student.id, today);
@@ -100,6 +102,11 @@ export default async function StudentPage({
         </section>
 
         <div className="grid gap-6">
+          <StudentTimeline
+            studentId={student.id}
+            params={filters}
+            timeZone={time_zone}
+          />
           <section className="grid gap-2 rounded-xl border bg-card p-4 sm:p-5">
             <h2 className="text-xl font-bold text-brown">Séries ativas</h2>
             {series.length ? (
@@ -122,10 +129,7 @@ export default async function StudentPage({
               </p>
             )}
           </section>
-          <StudentGuardians
-            studentId={student.id}
-            params={await searchParams}
-          />
+          <StudentGuardians studentId={student.id} params={filters} />
         </div>
       </div>
     </div>
