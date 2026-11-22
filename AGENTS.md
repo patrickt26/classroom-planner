@@ -80,9 +80,8 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 13. Não crie botões, telas ou números falsos. Se algo ainda não funciona, não aparece.
 14. **Responsivo:** toda tela nasce mobile-first, mas precisa funcionar bem em **375px** (celular), **768px** (tablet) e **1280px** (computador).
     No computador, aproveite a largura (ex.: lista e detalhe lado a lado, conteúdo com largura máxima) em vez de esticar a tela do celular.
-    Em todo PR que mexer em uma tela, gere os prints das três larguras com `pnpm screenshots <N> <nome>=<rota> ...`.
-    Commite os arquivos no PR e exiba os prints no corpo usando caminhos do repositório.
-    Nunca salve esses prints em `test-results/` nem use links para commits.
+    A exigência de prints por issue está suspensa até o lançamento (#19), inclusive para as issues #64 a #69, cujo rodapé ainda pede prints.
+    Durante a pausa, descreva a verificação na seção **Como testar** do PR, sem anexar prints.
 
 ### Escopo
 15. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
@@ -109,14 +108,18 @@ pnpm test                      # testes de unidade
 pnpm screenshots <N> <nome>=<rota> ... # prints em 375, 768 e 1280px
 ```
 
-### Prints de tela
+### Prints de tela para o lançamento
 
-Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o Supabase local populado pelo seed e `pnpm dev` rodando na porta 3000, execute `pnpm screenshots 78 hoje=/ alunos=/alunos`. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`. Use sempre `scripts/screenshots.mjs` para os prints de PR.
+A issue #19 prevê os prints de todas as telas para a documentação do lançamento. A exigência de prints por issue volta no Marco 2, após a #19.
+
+Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o Supabase local populado pelo seed e o servidor já rodando em `http://localhost:3000`, execute `pnpm screenshots 19 hoje=/ alunos=/alunos`. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`.
 
 ## Política de verificação
 
 - Antes de abrir um PR, rode `pnpm lint`, `pnpm typecheck` e `pnpm test`.
 - Rode `supabase db reset` e, em seguida, `supabase test db` apenas em issues que alterem `supabase/`.
+- Durante a verificação, não inicie, reinicie nem encerre o `pnpm dev` ou outros processos de longa duração para acompanhá-los.
+- Não escreva scripts ad hoc para testes no navegador. A issue #19 prevê os testes E2E do projeto.
 - Deixe `pnpm build` a cargo do CI.
 - Consulte apenas os trechos de arquivo necessários para a tarefa. Reuse o resultado de uma checagem que já passou enquanto os arquivos e as condições relevantes estiverem iguais.
 
