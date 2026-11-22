@@ -11,6 +11,7 @@ import type { LessonFormState } from "./form-state";
 
 export async function saveLesson(
   id: string | null,
+  returnStudentId: string | null,
   _: LessonFormState,
   form: FormData,
 ): Promise<LessonFormState> {
@@ -119,6 +120,10 @@ export async function saveLesson(
     }
     revalidatePath(`/alunos/${student.data}`);
     revalidatePath("/agenda");
+    if (returnStudentId) {
+      const notice = conflict ? "aula-conflito" : "aula-salva";
+      redirect(`/alunos/${returnStudentId}?aviso=${notice}`);
+    }
     if (conflict) {
       redirect(
         agendaHref(

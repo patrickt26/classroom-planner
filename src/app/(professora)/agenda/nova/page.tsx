@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { saveLesson } from "@/features/lessons/actions";
 import { agendaDateSchema } from "@/features/lessons/agenda-schema";
 import { agendaHref, localLessonDateTime } from "@/features/lessons/calendar";
 import { LessonForm } from "@/features/lessons/components/lesson-form";
 import { getLessonOptions } from "@/features/lessons/queries";
+import { getStudent } from "@/features/students/queries";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export const metadata = { title: "Nova aula | Agenda" };
@@ -12,7 +14,10 @@ export const metadata = { title: "Nova aula | Agenda" };
 export default async function NewLessonPage({
   searchParams,
 }: {
-  searchParams: Promise<{ data?: string | string[] }>;
+  searchParams: Promise<{
+    data?: string | string[];
+    aluno?: string | string[];
+  }>;
 }) {
   const { time_zone } = await requireTeacherWorkspace();
   const params = await searchParams;
@@ -20,7 +25,19 @@ export default async function NewLessonPage({
     .catch(localLessonDateTime(new Date(), time_zone).slice(0, 10))
     .parse(params.data);
   const options = await getLessonOptions();
-  const backHref = agendaHref(date);
+  const studentId = z.uuid().safeParse(params.aluno).data;
+  const student =
+    options.students.some(({ id }) => id === studentId) && studentId
+      ? await getStudent(studentId)
+      : null;
+  const [studentSubject] = student?.student_subjects ?? [];
+  const subjectId =
+    student?.student_subjects.length === 1 &&
+    options.subjects.some(({ id }) => id === studentSubject.subject_id)
+      ? studentSubject.subject_id
+      : "";
+  const backHref = student ? `/alunos/${student.id}` : agendaHref(date);
+  const backLabel = student ? "Voltar para a ficha" : "Voltar para a agenda";
 
   return (
     <div className="max-w-5xl">
@@ -30,11 +47,12 @@ export default async function NewLessonPage({
           <LessonForm
             timeZone={time_zone}
             {...options}
-            action={saveLesson.bind(null, null)}
+            action={saveLesson.bind(null, null, student?.id ?? null)}
             backHref={backHref}
+            backLabel={backLabel}
             initialValues={{
-              student_id: "",
-              subject_id: "",
+              student_id: student?.id ?? "",
+              subject_id: subjectId,
               date,
               time: "09:00",
               duration_minutes: "60",
@@ -63,7 +81,7 @@ export default async function NewLessonPage({
                 </Button>
               )}
               <Button asChild variant="outline">
-                <Link href={backHref}>Voltar para a agenda</Link>
+                <Link href={backHref}>{backLabel}</Link>
               </Button>
             </div>
           </>

@@ -32,7 +32,11 @@ export async function getPendingChargeTotal(workspaceId: string) {
   }
 }
 
-export async function getPendingCharges(workspaceId: string, timeZone: string) {
+export async function getPendingCharges(
+  workspaceId: string,
+  timeZone: string,
+  studentId?: string,
+) {
   const client = await createClient();
   const groups = new Map<
     string,
@@ -49,6 +53,7 @@ export async function getPendingCharges(workspaceId: string, timeZone: string) {
       .is("payment_id", null)
       .order("lesson_id")
       .limit(200);
+    if (studentId) query.eq("student_id", studentId);
     const { data, error } = await (cursor
       ? query.gt("lesson_id", cursor)
       : query);

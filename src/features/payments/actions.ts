@@ -21,6 +21,7 @@ function redirectToCharges(
 export async function recordPayment(
   studentId: string,
   month: string | undefined,
+  fromStudentPage: boolean,
   _: string,
   form: FormData,
 ) {
@@ -49,6 +50,12 @@ export async function recordPayment(
   if (error?.code === "P0001")
     return "As cobranças pendentes mudaram. Atualize a página e confira a seleção.";
   if (error) return "Não foi possível registrar o pagamento. Tente novamente.";
+  const studentPath = `/alunos/${parsed.data.studentId}`;
+  revalidatePath(studentPath);
+  if (fromStudentPage) {
+    revalidatePath("/cobrancas");
+    redirect(`${studentPath}?aviso=pagamento-registrado`);
+  }
   return redirectToCharges("registrado", month);
 }
 
