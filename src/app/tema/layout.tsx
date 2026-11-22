@@ -16,7 +16,7 @@ export default function ThemeLayout({ children }: { children: ReactNode }) {
         today: "/tema",
         students: "/tema/alunos",
         calendar: "/tema/agenda",
-        more: "/tema/mais",
+        settings: "/tema/mais",
       }}
     >
       {children}

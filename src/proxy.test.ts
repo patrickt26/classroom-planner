@@ -27,6 +27,7 @@ test.each([
   "/tema",
   "/tema/mais",
   "/mais-opcoes",
+  "/configuracoes-publicas",
   "/tela-futura",
 ])("refreshes the session and allows anonymous access to %s", async (path) => {
   expect(unstable_doesMiddlewareMatch({ config, url: path })).toBe(true);
@@ -39,6 +40,8 @@ test.each([
   "/",
   "/mais",
   "/mais/perfil",
+  "/configuracoes",
+  "/configuracoes/perfil",
   "/cobrancas",
   "/nova-senha",
   "/alunos",
