@@ -103,6 +103,9 @@ export async function saveLesson(
     };
 
   revalidatePath("/agenda");
+  if (id && lesson.status === "realizada") {
+    redirect(`/agenda/${id}/registro${conflict ? "?conflito=1" : ""}`);
+  }
   redirect(agendaHref(values.date, conflict ? "conflito" : "salva"));
 }
 

@@ -6,6 +6,7 @@ declare
   workspace_time_zone text;
   current_week_start date;
   math_subject_id uuid;
+  previous_note_id bigint;
   example_meeting_url constant text := 'https://meet.google.com/exemplo-agenda';
 begin
   insert into auth.users (
@@ -91,5 +92,23 @@ begin
   from public.lessons
   where lessons.workspace_id = ws
     and lessons.starts_at = (current_week_start - 6 + time '14:00') at time zone workspace_time_zone;
+
+  insert into public.lesson_notes (workspace_id, lesson_id, worked_on, difficulties, next_steps)
+  select ws, lesson.id,
+    'Comparamos frações com tiras de papel.',
+    'Precisou de apoio para identificar o numerador.',
+    'Retomar a atividade com desenhos.'
+  from public.lessons as lesson
+  where lesson.workspace_id = ws
+    and lesson.starts_at = (current_week_start - 6 + time '14:00') at time zone workspace_time_zone
+  returning id into strict previous_note_id;
+
+  insert into public.lesson_notes (workspace_id, lesson_id, worked_on, difficulties, next_steps, supersedes_id)
+  select ws, lesson_id,
+    'Comparamos frações com tiras de papel e registramos as primeiras comparações no caderno.',
+    'Precisou de apoio para identificar o numerador e separá-lo do denominador.',
+    'Começar com desenhos e depois comparar duas frações com o mesmo denominador.',
+    previous_note_id
+  from public.lesson_notes where id = previous_note_id;
 end;
 $$;

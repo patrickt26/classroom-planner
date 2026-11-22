@@ -98,6 +98,29 @@ function LessonCard({
           </Button>
         )}
       </div>
+      {(lesson.hasNote ||
+        lesson.status === "realizada" ||
+        lesson.status === "agendada" ||
+        lesson.status === "confirmada") && (
+        <div className="px-2 pb-1">
+          <Button
+            asChild
+            variant="outline"
+            className="h-auto w-full whitespace-normal px-2 text-center"
+          >
+            <Link href={`/agenda/${lesson.id}/registro`}>
+              <span className="sr-only">
+                {student}, {start}:{" "}
+              </span>
+              {lesson.hasNote
+                ? "Ver registro"
+                : lesson.status === "realizada"
+                  ? "Registrar aula"
+                  : "Marcar realizada"}
+            </Link>
+          </Button>
+        </div>
+      )}
       {lesson.rescheduled_from_id && (
         <p className="px-2 pb-2 text-xs">Aula de reposição</p>
       )}
