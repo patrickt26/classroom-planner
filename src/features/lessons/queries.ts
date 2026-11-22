@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { getCatalogOptions } from "@/features/catalog/queries";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
@@ -138,7 +139,10 @@ export async function getEditableLesson(id: string) {
   return { ...data, hasMakeup: false, canDelete };
 }
 
-export async function getLessonOptions(currentStudentId?: string) {
+export async function getLessonOptions(
+  currentStudentId?: string,
+  currentSubjectId?: string | null,
+) {
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
   const studentsQuery = client
@@ -150,15 +154,10 @@ export async function getLessonOptions(currentStudentId?: string) {
       ? studentsQuery.or(`archived_at.is.null,id.eq.${currentStudentId}`)
       : studentsQuery.is("archived_at", null)
     ).order("name"),
-    client
-      .from("subjects")
-      .select("id, name")
-      .eq("workspace_id", workspace.workspace_id)
-      .order("name"),
+    getCatalogOptions("subjects", currentSubjectId ? [currentSubjectId] : []),
   ]);
-  if (students.error || subjects.error)
-    throw new Error("Não foi possível carregar alunos e disciplinas.");
-  return { students: students.data, subjects: subjects.data };
+  if (students.error) throw new Error("Não foi possível carregar os alunos.");
+  return { students: students.data, subjects };
 }
 
 export type WeekLesson = Awaited<ReturnType<typeof listWeekLessons>>[number];

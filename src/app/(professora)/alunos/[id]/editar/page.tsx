@@ -14,10 +14,11 @@ export default async function EditStudentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [student, options] = await Promise.all([
-    getStudent(id),
-    getStudentOptions(),
-  ]);
+  const student = await getStudent(id);
+  const subjectIds = student.student_subjects.map(
+    ({ subject_id }) => subject_id,
+  );
+  const options = await getStudentOptions(student.grade_id, subjectIds);
   const archived = student.archived_at !== null;
   const listHref = archived ? "/alunos?situacao=arquivados" : "/alunos";
   return (
@@ -41,9 +42,7 @@ export default async function EditStudentPage({
                 : (student.hourly_rate / 100).toFixed(2).replace(".", ","),
               is_free: student.is_free,
               notes: student.notes ?? "",
-              subject_ids: student.student_subjects.map(
-                ({ subject_id }) => subject_id,
-              ),
+              subject_ids: subjectIds,
             }}
             listHref={listHref}
             {...options}

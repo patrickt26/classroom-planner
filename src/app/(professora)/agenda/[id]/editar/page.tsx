@@ -62,7 +62,7 @@ export default async function EditLessonPage({
     );
   }
 
-  const options = await getLessonOptions(lesson.student_id);
+  const options = await getLessonOptions(lesson.student_id, lesson.subject_id);
   return (
     <div className="max-w-2xl">
       <h1 className="mb-5 text-3xl font-bold text-brown">Editar aula</h1>

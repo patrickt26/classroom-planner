@@ -111,7 +111,10 @@ export async function saveStudent(
     return state;
   }
   if (error?.code === "23503") {
-    if (error.message.includes("students_workspace_id_grade_id_fkey")) {
+    if (
+      error.message === "grade_unavailable" ||
+      error.message.includes("students_workspace_id_grade_id_fkey")
+    ) {
       return {
         ...state,
         errors: {
@@ -120,6 +123,7 @@ export async function saveStudent(
       };
     }
     if (
+      error.message === "subject_unavailable" ||
       error.message.includes("student_subjects_workspace_id_subject_id_fkey")
     ) {
       return {

@@ -11,6 +11,7 @@ declare
   previous_month_payer uuid;
   math_subject_id uuid;
   previous_note_id bigint;
+  archived_subject_id uuid;
   example_meeting_url constant text := 'https://meet.google.com/exemplo-agenda';
 begin
   insert into auth.users (
@@ -179,6 +180,18 @@ begin
       (current_week_start - 6 + time '14:00') at time zone workspace_time_zone
     )
   group by student_id;
+
+  -- Example catalog items and historical links after archiving.
+  insert into public.subjects (workspace_id, name)
+  values (ws, 'Leitura guiada') returning id into archived_subject_id;
+  insert into public.lessons (workspace_id, student_id, subject_id, starts_at, duration_minutes, modality, status)
+  select ws, id, archived_subject_id, (current_week_start - 10 + time '09:00') at time zone workspace_time_zone,
+    45, 'presencial', 'falta'
+  from public.students where workspace_id = ws and name = 'Aluno C';
+
+  insert into public.grades (workspace_id, name) values (ws, 'Reforço de alfabetização');
+  update public.subjects set archived_at = now() where workspace_id = ws and id = archived_subject_id;
+  update public.grades set archived_at = now() where workspace_id = ws and name = '7º ano';
 
   -- A previous month with both a pending charge and a recorded payment.
   insert into public.lessons (

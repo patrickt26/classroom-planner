@@ -42,6 +42,8 @@ export async function saveRecurrence(id: string, _: string, form: FormData) {
     .or(`end_date.is.null,end_date.gte.${today}`)
     .select("student_id")
     .maybeSingle();
+  if (error?.message === "subject_unavailable")
+    return "Esta matéria não está mais disponível. Selecione outra.";
   if (error || !data)
     return "Não foi possível salvar a série. Confira a data final.";
   revalidatePath(`/alunos/${data.student_id}`);
