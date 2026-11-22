@@ -34,54 +34,7 @@ export function GuardianForm({
     <form action={formAction} className="grid gap-4" noValidate>
       <Alert variant="error" message={state.message} />
       <div key={state.attempt} className="grid gap-4">
-        {fields.map(({ name, label, maxLength }) => {
-          const error = state.errors?.[name]?.[0];
-          const isPhone = name === "phone";
-          const description = error
-            ? `guardian-${name}-error`
-            : isPhone
-              ? "guardian-phone-hint"
-              : undefined;
-          return (
-            <div key={name} className="grid gap-1.5">
-              <label
-                className="text-sm font-semibold"
-                htmlFor={`guardian-${name}`}
-              >
-                {label}
-              </label>
-              <Input
-                id={`guardian-${name}`}
-                name={name}
-                type={isPhone ? "tel" : "text"}
-                defaultValue={state.values[name]}
-                maxLength={maxLength}
-                required={!isPhone}
-                aria-invalid={Boolean(error)}
-                aria-describedby={description}
-              />
-              {error ? (
-                <p
-                  id={`guardian-${name}-error`}
-                  role="alert"
-                  className="text-sm text-destructive"
-                >
-                  {error}
-                </p>
-              ) : (
-                isPhone && (
-                  <p
-                    id="guardian-phone-hint"
-                    className="text-sm text-muted-foreground"
-                  >
-                    Opcional. Use DDD ou código do país com +.
-                  </p>
-                )
-              )}
-            </div>
-          );
-        })}
-        <FinancialGuardianField checked={state.values.financial} />
+        <GuardianFields values={state.values} errors={state.errors} />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
@@ -95,25 +48,105 @@ export function GuardianForm({
   );
 }
 
-export function FinancialGuardianField({ checked }: { checked: boolean }) {
+export function GuardianFields({
+  values,
+  errors,
+  prefix = "",
+  existing = false,
+}: {
+  values: GuardianFormValues;
+  errors?: GuardianFormState["errors"];
+  prefix?: string;
+  existing?: boolean;
+}) {
+  return (
+    <>
+      {fields.map(({ name, label, maxLength }) => {
+        if (existing && name !== "relationship") return null;
+        const error = errors?.[name]?.[0];
+        const isPhone = name === "phone";
+        const description = error
+          ? `guardian-${name}-error`
+          : isPhone
+            ? "guardian-phone-hint"
+            : undefined;
+        return (
+          <div key={name} className="grid gap-1.5">
+            <label
+              className="text-sm font-semibold"
+              htmlFor={`guardian-${name}`}
+            >
+              {label}
+            </label>
+            <Input
+              id={`guardian-${name}`}
+              name={prefix + name}
+              type={isPhone ? "tel" : "text"}
+              defaultValue={values[name]}
+              maxLength={maxLength}
+              required={!isPhone}
+              aria-invalid={Boolean(error)}
+              aria-describedby={description}
+            />
+            {error ? (
+              <p
+                id={`guardian-${name}-error`}
+                role="alert"
+                className="text-sm text-destructive"
+              >
+                {error}
+              </p>
+            ) : (
+              isPhone && (
+                <p
+                  id="guardian-phone-hint"
+                  className="text-sm text-muted-foreground"
+                >
+                  Opcional. Use DDD ou código do país com +.
+                </p>
+              )
+            )}
+          </div>
+        );
+      })}
+      <FinancialGuardianField
+        checked={values.financial}
+        name={`${prefix}financial`}
+        showHint={!prefix}
+      />
+    </>
+  );
+}
+
+export function FinancialGuardianField({
+  checked,
+  name = "financial",
+  showHint = true,
+}: {
+  checked: boolean;
+  name?: string;
+  showHint?: boolean;
+}) {
   return (
     <>
       <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
         <input
           type="checkbox"
-          name="financial"
+          name={name}
           defaultChecked={checked}
           className="size-4 accent-navy"
-          aria-describedby="guardian-financial-hint"
+          aria-describedby={showHint ? "guardian-financial-hint" : undefined}
         />
         Responsável financeiro
       </label>
-      <p
-        id="guardian-financial-hint"
-        className="-mt-3 text-sm text-muted-foreground"
-      >
-        Ao marcar esta opção, você substitui o responsável financeiro atual.
-      </p>
+      {showHint && (
+        <p
+          id="guardian-financial-hint"
+          className="-mt-3 text-sm text-muted-foreground"
+        >
+          Ao marcar esta opção, você substitui o responsável financeiro atual.
+        </p>
+      )}
     </>
   );
 }

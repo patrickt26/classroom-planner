@@ -47,16 +47,17 @@ begin
   join public.subjects using (workspace_id)
   where students.workspace_id = ws and subjects.name = 'Matemática';
 
-  insert into public.guardians (workspace_id, name) values (ws, 'Responsável A');
+  insert into public.guardians (workspace_id, name)
+  values (ws, 'Responsável A'), (ws, 'Responsável C');
   insert into public.student_guardians (workspace_id, student_id, guardian_id, relationship, is_financial_guardian)
-  select ws, students.id, guardians.id, 'Mãe', true from public.students
-  join public.guardians using (workspace_id)
-  where students.workspace_id = ws and students.name = 'Aluno A' and guardians.name = 'Responsável A';
-
-  insert into public.student_guardians (workspace_id, student_id, guardian_id, relationship)
-  select ws, students.id, guardians.id, 'Mãe' from public.students
-  join public.guardians using (workspace_id)
-  where students.workspace_id = ws and students.name = 'Aluno B' and guardians.name = 'Responsável A';
+  select ws, students.id, guardians.id, sample.relationship, sample.financial
+  from (values
+    ('Aluno A', 'Responsável A', 'Mãe', true),
+    ('Aluno B', 'Responsável A', 'Mãe', false),
+    ('Aluno C', 'Responsável C', 'Tutor', true)
+  ) as sample(student_name, guardian_name, relationship, financial)
+  join public.students on students.workspace_id = ws and students.name = sample.student_name
+  join public.guardians on guardians.workspace_id = ws and guardians.name = sample.guardian_name;
 
   -- The recurrence trigger generates lessons for the next eight weeks.
   insert into public.recurrences (

@@ -2,10 +2,22 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import {
+  guardianFormSchema,
+  guardianLinkSchema,
+} from "@/features/guardians/schema";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { StudentFormState, StudentFormValues } from "./form-state";
 import { studentFormSchema } from "./schema";
+
+const registrationGuardianSchema = z.discriminatedUnion("mode", [
+  guardianLinkSchema.extend({
+    mode: z.literal("existing"),
+    id: z.uuid("Selecione um responsável na busca."),
+  }),
+  guardianFormSchema.extend({ mode: z.literal("new") }),
+]);
 
 function readText(form: FormData, key: string) {
   const value = form.get(key);
@@ -30,13 +42,43 @@ export async function saveStudent(
       .getAll("subject_ids")
       .map((value) => (typeof value === "string" ? value : "")),
   };
-  const state = { values, attempt: previous.attempt + 1 };
-  const input = studentFormSchema.safeParse(values);
-  if (!input.success) {
-    return { ...state, errors: z.flattenError(input.error).fieldErrors };
-  }
   const studentId = z.uuid().nullable().safeParse(id);
+  const attempt = previous.attempt + 1;
+  const state: StudentFormState = { values, attempt };
   if (!studentId.success) return { ...state, message: "Cadastro inválido." };
+
+  const input = studentFormSchema.safeParse(values);
+  if (!input.success) state.errors = z.flattenError(input.error).fieldErrors;
+
+  let guardian: z.output<typeof registrationGuardianSchema> | undefined;
+  if (!studentId.data) {
+    const guardianValues = {
+      name: readText(form, "guardian_name"),
+      phone: readText(form, "guardian_phone"),
+      relationship: readText(form, "guardian_relationship"),
+      financial: form.get("guardian_financial") === "on",
+    };
+    state.guardian = { values: guardianValues, attempt };
+    const guardianInput = registrationGuardianSchema.safeParse({
+      ...guardianValues,
+      mode: form.get("guardian_mode"),
+      id: form.get("guardian_id"),
+    });
+    if (!guardianInput.success) {
+      const errors = z.flattenError(guardianInput.error).fieldErrors;
+      state.guardian.errors = errors;
+      const selectionError = guardianInput.error.issues.find(
+        ({ path }) => path[0] === "id",
+      );
+      state.guardian.message = errors.mode
+        ? "Escolha como informar o responsável."
+        : (selectionError?.message ?? "Confira os dados do responsável.");
+      return state;
+    }
+    guardian = guardianInput.data;
+  }
+
+  if (!input.success) return state;
 
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
@@ -52,8 +94,22 @@ export async function saveStudent(
     student_is_free: student.is_free,
     student_notes: student.notes ?? undefined,
     selected_subject_ids: subject_ids,
+    ...(guardian && {
+      existing_guardian_id:
+        guardian.mode === "existing" ? guardian.id : undefined,
+      guardian_name: guardian.mode === "new" ? guardian.name : undefined,
+      guardian_phone:
+        guardian.mode === "new" ? (guardian.phone ?? undefined) : undefined,
+      guardian_relationship: guardian.relationship,
+      financial_guardian: guardian.financial,
+    }),
   });
 
+  if (state.guardian && error?.message === "student_guardian_unavailable") {
+    state.guardian.message =
+      "Este responsável não está mais disponível. Selecione outro.";
+    return state;
+  }
   if (error?.code === "23503") {
     if (error.message.includes("students_workspace_id_grade_id_fkey")) {
       return {

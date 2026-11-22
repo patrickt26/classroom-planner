@@ -836,6 +836,11 @@ export type Database = {
       };
       save_student: {
         Args: {
+          existing_guardian_id?: string;
+          financial_guardian?: boolean;
+          guardian_name?: string;
+          guardian_phone?: string;
+          guardian_relationship?: string;
           selected_subject_ids: string[];
           student_birth_date?: string;
           student_grade_id?: string;

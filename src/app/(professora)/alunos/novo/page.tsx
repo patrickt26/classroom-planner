@@ -22,6 +22,7 @@ export default async function NewStudentPage() {
           action={saveStudent.bind(null, null, false)}
           initialValues={emptyStudentForm}
           listHref="/alunos"
+          requireGuardian
           {...options}
         />
       </section>
