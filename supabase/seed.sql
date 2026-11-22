@@ -75,6 +75,9 @@ begin
     sample.duration_minutes, sample.modality::public.lesson_modality, sample.meeting_url,
     sample.status::public.lesson_status, sample.pending_reason::public.lesson_status
   from (values
+    -- A 90-minute lesson at R$ 80/h produces a pending charge of 12000 cents.
+    ('Aluno A', -9, time '09:00', 90, 'presencial', null, 'realizada', null),
+    ('Aluno B', -9, time '11:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno A', -8, time '14:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno A', -6, time '14:00', 60, 'presencial', null, 'realizada', null),
     ('Aluno A', -4, time '10:00', 60, 'presencial', null, 'falta', null),
@@ -134,5 +137,8 @@ begin
   from public.lessons as lesson
   where lesson.workspace_id = ws
     and lesson.starts_at = (current_week_start - 8 + time '14:00') at time zone workspace_time_zone;
+
+  -- Future lessons use the new rate. The charge above keeps its original amount.
+  update public.students set hourly_rate = 8500 where workspace_id = ws and name = 'Aluno A';
 end;
 $$;

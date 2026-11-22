@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      charges: {
+        Row: {
+          amount_cents: number;
+          duration_minutes: number;
+          hourly_rate: number;
+          lesson_id: string;
+          payment_id: string | null;
+          student_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_cents?: never;
+          duration_minutes: number;
+          hourly_rate: number;
+          lesson_id: string;
+          payment_id?: string | null;
+          student_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          amount_cents?: never;
+          duration_minutes?: number;
+          hourly_rate?: number;
+          lesson_id?: string;
+          payment_id?: string | null;
+          student_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "charges_workspace_id_student_id_lesson_id_fkey";
+            columns: ["workspace_id", "student_id", "lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["workspace_id", "student_id", "id"];
+          },
+        ];
+      };
       grades: {
         Row: {
           created_at: string;
@@ -411,6 +450,36 @@ export type Database = {
           },
           {
             foreignKeyName: "student_guardians_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      student_rate_history: {
+        Row: {
+          changed_on: string;
+          previous_hourly_rate: number;
+          student_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          changed_on: string;
+          previous_hourly_rate: number;
+          student_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          changed_on?: string;
+          previous_hourly_rate?: number;
+          student_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_rate_history_workspace_id_student_id_fkey";
             columns: ["workspace_id", "student_id"];
             isOneToOne: false;
             referencedRelation: "students";
