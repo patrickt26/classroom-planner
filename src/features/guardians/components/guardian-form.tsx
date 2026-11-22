@@ -81,22 +81,7 @@ export function GuardianForm({
             </div>
           );
         })}
-        <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
-          <input
-            type="checkbox"
-            name="financial"
-            defaultChecked={state.values.financial}
-            className="size-4 accent-navy"
-            aria-describedby="guardian-financial-hint"
-          />
-          Responsável financeiro
-        </label>
-        <p
-          id="guardian-financial-hint"
-          className="-mt-3 text-sm text-muted-foreground"
-        >
-          Ao marcar esta opção, você substitui o responsável financeiro atual.
-        </p>
+        <FinancialGuardianField checked={state.values.financial} />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
@@ -107,6 +92,29 @@ export function GuardianForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+export function FinancialGuardianField({ checked }: { checked: boolean }) {
+  return (
+    <>
+      <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
+        <input
+          type="checkbox"
+          name="financial"
+          defaultChecked={checked}
+          className="size-4 accent-navy"
+          aria-describedby="guardian-financial-hint"
+        />
+        Responsável financeiro
+      </label>
+      <p
+        id="guardian-financial-hint"
+        className="-mt-3 text-sm text-muted-foreground"
+      >
+        Ao marcar esta opção, você substitui o responsável financeiro atual.
+      </p>
+    </>
   );
 }
 

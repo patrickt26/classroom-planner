@@ -53,6 +53,11 @@ begin
   join public.guardians using (workspace_id)
   where students.workspace_id = ws and students.name = 'Aluno A' and guardians.name = 'Responsável A';
 
+  insert into public.student_guardians (workspace_id, student_id, guardian_id, relationship)
+  select ws, students.id, guardians.id, 'Mãe' from public.students
+  join public.guardians using (workspace_id)
+  where students.workspace_id = ws and students.name = 'Aluno B' and guardians.name = 'Responsável A';
+
   -- The recurrence trigger generates lessons for the next eight weeks.
   insert into public.recurrences (
     workspace_id, student_id, subject_id, day_of_week, start_time, duration_minutes,

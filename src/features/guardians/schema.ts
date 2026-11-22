@@ -12,13 +12,18 @@ export function normalizePhone(value: string) {
   return /^[1-9]\d{9,10}$/.test(digits) ? `+55${digits}` : null;
 }
 
-export const guardianFormSchema = z.object({
-  name: z.string().trim().min(1, "Informe o nome.").max(120),
+export const guardianLinkSchema = z.object({
   relationship: z
     .string()
     .trim()
     .min(1, "Informe o parentesco ou vínculo.")
     .max(80),
+  financial: z.boolean(),
+});
+
+export const guardianFormSchema = z.object({
+  name: z.string().trim().min(1, "Informe o nome.").max(120),
+  ...guardianLinkSchema.shape,
   phone: z
     .string()
     .trim()
@@ -28,7 +33,6 @@ export const guardianFormSchema = z.object({
       "Informe um telefone com DDD ou com código do país.",
     )
     .transform(normalizePhone),
-  financial: z.boolean(),
 });
 
 export type GuardianFormValues = z.input<typeof guardianFormSchema>;
@@ -36,6 +40,13 @@ export type GuardianFormValues = z.input<typeof guardianFormSchema>;
 export type GuardianFormState = {
   values: GuardianFormValues;
   errors?: Partial<Record<keyof GuardianFormValues, string[]>>;
+  message?: string;
+  attempt: number;
+};
+
+export type GuardianLinkState = {
+  values: z.input<typeof guardianLinkSchema>;
+  errors?: Partial<Record<keyof GuardianLinkState["values"], string[]>>;
   message?: string;
   attempt: number;
 };

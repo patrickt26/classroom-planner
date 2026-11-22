@@ -1,4 +1,11 @@
-import { MessageCircle, Pencil, Phone, Plus, Trash2 } from "lucide-react";
+import {
+  Link2,
+  MessageCircle,
+  Pencil,
+  Phone,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 import { Alert } from "@/components/ui/alert";
@@ -7,17 +14,20 @@ import { removeGuardian, saveGuardian } from "../actions";
 import { listStudentGuardians } from "../queries";
 import { normalizePhone } from "../schema";
 import { GuardianForm, RemoveGuardianForm } from "./guardian-form";
+import { GuardianLinkPanel } from "./guardian-link-panel";
 
 const notices = {
   cadastrado: "Responsável cadastrado.",
+  vinculado: "Responsável vinculado.",
   salvo: "Responsável atualizado.",
   removido: "Responsável removido desta ficha.",
 };
 const panelSchema = z.discriminatedUnion("acao", [
   z.object({ acao: z.literal("cadastrar") }),
+  z.object({ acao: z.literal("vincular") }),
   z.object({ acao: z.enum(["editar", "remover"]), responsavel: z.uuid() }),
 ]);
-const noticeSchema = z.enum(["cadastrado", "salvo", "removido"]);
+const noticeSchema = z.enum(["cadastrado", "vinculado", "salvo", "removido"]);
 
 export async function StudentGuardians({
   studentId,
@@ -33,6 +43,7 @@ export async function StudentGuardians({
       ? guardians.find(({ guardian_id }) => guardian_id === panel.responsavel)
       : undefined;
   const adding = panel?.acao === "cadastrar";
+  const linking = panel?.acao === "vincular";
   const editing = panel?.acao === "editar" && selected;
   const removing = panel?.acao === "remover" && selected;
   const baseHref = `/alunos/${studentId}`;
@@ -48,13 +59,22 @@ export async function StudentGuardians({
         >
           Responsáveis
         </h2>
-        {!adding && (
-          <Button asChild variant="outline">
-            <Link href={`${baseHref}?acao=cadastrar#responsaveis`}>
-              <Plus aria-hidden="true" /> Cadastrar responsável
-            </Link>
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {!adding && (
+            <Button asChild variant="outline">
+              <Link href={`${baseHref}?acao=cadastrar#responsaveis`}>
+                <Plus aria-hidden="true" /> Cadastrar responsável
+              </Link>
+            </Button>
+          )}
+          {!linking && (
+            <Button asChild variant="outline">
+              <Link href={`${baseHref}?acao=vincular#responsaveis`}>
+                <Link2 aria-hidden="true" /> Vincular responsável existente
+              </Link>
+            </Button>
+          )}
+        </div>
       </header>
 
       {notice.success && (
@@ -66,6 +86,8 @@ export async function StudentGuardians({
           message="Este responsável não está vinculado ao aluno."
         />
       )}
+
+      {linking && <GuardianLinkPanel studentId={studentId} params={params} />}
 
       {(adding || editing || removing) && (
         <div className="grid gap-4 rounded-xl border bg-card p-4 sm:p-5">
