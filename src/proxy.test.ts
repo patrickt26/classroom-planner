@@ -20,7 +20,6 @@ function request(path: string) {
 }
 
 test.each([
-  "/",
   "/entrar",
   "/criar-conta",
   "/recuperar-senha",
@@ -37,6 +36,7 @@ test.each([
 });
 
 test.each([
+  "/",
   "/mais",
   "/mais/perfil",
   "/cobrancas",

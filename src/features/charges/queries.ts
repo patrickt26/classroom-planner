@@ -9,6 +9,29 @@ export type PendingCharge = {
   amount: number;
 };
 
+export async function getPendingChargeTotal(workspaceId: string) {
+  const client = await createClient();
+  let total = 0;
+  let cursor: string | undefined;
+  const pageSize = 200;
+  for (;;) {
+    const query = client
+      .from("charges")
+      .select("lesson_id, amount_cents")
+      .eq("workspace_id", workspaceId)
+      .is("payment_id", null)
+      .order("lesson_id")
+      .limit(pageSize);
+    const { data, error } = await (cursor
+      ? query.gt("lesson_id", cursor)
+      : query);
+    if (error) throw new Error("Não foi possível carregar o total a receber.");
+    for (const charge of data) total += charge.amount_cents;
+    if (data.length < pageSize) return total;
+    cursor = data[data.length - 1].lesson_id;
+  }
+}
+
 export async function getPendingCharges(workspaceId: string, timeZone: string) {
   const client = await createClient();
   const groups = new Map<

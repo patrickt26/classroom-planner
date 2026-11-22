@@ -3,6 +3,34 @@ import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
+export async function listLessonsWithoutNotes(workspaceId: string) {
+  const client = await createClient();
+  const query = client
+    .from("lessons")
+    .select(
+      "id, starts_at, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_notes()",
+    )
+    .eq("workspace_id", workspaceId)
+    .eq("status", "realizada")
+    .is("lesson_notes", null)
+    .order("starts_at", { ascending: false })
+    .order("id");
+
+  const pageSize = 100;
+  const lessons = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await query.range(offset, offset + pageSize - 1);
+    if (error)
+      throw new Error("Não foi possível carregar os registros pendentes.");
+    lessons.push(...data);
+    if (data.length < pageSize) return lessons;
+  }
+}
+
+export type LessonWithoutNote = Awaited<
+  ReturnType<typeof listLessonsWithoutNotes>
+>[number];
+
 export async function getPreviousLessonNote(
   client: Awaited<ReturnType<typeof createClient>>,
   workspaceId: string,

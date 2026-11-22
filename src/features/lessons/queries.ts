@@ -5,6 +5,41 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import { addDays, calendarDayStart } from "./calendar";
 
+export async function listDayLessons(
+  workspaceId: string,
+  date: string,
+  timeZone: string,
+) {
+  const client = await createClient();
+  const query = client
+    .from("lessons")
+    .select(
+      "id, starts_at, duration_minutes, status, modality, meeting_url, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_notes(id)",
+    )
+    .eq("workspace_id", workspaceId)
+    .gte("starts_at", calendarDayStart(date, timeZone))
+    .lt("starts_at", calendarDayStart(addDays(date, 1), timeZone))
+    .limit(1, { referencedTable: "lesson_notes" })
+    .order("starts_at")
+    .order("id");
+
+  const pageSize = 100;
+  const lessons = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await query.range(offset, offset + pageSize - 1);
+    if (error) throw new Error("Não foi possível carregar as aulas do dia.");
+    lessons.push(
+      ...data.map(({ lesson_notes, ...lesson }) => ({
+        ...lesson,
+        hasNote: lesson_notes.length > 0,
+      })),
+    );
+    if (data.length < pageSize) return lessons;
+  }
+}
+
+export type DayLesson = Awaited<ReturnType<typeof listDayLessons>>[number];
+
 export function canEditLesson(
   lesson: Pick<
     Tables<"lessons">,

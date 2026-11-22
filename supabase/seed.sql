@@ -5,6 +5,7 @@ declare
   ws uuid;
   workspace_time_zone text;
   current_week_start date;
+  current_local_date date;
   math_subject_id uuid;
   previous_note_id bigint;
   example_meeting_url constant text := 'https://meet.google.com/exemplo-agenda';
@@ -27,6 +28,7 @@ begin
   update public.workspaces set name = 'Espaço de exemplo' where workspace_id = ws
   returning time_zone into strict workspace_time_zone;
   current_week_start := date_trunc('week', now() at time zone workspace_time_zone)::date;
+  current_local_date := (now() at time zone workspace_time_zone)::date;
 
   select id into strict math_subject_id from public.subjects
   where workspace_id = ws and name = 'Matemática';
@@ -86,6 +88,21 @@ begin
     ('Aluno A', -2, time '10:00', 60, 'presencial', null, 'reposicao_pendente', 'falta'),
     ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null)
   ) as sample(student_name, day_offset, start_time, duration_minutes, modality, meeting_url, status, pending_reason)
+  join public.students on students.workspace_id = ws and students.name = sample.student_name;
+
+  -- Today's dashboard can be exercised on any day of the week.
+  insert into public.lessons (
+    workspace_id, student_id, subject_id, starts_at, duration_minutes,
+    modality, meeting_url, status
+  )
+  select ws, students.id, math_subject_id,
+    (current_local_date + sample.start_time) at time zone workspace_time_zone,
+    sample.duration_minutes, sample.modality::public.lesson_modality,
+    sample.meeting_url, sample.status::public.lesson_status
+  from (values
+    ('Aluno C', time '09:30', 45, 'online', example_meeting_url, 'confirmada'),
+    ('Aluno B', time '13:00', 50, 'presencial', null, 'realizada')
+  ) as sample(student_name, start_time, duration_minutes, modality, meeting_url, status)
   join public.students on students.workspace_id = ws and students.name = sample.student_name;
 
   -- An absence with a completed replacement for the student's timeline.
