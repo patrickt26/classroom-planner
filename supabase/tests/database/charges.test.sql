@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(35);
+select plan(41);
 
 \set teacher '10000000-0000-4000-8000-000000000016'
 \set other_teacher '20000000-0000-4000-8000-000000000016'
@@ -116,6 +116,37 @@ select is((select amount_cents from charges where workspace_id = :'ws' and lesso
   12000::bigint, 'Refazer a realização preserva o valor já pago');
 select is((select payment_id from charges where workspace_id = :'ws' and lesson_id = :'late_lesson'),
   :'payment'::uuid, 'Refazer a realização preserva o vínculo com o pagamento');
+
+set local role authenticated;
+insert into recurrences (workspace_id, id, student_id, subject_id, day_of_week,
+  start_time, duration_minutes, modality, start_date)
+values (:'ws', :'ws', :'ws', :'ws', 1, '09:00', 60, 'presencial', current_date + 8);
+select id as recurring_lesson, starts_at as recurring_start from lessons
+where workspace_id = :'ws' and recurrence_id = :'ws'
+order by starts_at limit 1 \gset
+
+-- Register the payment with the lesson dated today, then restore its future slot.
+update lessons set starts_at = now(), status = 'realizada'
+where workspace_id = :'ws' and id = :'recurring_lesson';
+select record_payment(:'ws', :'ws', array[:'recurring_lesson'::uuid],
+  (now() at time zone time_zone)::date, 'pix', '') as recurring_payment
+from workspaces where workspace_id = :'ws' \gset
+update lessons set starts_at = :'recurring_start', status = 'agendada'
+where workspace_id = :'ws' and id = :'recurring_lesson';
+
+select is((select payment_id from charges where workspace_id = :'ws' and lesson_id = :'recurring_lesson'),
+  :'recurring_payment'::uuid, 'A aula reagendada conserva a cobrança paga');
+select lives_ok(format('update recurrences set day_of_week = 2, start_time = ''10:00''
+  where workspace_id = %L and id = %L', :'ws', :'ws'), 'Altera a série com cobrança paga');
+select is((select status from lessons where workspace_id = :'ws' and id = :'recurring_lesson'
+  and recurrence_id = :'ws' and starts_at = :'recurring_start' and starts_at > now()),
+  'agendada'::lesson_status, 'A edição preserva a aula futura no horário original');
+select lives_ok(format('update recurrences set ended_at = now()
+  where workspace_id = %L and id = %L', :'ws', :'ws'), 'Encerra a série com cobrança paga');
+select results_eq(format('select id from lessons where workspace_id = %L and recurrence_id = %L',
+  :'ws', :'ws'), array[:'recurring_lesson'::uuid], 'Somente a aula com cobrança permanece na série encerrada');
+select is((select payment_id from charges where workspace_id = :'ws' and lesson_id = :'recurring_lesson'),
+  :'recurring_payment'::uuid, 'O pagamento continua vinculado à mesma aula após o encerramento');
 
 select * from finish();
 rollback;
