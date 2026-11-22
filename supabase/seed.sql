@@ -81,5 +81,15 @@ begin
     ('Aluno C', 6, time '16:00', 45, 'online', example_meeting_url, 'confirmada', null)
   ) as sample(student_name, day_offset, start_time, duration_minutes, modality, meeting_url, status, pending_reason)
   join public.students on students.workspace_id = ws and students.name = sample.student_name;
+
+  insert into public.lesson_plans (workspace_id, lesson_id, objective, content, activities, materials)
+  select ws, lessons.id,
+    'Comparar frações com o mesmo denominador',
+    'Partes do inteiro, numerador e denominador.',
+    'Montar pares de frações com tiras de papel e comparar as partes pintadas.',
+    'Papel quadriculado, lápis de cor e régua.'
+  from public.lessons
+  where lessons.workspace_id = ws
+    and lessons.starts_at = (current_week_start - 6 + time '14:00') at time zone workspace_time_zone;
 end;
 $$;

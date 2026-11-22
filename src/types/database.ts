@@ -78,6 +78,55 @@ export type Database = {
           },
         ];
       };
+      lesson_plans: {
+        Row: {
+          activities: string;
+          content: string;
+          created_at: string;
+          lesson_id: string;
+          materials: string;
+          objective: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          activities?: string;
+          content?: string;
+          created_at?: string;
+          lesson_id: string;
+          materials?: string;
+          objective: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          activities?: string;
+          content?: string;
+          created_at?: string;
+          lesson_id?: string;
+          materials?: string;
+          objective?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plans_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["workspace_id"];
+          },
+          {
+            foreignKeyName: "lesson_plans_workspace_id_lesson_id_fkey";
+            columns: ["workspace_id", "lesson_id"];
+            isOneToOne: true;
+            referencedRelation: "lessons";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       lessons: {
         Row: {
           created_at: string;
