@@ -119,13 +119,29 @@ export async function scheduleMakeup(id: string, _: string, form: FormData) {
   );
   if (!start) return "Esse horário não existe no fuso do espaço.";
   const client = await createClient();
+  const unavailableMessage =
+    "Não foi possível agendar a reposição. Atualize a agenda.";
+  const earlierStartMessage =
+    "Escolha uma data e um horário iguais ou posteriores aos da aula original.";
+  const { data: original, error: originalError } = await client
+    .from("lessons")
+    .select("starts_at")
+    .eq("workspace_id", ws.workspace_id)
+    .eq("id", id)
+    .eq("status", "reposicao_pendente")
+    .maybeSingle();
+  if (originalError || !original) return unavailableMessage;
+  if (start.getTime() < Date.parse(original.starts_at))
+    return earlierStartMessage;
+
   const { data, error } = await client.rpc("schedule_makeup", {
     target_workspace_id: ws.workspace_id,
     original_id: id,
     new_start: start.toISOString(),
   });
-  if (error || !data)
-    return "Não foi possível agendar a reposição. Atualize a agenda.";
+  if (error?.code === "22023" && error.message === "makeup_before_original")
+    return earlierStartMessage;
+  if (error || !data) return unavailableMessage;
   revalidatePath("/agenda");
   redirect(agendaHref(parsed.data.date, "reposicao"));
 }

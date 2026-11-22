@@ -1,10 +1,10 @@
-import { Input } from "@/components/ui/input";
 import {
   formatCalendarDay,
   localLessonDateTime,
 } from "@/features/lessons/calendar";
 import { ActionForm } from "./action-form";
 import { scheduleMakeup } from "./actions";
+import { MakeupDateFields } from "./makeup-date-fields";
 import { listPendingMakeups } from "./queries";
 
 export async function PendingMakeups({
@@ -25,10 +25,17 @@ export async function PendingMakeups({
       )}
       <div className="grid gap-3 md:grid-cols-2">
         {pending.map((row) => {
+          const originalStart = new Date(row.starts_at);
           const [date, time] = localLessonDateTime(
-            new Date(row.starts_at),
+            originalStart,
             timeZone,
           ).split("T");
+          const milliseconds = originalStart.getUTCMilliseconds();
+          const originalTime = milliseconds
+            ? `${time}.${String(milliseconds).padStart(3, "0")}`
+            : time.endsWith(":00")
+              ? time.slice(0, 5)
+              : time;
           return (
             <article key={row.id} className="rounded-xl border bg-card p-4">
               <h3 className="font-semibold">
@@ -37,7 +44,7 @@ export async function PendingMakeups({
               <p className="text-sm">
                 Aula original de{" "}
                 {formatCalendarDay(date, { dateStyle: "short" })} às{" "}
-                {time.slice(0, 5)}
+                {originalTime}
               </p>
               <details>
                 <summary className="min-h-11 cursor-pointer py-2.5">
@@ -47,26 +54,13 @@ export async function PendingMakeups({
                   action={scheduleMakeup.bind(null, row.id)}
                   label="Salvar reposição"
                 >
-                  <label htmlFor={`${row.id}-date`}>
-                    Nova data
-                    <Input
-                      id={`${row.id}-date`}
-                      type="date"
-                      name="date"
-                      required
-                      defaultValue={today}
-                    />
-                  </label>
-                  <label htmlFor={`${row.id}-time`}>
-                    Novo horário ({timeZone})
-                    <Input
-                      id={`${row.id}-time`}
-                      type="time"
-                      name="time"
-                      required
-                      defaultValue={time.slice(0, 5)}
-                    />
-                  </label>
+                  <MakeupDateFields
+                    id={row.id}
+                    originalDate={date}
+                    originalTime={originalTime}
+                    today={today}
+                    timeZone={timeZone}
+                  />
                 </ActionForm>
               </details>
             </article>
