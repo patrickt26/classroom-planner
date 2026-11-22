@@ -14,19 +14,17 @@ export function OccurrenceActions({
   return (
     <>
       {(lesson.status === "falta" || cancelled) && !lesson.hasMakeup && (
-        <div className="p-1">
-          <ActionForm
-            action={changeOccurrence.bind(null, lesson.id)}
-            label="Solicitar reposição"
-          >
-            <input type="hidden" name="status" value="reposicao_pendente" />
-          </ActionForm>
-        </div>
+        <ActionForm
+          action={changeOccurrence.bind(null, lesson.id)}
+          label="Solicitar reposição"
+        >
+          <input type="hidden" name="status" value="reposicao_pendente" />
+        </ActionForm>
       )}
       {canChangeStatus &&
         (lesson.status === "agendada" || lesson.status === "confirmada") && (
-          <details className="px-2 pb-2">
-            <summary className="min-h-11 cursor-pointer py-2 text-sm">
+          <details className="min-w-0">
+            <summary className="min-h-11 cursor-pointer py-3 text-sm">
               Alterar situação
             </summary>
             <ActionForm

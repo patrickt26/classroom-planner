@@ -23,7 +23,7 @@ export function TeacherShell({
       className={cn(
         "min-h-dvh",
         hasNavigation &&
-          "pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:grid md:grid-cols-[13rem_minmax(0,1fr)] md:pb-0 lg:grid-cols-[15rem_minmax(0,1fr)]",
+          "pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:grid md:grid-cols-[13rem_minmax(0,1fr)] md:pb-0 lg:grid-cols-[15rem_minmax(0,1fr)] xl:has-[main>[data-wide-content]]:grid-cols-[12rem_minmax(0,1fr)]",
       )}
     >
       <a
@@ -62,7 +62,7 @@ export function TeacherShell({
       <main
         id="conteudo"
         tabIndex={-1}
-        className="mx-auto w-full max-w-5xl px-5 py-7 md:px-8 md:py-10 lg:px-12"
+        className="mx-auto w-full max-w-5xl px-5 py-7 md:px-8 md:py-10 lg:px-12 xl:has-[>[data-wide-content]]:max-w-7xl xl:has-[>[data-wide-content]]:px-2"
       >
         {children}
       </main>

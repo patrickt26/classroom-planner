@@ -77,7 +77,7 @@ export default async function AgendaPage({
   const notice = noticeSchema.safeParse(params.aviso);
 
   return (
-    <div className="grid gap-5">
+    <div data-wide-content="" className="grid min-w-0 gap-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-brown">Agenda</h1>
         <Button asChild className="px-4">
