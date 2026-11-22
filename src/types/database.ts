@@ -46,6 +46,13 @@ export type Database = {
             referencedRelation: "lessons";
             referencedColumns: ["workspace_id", "student_id", "id"];
           },
+          {
+            foreignKeyName: "charges_workspace_id_student_id_payment_id_fkey";
+            columns: ["workspace_id", "student_id", "payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payments";
+            referencedColumns: ["workspace_id", "student_id", "id"];
+          },
         ];
       };
       grades: {
@@ -327,6 +334,48 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["workspace_id"];
+          },
+        ];
+      };
+      payments: {
+        Row: {
+          amount_cents: number;
+          id: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          note: string;
+          paid_on: string;
+          reversed_at: string | null;
+          student_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_cents: number;
+          id?: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          note?: string;
+          paid_on: string;
+          reversed_at?: string | null;
+          student_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          amount_cents?: number;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"];
+          note?: string;
+          paid_on?: string;
+          reversed_at?: string | null;
+          student_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payments_workspace_id_student_id_fkey";
+            columns: ["workspace_id", "student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["workspace_id", "id"];
           },
         ];
       };
@@ -727,12 +776,27 @@ export type Database = {
         Returns: boolean;
       };
       is_workspace_member: { Args: { ws: string }; Returns: boolean };
+      record_payment: {
+        Args: {
+          lesson_ids: string[];
+          payment_date: string;
+          payment_method: Database["public"]["Enums"]["payment_method"];
+          payment_note: string;
+          target_student_id: string;
+          target_workspace_id: string;
+        };
+        Returns: string;
+      };
       remove_student_guardian: {
         Args: {
           target_guardian_id: string;
           target_student_id: string;
           target_workspace_id: string;
         };
+        Returns: boolean;
+      };
+      reverse_payment: {
+        Args: { target_payment_id: string; target_workspace_id: string };
         Returns: boolean;
       };
       save_lesson: {
@@ -805,6 +869,7 @@ export type Database = {
         | "cancelada"
         | "falta"
         | "reposicao_pendente";
+      payment_method: "pix" | "cash" | "transfer" | "other";
       workspace_role: "teacher" | "student" | "guardian";
     };
     CompositeTypes: {
@@ -945,6 +1010,7 @@ export const Constants = {
         "falta",
         "reposicao_pendente",
       ],
+      payment_method: ["pix", "cash", "transfer", "other"],
       workspace_role: ["teacher", "student", "guardian"],
     },
   },

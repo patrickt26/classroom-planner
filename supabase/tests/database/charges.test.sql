@@ -99,11 +99,12 @@ select throws_ok(format('insert into charges (workspace_id,lesson_id,student_id,
   values (%L,%L,%L,8000,90)', :'ws', :'late_lesson', :'ws'), '23505', null, 'Uma única cobrança por aula no banco');
 select throws_ok(format('update charges set student_id = %L where workspace_id = %L and lesson_id = %L',
   :'student_user', :'ws', :'late_lesson'), '23503', null, 'Cobrança pertence ao aluno da aula');
-update charges set payment_id = :'teacher' where workspace_id = :'ws' and lesson_id = :'late_lesson';
 set local role authenticated;
 set local request.jwt.claim.sub = :'teacher';
+select record_payment(:'ws', :'ws', array[:'late_lesson'::uuid],
+  (now() at time zone time_zone)::date, 'pix', '') as payment from workspaces where workspace_id = :'ws' \gset
 update lessons set status = 'agendada' where id = :'late_lesson';
-select is((select payment_id from charges where lesson_id = :'late_lesson'), :'teacher'::uuid,
+select is((select payment_id from charges where lesson_id = :'late_lesson'), :'payment'::uuid,
   'Desfazer a realização conserva a cobrança paga');
 select is(can_delete_lesson(:'ws', :'late_lesson'), false, 'Cobrança bloqueia exclusão mesmo em aula avulsa agendada');
 select is(delete_lesson(:'ws', :'late_lesson'), null::timestamptz, 'RPC recusa excluir a aula com cobrança');
@@ -114,7 +115,7 @@ update lessons set status = 'realizada', duration_minutes = 60 where workspace_i
 select is((select amount_cents from charges where workspace_id = :'ws' and lesson_id = :'late_lesson'),
   12000::bigint, 'Refazer a realização preserva o valor já pago');
 select is((select payment_id from charges where workspace_id = :'ws' and lesson_id = :'late_lesson'),
-  :'teacher'::uuid, 'Refazer a realização preserva o vínculo com o pagamento');
+  :'payment'::uuid, 'Refazer a realização preserva o vínculo com o pagamento');
 
 select * from finish();
 rollback;

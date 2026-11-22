@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/features/auth/actions";
 import { AccountForm } from "@/features/auth/components/account-form";
@@ -9,6 +10,9 @@ export default async function MorePage() {
   return (
     <>
       <h1 className="mb-7 text-3xl font-bold text-brown">Mais</h1>
+      <Button asChild variant="outline" className="mb-5">
+        <Link href="/cobrancas">Cobranças</Link>
+      </Button>
       <div className="grid items-start gap-5 lg:grid-cols-[2fr_1fr]">
         <section className="grid gap-5 rounded-xl border bg-card p-5 sm:p-7">
           <h2 className="text-xl font-semibold">Configurações do espaço</h2>

@@ -39,6 +39,7 @@ test.each([
 test.each([
   "/mais",
   "/mais/perfil",
+  "/cobrancas",
   "/nova-senha",
   "/alunos",
   "/alunos/novo",
