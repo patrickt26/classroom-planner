@@ -1,4 +1,4 @@
-import { Video } from "lucide-react";
+import { MapPin, Video } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,10 +32,12 @@ function LessonCard({
   const cancelled = lesson.status === "cancelada";
   const student = lesson.students?.name ?? "Aluno";
   const editable = canEditLesson(lesson);
+  const online = lesson.modality === "online";
+  const ModalityIcon = online ? Video : MapPin;
 
   return (
-    <li className="min-w-0 rounded-lg border bg-card">
-      <div className="space-y-1.5 px-3 pt-3 lg:px-2">
+    <li className="grid min-w-0 gap-2 rounded-lg border bg-card px-3 py-3 xl:px-1 xl:[&_form_[data-slot=button]]:px-1">
+      <div className="grid gap-1.5">
         <p className="text-sm font-semibold tabular-nums">
           <time dateTime={lesson.starts_at}>{start}</time>
           {" – "}
@@ -50,7 +52,8 @@ function LessonCard({
         <p className="wrap-anywhere text-sm text-muted-foreground">
           {lesson.subjects?.name}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
+          <ModalityIcon aria-hidden="true" className="size-4 shrink-0" />
           {lessonModalityLabels[lesson.modality]}
         </p>
         <Badge
@@ -66,8 +69,8 @@ function LessonCard({
           {lessonStatusLabels[lesson.status]}
         </Badge>
       </div>
-      <div className="flex flex-wrap gap-x-1 px-1 lg:gap-x-0">
-        <Button asChild variant="link" className="underline lg:px-1">
+      <div className="flex flex-wrap gap-x-1 xl:gap-x-0">
+        <Button asChild variant="link" className="underline xl:px-0">
           <Link
             href={`/agenda/${lesson.id}/planejamento`}
             aria-label={`Planejamento da aula de ${student} às ${start}`}
@@ -76,7 +79,7 @@ function LessonCard({
           </Link>
         </Button>
         {(editable || lesson.recurrence_id) && (
-          <Button asChild variant="link" className="underline lg:px-1">
+          <Button asChild variant="link" className="underline xl:px-0">
             <Link
               href={`/agenda/${lesson.id}/editar`}
               aria-label={`Editar aula de ${student} às ${start}`}
@@ -85,15 +88,15 @@ function LessonCard({
             </Link>
           </Button>
         )}
-        {!cancelled && lesson.modality === "online" && lesson.meeting_url && (
-          <Button asChild variant="link" className="underline lg:px-1">
+        {!cancelled && online && lesson.meeting_url && (
+          <Button asChild variant="link" className="underline xl:px-0">
             <a
               href={lesson.meeting_url}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Abrir Meet da aula de ${student} às ${start} (nova aba)`}
             >
-              <Video aria-hidden="true" /> Meet
+              Meet
             </a>
           </Button>
         )}
@@ -102,27 +105,25 @@ function LessonCard({
         lesson.status === "realizada" ||
         lesson.status === "agendada" ||
         lesson.status === "confirmada") && (
-        <div className="px-2 pb-1">
-          <Button
-            asChild
-            variant="outline"
-            className="h-auto w-full whitespace-normal px-2 text-center"
-          >
-            <Link href={`/agenda/${lesson.id}/registro`}>
-              <span className="sr-only">
-                {student}, {start}:{" "}
-              </span>
-              {lesson.hasNote
-                ? "Ver registro"
-                : lesson.status === "realizada"
-                  ? "Registrar aula"
-                  : "Marcar realizada"}
-            </Link>
-          </Button>
-        </div>
+        <Button
+          asChild
+          variant="outline"
+          className="h-auto w-full whitespace-normal px-1 text-center"
+        >
+          <Link href={`/agenda/${lesson.id}/registro`}>
+            <span className="sr-only">
+              {student}, {start}:{" "}
+            </span>
+            {lesson.hasNote
+              ? "Ver registro"
+              : lesson.status === "realizada"
+                ? "Registrar aula"
+                : "Marcar realizada"}
+          </Link>
+        </Button>
       )}
       {lesson.rescheduled_from_id && (
-        <p className="px-2 pb-2 text-xs">Aula de reposição</p>
+        <p className="text-xs">Aula de reposição</p>
       )}
       <OccurrenceActions lesson={lesson} canChangeStatus={!editable} />
     </li>
@@ -145,7 +146,7 @@ export function WeeklyAgenda({
   );
 
   return (
-    <div className="grid gap-3 lg:grid-cols-7 lg:gap-2">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 xl:gap-1">
       {Array.from({ length: 7 }, (_, index) => {
         const date = addDays(week, index);
         const dayLessons = byDay.get(date) ?? [];
@@ -163,7 +164,7 @@ export function WeeklyAgenda({
             <h2
               id={`dia-${date}`}
               className={cn(
-                "flex flex-wrap items-center justify-between gap-x-2 rounded-t-xl px-3 py-2.5 text-sm font-bold lg:block lg:px-2",
+                "flex flex-wrap items-center justify-between gap-x-2 rounded-t-xl px-3 py-2.5 text-sm font-bold xl:block",
                 isToday && "bg-accent text-accent-foreground",
               )}
             >
@@ -171,17 +172,17 @@ export function WeeklyAgenda({
                 <span className="capitalize">
                   {formatCalendarDay(date, { weekday: "long" }).split("-")[0]}
                 </span>
-                <span className="ml-2 font-normal lg:ml-0 lg:block">
+                <span className="ml-2 font-normal xl:ml-0 xl:block">
                   {formatCalendarDay(date, {
                     day: "2-digit",
                     month: "2-digit",
                   })}
                 </span>
               </time>
-              {isToday && <span className="font-normal lg:sr-only">Hoje</span>}
+              {isToday && <span className="font-normal xl:sr-only">Hoje</span>}
             </h2>
             {dayLessons.length ? (
-              <ul className="grid gap-2 px-2 pb-2 lg:px-1.5">
+              <ul className="grid gap-2 px-2 pt-2 pb-2 xl:px-0.5">
                 {dayLessons.map((lesson) => (
                   <LessonCard
                     timeZone={timeZone}
@@ -191,7 +192,7 @@ export function WeeklyAgenda({
                 ))}
               </ul>
             ) : (
-              <p className="px-3 pb-3 text-sm text-muted-foreground lg:px-2">
+              <p className="px-3 pb-3 text-sm text-muted-foreground">
                 Sem aulas
               </p>
             )}
