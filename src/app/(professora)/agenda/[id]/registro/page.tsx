@@ -3,6 +3,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { saveLessonNote } from "@/features/lesson-notes/actions";
 import { LessonNoteForm } from "@/features/lesson-notes/components/lesson-note-form";
+import { PreviousLessonNote } from "@/features/lesson-notes/components/previous-lesson-note";
 import { getLessonNotes } from "@/features/lesson-notes/queries";
 import {
   type LessonNoteValues,
@@ -42,7 +43,7 @@ export default async function LessonNotePage({
 }) {
   const { id } = await params;
   const { editar, salvo, conflito } = await searchParams;
-  const { lesson, notes, timeZone } = await getLessonNotes(id);
+  const { lesson, notes, previousNote, timeZone } = await getLessonNotes(id);
   const [current, ...history] = notes;
   const noteHref = `/agenda/${id}/registro`;
   const startsAt = new Date(lesson.starts_at);
@@ -82,6 +83,7 @@ export default async function LessonNotePage({
       {salvo === "1" && current && editar !== "1" && (
         <Alert variant="success" message="Registro salvo." />
       )}
+      {previousNote && <PreviousLessonNote note={previousNote} />}
       <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {!current || editar === "1" ? (
           <LessonNoteForm
