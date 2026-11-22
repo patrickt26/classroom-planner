@@ -79,8 +79,10 @@ export function formatLessonTime(date: Date, timeZone: string) {
   return localLessonDateTime(date, timeZone).slice(11, 16);
 }
 
-export function agendaHref(date: string, notice?: string) {
-  const query = new URLSearchParams({ semana: weekStart(date) });
+export function agendaHref(date?: string, notice?: string, studentId?: string) {
+  const query = new URLSearchParams();
+  if (date) query.set("semana", weekStart(date));
   if (notice) query.set("aviso", notice);
-  return `/agenda?${query}`;
+  if (studentId) query.set("aluno", studentId);
+  return query.size ? `/agenda?${query}` : "/agenda";
 }
