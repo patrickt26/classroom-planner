@@ -60,6 +60,8 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 7. Registros pedagógicos (`lesson_notes`, `skill_records`, `observations`) **não são sobrescritos**: editar cria uma nova linha (`supersedes_id`).
 8. Após mudar o schema, regenere `src/types/database.ts`.
 
+**Todo card que cria uma tabela ou um fluxo novo acrescenta dados fictícios de exemplo no `supabase/seed.sql`, no mesmo PR.**
+
 ### Código
 9. TypeScript estrito. Sem `any` sem justificativa.
 10. Toda entrada de usuário passa por um schema Zod no servidor.

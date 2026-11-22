@@ -76,8 +76,11 @@ pnpm exec supabase test db
 pnpm db:types
 ```
 
-Para ver os alunos fictícios, acesse [Entrar](http://localhost:3000/entrar) com o e-mail
-`professora.exemplo@example.test` e a senha local `senha-de-teste`. Depois, selecione **Alunos** no menu.
+Depois do reset, acesse [Entrar](http://localhost:3000/entrar) com o e-mail fictício
+`professora.exemplo@example.test` e a senha local `senha-de-teste`. Em **Alunos**, confira as fichas de exemplo.
+Em **Agenda**, a semana atual tem uma aula confirmada e a lista de reposições pendentes tem uma aula.
+Navegue para a semana anterior para ver uma aula realizada, uma cancelada e uma com falta.
+Nas próximas semanas, confira as aulas geradas pelas recorrências de terça e quinta.
 
 Versione a migração e o arquivo gerado `src/types/database.ts` juntos.
 Para encerrar os serviços, use `pnpm exec supabase stop`.
