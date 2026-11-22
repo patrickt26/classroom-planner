@@ -7,106 +7,147 @@ import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 import { lessonFormSchema, weeklyLessonSchema } from "./agenda-schema";
 import { agendaHref, localLessonDateTime } from "./calendar";
-import type { LessonFormState, LessonFormValues } from "./form-state";
-
-function readText(form: FormData, key: keyof LessonFormValues) {
-  const value = form.get(key);
-  return typeof value === "string" ? value : "";
-}
+import type { LessonFormState } from "./form-state";
 
 export async function saveLesson(
   id: string | null,
-  previous: LessonFormState,
+  _: LessonFormState,
   form: FormData,
 ): Promise<LessonFormState> {
-  const values: LessonFormValues = {
-    student_id: readText(form, "student_id"),
-    subject_id: readText(form, "subject_id"),
-    date: readText(form, "date"),
-    time: readText(form, "time"),
-    duration_minutes: readText(form, "duration_minutes"),
-    modality: readText(form, "modality"),
-    meeting_url: readText(form, "meeting_url"),
-    status: id ? readText(form, "status") : "agendada",
-    repeat_weekly: id ? "" : readText(form, "repeat_weekly"),
-    end_date: readText(form, "end_date"),
-  };
-  const state = { values, attempt: previous.attempt + 1 };
-  const workspace = await requireTeacherWorkspace();
-  const parsed = lessonFormSchema(workspace.time_zone).safeParse(values);
-  if (!parsed.success)
-    return { ...state, errors: z.flattenError(parsed.error).fieldErrors };
-
-  const weekly = weeklyLessonSchema.safeParse(values);
-  if (!weekly.success)
-    return { ...state, errors: z.flattenError(weekly.error).fieldErrors };
-
   const lessonId = z.uuid().nullable().safeParse(id);
-  if (!lessonId.success) return { ...state, message: "Aula inválida." };
+  if (!lessonId.success) return { message: "Aula inválida." };
+  const student = z.uuid().safeParse(form.get("student_id"));
+  if (!student.success) return { studentError: "Selecione um aluno." };
+  const keys = z
+    .array(z.string().regex(/^\d+$/))
+    .nonempty()
+    .safeParse(form.getAll("day_id"));
+  if (
+    !keys.success ||
+    new Set(keys.data).size !== keys.data.length ||
+    (id && keys.data.length !== 1)
+  )
+    return { message: "Confira os dias da aula e tente novamente." };
+
+  const workspace = await requireTeacherWorkspace();
+  const schema = lessonFormSchema(workspace.time_zone);
+  const days: NonNullable<LessonFormState["days"]> = {};
+  const blocks = [];
+  for (const key of keys.data) {
+    const read = (field: string) => form.get(`day.${key}.${field}`) ?? "";
+    const date = read("date");
+    const time = read("time");
+    const lesson = schema.safeParse({
+      student_id: student.data,
+      subject_id: read("subject_id"),
+      date,
+      time,
+      duration_minutes: read("duration_minutes"),
+      modality: read("modality"),
+      meeting_url: read("meeting_url"),
+      status: id ? read("status") : "agendada",
+    });
+    const weekly = weeklyLessonSchema.safeParse({
+      repeat_weekly: id ? "" : read("repeat_weekly"),
+      date,
+      end_date: read("end_date"),
+    });
+    if (!lesson.success || !weekly.success) {
+      days[key] = {
+        fields: {
+          ...(!lesson.success && z.flattenError(lesson.error).fieldErrors),
+          ...(!weekly.success && z.flattenError(weekly.error).fieldErrors),
+        },
+      };
+      continue;
+    }
+    const {
+      subject_id,
+      starts_at,
+      duration_minutes,
+      modality,
+      meeting_url,
+      status,
+    } = lesson.data;
+    blocks.push({
+      date: String(date),
+      status,
+      schedule: {
+        subject_id,
+        starts_at,
+        duration_minutes,
+        modality,
+        meeting_url: meeting_url ?? null,
+        weekly: weekly.data.repeat_weekly === "on",
+        end_date:
+          weekly.data.repeat_weekly === "on"
+            ? weekly.data.end_date || null
+            : null,
+      },
+    });
+  }
+  if (Object.keys(days).length)
+    return { days, message: "Confira os campos indicados." };
 
   const client = await createClient();
-  const lesson = parsed.data;
-  if (weekly.data.repeat_weekly === "on") {
-    const { data: conflict, error } = await client.rpc("create_weekly_lesson", {
+  const first = blocks[0];
+  if (!id) {
+    const { error } = await client.rpc("create_lesson_days", {
       target_workspace_id: workspace.workspace_id,
-      lesson_student_id: lesson.student_id,
-      lesson_subject_id: lesson.subject_id,
-      first_date: weekly.data.date,
-      first_time: values.time,
-      lesson_duration_minutes: lesson.duration_minutes,
-      lesson_modality: lesson.modality,
-      lesson_meeting_url: lesson.meeting_url ?? undefined,
-      last_date: weekly.data.end_date || undefined,
+      lesson_student_id: student.data,
+      lesson_days: blocks.map((block) => block.schedule),
     });
-    if (error)
+    if (error) {
+      const key = keys.data[Number(error.details) - 1];
+      const message =
+        error.code === "23P01"
+          ? "Há outra aula nesse horário. Escolha outra data ou horário."
+          : "Confira os dados deste dia e tente novamente.";
       return {
-        ...state,
-        message:
-          "Não foi possível salvar a série. Confira os dados e tente novamente.",
+        message: "Nenhuma aula foi salva.",
+        days: key ? { [key]: { message } } : undefined,
       };
-
-    revalidatePath(`/alunos/${lesson.student_id}`);
+    }
+    revalidatePath(`/alunos/${student.data}`);
     revalidatePath("/agenda");
     redirect(
-      agendaHref(values.date, conflict ? "serie-conflito" : "serie-salva"),
+      agendaHref(
+        first.date,
+        blocks.length > 1
+          ? "dias-salvos"
+          : first.schedule.weekly
+            ? "serie-salva"
+            : "salva",
+      ),
     );
   }
 
   const { data: conflict, error } = await client.rpc("save_lesson", {
     target_workspace_id: workspace.workspace_id,
-    target_lesson_id: lessonId.data ?? undefined,
-    lesson_student_id: lesson.student_id,
-    lesson_subject_id: lesson.subject_id,
-    lesson_starts_at: lesson.starts_at,
-    lesson_duration_minutes: lesson.duration_minutes,
-    lesson_modality: lesson.modality,
-    lesson_meeting_url: lesson.meeting_url ?? undefined,
-    lesson_status: lesson.status,
+    target_lesson_id: id,
+    lesson_student_id: student.data,
+    lesson_subject_id: first.schedule.subject_id,
+    lesson_starts_at: first.schedule.starts_at,
+    lesson_duration_minutes: first.schedule.duration_minutes,
+    lesson_modality: first.schedule.modality,
+    lesson_meeting_url: first.schedule.meeting_url ?? undefined,
+    lesson_status: first.status,
   });
-
-  if (error?.code === "23503") {
+  if (error?.code === "23503")
     return {
-      ...state,
       message:
         "O aluno ou a disciplina não está disponível. Confira a seleção.",
     };
-  }
   if (error)
-    return {
-      ...state,
-      message: "Não foi possível salvar a aula. Tente novamente.",
-    };
+    return { message: "Não foi possível salvar a aula. Tente novamente." };
   if (conflict === null)
-    return {
-      ...state,
-      message: "Esta aula não está mais disponível para edição.",
-    };
+    return { message: "Esta aula não está mais disponível para edição." };
 
   revalidatePath("/agenda");
-  if (id && lesson.status === "realizada") {
+  if (first.status === "realizada") {
     redirect(`/agenda/${id}/registro${conflict ? "?conflito=1" : ""}`);
   }
-  redirect(agendaHref(values.date, conflict ? "conflito" : "salva"));
+  redirect(agendaHref(first.date, conflict ? "conflito" : "salva"));
 }
 
 export async function cancelLesson(id: string, _: string): Promise<string> {

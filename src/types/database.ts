@@ -727,6 +727,14 @@ export type Database = {
         Args: { target_lesson_id: string; target_workspace_id: string };
         Returns: boolean;
       };
+      create_lesson_days: {
+        Args: {
+          lesson_days: Json;
+          lesson_student_id: string;
+          target_workspace_id: string;
+        };
+        Returns: undefined;
+      };
       create_weekly_lesson: {
         Args: {
           first_date: string;
@@ -873,6 +881,18 @@ export type Database = {
           target_workspace_id: string;
         };
         Returns: boolean;
+      };
+      weekly_lesson_slots: {
+        Args: {
+          first_date: string;
+          from_date: string;
+          last_date: string;
+          slot_time: string;
+          through_date: string;
+          weekday: number;
+          zone: string;
+        };
+        Returns: string[];
       };
     };
     Enums: {

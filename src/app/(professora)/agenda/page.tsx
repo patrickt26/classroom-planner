@@ -24,6 +24,7 @@ const weekFormatter = new Intl.DateTimeFormat("pt-BR", {
 const notices = {
   reposicao: "Reposição agendada.",
   salva: "Aula salva.",
+  "dias-salvos": "Todos os dias foram agendados.",
   conflito: "Aula salva. Há outra aula no mesmo horário.",
   cancelada: "Aula cancelada.",
   excluida: "Aula excluída.",
@@ -33,6 +34,7 @@ const notices = {
 };
 const noticeSchema = z.enum([
   "salva",
+  "dias-salvos",
   "conflito",
   "cancelada",
   "reposicao",

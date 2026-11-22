@@ -11,11 +11,15 @@ export type LessonFormValues = {
   end_date: string;
 };
 
+export type LessonDay = Omit<LessonFormValues, "student_id">;
+export type LessonFieldErrors = Partial<
+  Record<keyof LessonFormValues, string[]>
+>;
+
 export type LessonFormState = {
-  values: LessonFormValues;
-  attempt: number;
   message?: string;
-  errors?: Partial<Record<keyof LessonFormValues, string[]>>;
+  studentError?: string;
+  days?: Record<string, { message?: string; fields?: LessonFieldErrors }>;
 };
 
 export const lessonStatusLabels = {

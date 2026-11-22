@@ -1,13 +1,22 @@
 "use client";
 
+import { Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { type ReactNode, useActionState, useState } from "react";
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useActionState,
+  useRef,
+  useState,
+} from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { weeklySchedule } from "@/features/recurrences/schedule";
 import { editableLessonStatusSchema } from "../agenda-schema";
 import {
+  type LessonDay,
+  type LessonFieldErrors,
   type LessonFormState,
   type LessonFormValues,
   lessonModalityLabels,
@@ -32,26 +41,151 @@ const selectClass =
   "min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive md:text-sm";
 
 function Field({
-  name,
+  id,
   label,
   error,
   children,
 }: {
-  name: keyof LessonFormValues;
+  id: string;
   label: string;
   error?: string;
   children: ReactNode;
 }) {
   return (
     <div className="min-w-0">
-      <label htmlFor={name} className="mb-1.5 block text-sm font-semibold">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold">
         {label}
       </label>
       {children}
       {error && (
-        <p id={`${name}-erro`} className="mt-1.5 text-sm text-destructive">
+        <p id={`${id}-erro`} className="mt-1.5 text-sm text-destructive">
           {error}
         </p>
+      )}
+    </div>
+  );
+}
+
+function DayFields({
+  dayKey,
+  initialValues,
+  subjects,
+  timeZone,
+  editing,
+  errors,
+}: {
+  dayKey: number;
+  initialValues: LessonDay;
+  subjects: Option[];
+  timeZone: string;
+  editing?: boolean;
+  errors?: LessonFieldErrors;
+}) {
+  const [day, setDay] = useState(initialValues);
+  const weekday = new Date(`${day.date}T00:00:00Z`).getUTCDay();
+
+  function field(name: keyof LessonDay) {
+    const id = `day.${dayKey}.${name}`;
+    return {
+      id,
+      name: id,
+      value: day[name],
+      onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+        setDay({ ...day, [name]: event.target.value }),
+      "aria-invalid": Boolean(errors?.[name]),
+      "aria-describedby": errors?.[name] ? `${id}-erro` : undefined,
+    };
+  }
+  function label(name: keyof LessonDay, text: string) {
+    return {
+      id: `day.${dayKey}.${name}`,
+      label: text,
+      error: errors?.[name]?.[0],
+    };
+  }
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <input type="hidden" name="day_id" value={dayKey} />
+      <Field {...label("date", "Data")}>
+        <Input {...field("date")} type="date" required />
+      </Field>
+      <Field {...label("time", `Horário de início (${timeZone})`)}>
+        <Input {...field("time")} type="time" step="any" required />
+      </Field>
+      <Field {...label("subject_id", "Disciplina")}>
+        <select {...field("subject_id")} required className={selectClass}>
+          <option value="">Selecione uma disciplina</option>
+          {subjects.map(({ id, name }) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field {...label("duration_minutes", "Duração em minutos")}>
+        <Input {...field("duration_minutes")} type="number" min={1} required />
+      </Field>
+      <Field {...label("modality", "Modalidade")}>
+        <select {...field("modality")} className={selectClass}>
+          {Object.entries(lessonModalityLabels).map(([value, text]) => (
+            <option key={value} value={value}>
+              {text}
+            </option>
+          ))}
+        </select>
+      </Field>
+      {day.modality === "online" && (
+        <Field {...label("meeting_url", "Link do Google Meet (opcional)")}>
+          <Input {...field("meeting_url")} type="url" />
+        </Field>
+      )}
+      {editing ? (
+        <Field {...label("status", "Situação")}>
+          <select {...field("status")} className={selectClass}>
+            {editableLessonStatusSchema.options.map((status) => (
+              <option key={status} value={status}>
+                {lessonStatusLabels[status]}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : (
+        <div className="grid gap-2 border-t pt-2 sm:col-span-2">
+          <label className="flex min-h-11 w-fit cursor-pointer items-center gap-3 font-semibold">
+            <input
+              name={`day.${dayKey}.repeat_weekly`}
+              type="checkbox"
+              className="size-5 accent-primary"
+              checked={day.repeat_weekly === "on"}
+              onChange={(event) =>
+                setDay({
+                  ...day,
+                  repeat_weekly: event.target.checked ? "on" : "",
+                })
+              }
+            />
+            Repetir toda semana
+          </label>
+          {day.repeat_weekly === "on" && (
+            <>
+              <p aria-live="polite" className="text-sm text-muted-foreground">
+                {Number.isFinite(weekday) && day.time
+                  ? weeklySchedule(weekday, day.time)
+                  : "Escolha a data e o horário da primeira aula."}
+              </p>
+              <div className="sm:max-w-64">
+                <Field {...label("end_date", "Repetir até (opcional)")}>
+                  <Input
+                    {...field("end_date")}
+                    type="date"
+                    min={day.date || undefined}
+                  />
+                </Field>
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
   );
@@ -66,43 +200,33 @@ export function LessonForm({
   editing,
   timeZone,
 }: LessonFormProps) {
-  const [state, submit, pending] = useActionState(action, {
-    values: initialValues,
-    attempt: 0,
-  });
-  const [modality, setModality] = useState(initialValues.modality);
-  const [repeatWeekly, setRepeatWeekly] = useState(false);
-  const [date, setDate] = useState(initialValues.date);
-  const [time, setTime] = useState(initialValues.time);
-  const { values, errors } = state;
-  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
-  function field(name: keyof LessonFormValues) {
-    return {
-      id: name,
-      name,
-      "aria-invalid": Boolean(errors?.[name]),
-      "aria-describedby": errors?.[name] ? `${name}-erro` : undefined,
-    };
-  }
-
+  const [state, submit, pending] = useActionState<LessonFormState, FormData>(
+    action,
+    {},
+  );
+  const [studentId, setStudentId] = useState(initialValues.student_id);
+  const [keys, setKeys] = useState([0]);
+  const nextKey = useRef(1);
   return (
-    <form action={submit} className="space-y-5">
-      <Alert
-        variant="error"
-        message={
-          state.message ?? (errors && "Confira os campos do formulário.")
-        }
-      />
-      <fieldset
-        key={state.attempt}
-        disabled={pending}
-        className="grid gap-4 sm:grid-cols-2"
-      >
-        <Field name="student_id" label="Aluno" error={errors?.student_id?.[0]}>
+    <form
+      action={submit}
+      // Success redirects. On validation errors the teacher can correct just one day.
+      onReset={(event) => event.preventDefault()}
+      className="space-y-5"
+    >
+      <Alert variant="error" message={state.message} />
+      <fieldset disabled={pending} className="grid min-w-0 gap-5">
+        <Field id="student_id" label="Aluno" error={state.studentError}>
           <select
-            {...field("student_id")}
+            id="student_id"
+            name="student_id"
             required
-            defaultValue={values.student_id}
+            value={studentId}
+            onChange={(event) => setStudentId(event.target.value)}
+            aria-invalid={Boolean(state.studentError)}
+            aria-describedby={
+              state.studentError ? "student_id-erro" : undefined
+            }
             className={selectClass}
           >
             <option value="">Selecione um aluno</option>
@@ -113,150 +237,63 @@ export function LessonForm({
             ))}
           </select>
         </Field>
-        <Field
-          name="subject_id"
-          label="Disciplina"
-          error={errors?.subject_id?.[0]}
-        >
-          <select
-            {...field("subject_id")}
-            required
-            defaultValue={values.subject_id}
-            className={selectClass}
-          >
-            <option value="">Selecione uma disciplina</option>
-            {subjects.map(({ id, name }) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field name="date" label="Data" error={errors?.date?.[0]}>
-          <Input
-            {...field("date")}
-            type="date"
-            required
-            defaultValue={values.date}
-            onChange={(event) => setDate(event.target.value)}
-          />
-        </Field>
-        <Field
-          name="time"
-          label={`Horário de início (${timeZone})`}
-          error={errors?.time?.[0]}
-        >
-          <Input
-            {...field("time")}
-            type="time"
-            step="any"
-            required
-            defaultValue={values.time}
-            onChange={(event) => setTime(event.target.value)}
-          />
-        </Field>
-        <Field
-          name="duration_minutes"
-          label="Duração em minutos"
-          error={errors?.duration_minutes?.[0]}
-        >
-          <Input
-            {...field("duration_minutes")}
-            type="number"
-            min={1}
-            required
-            defaultValue={values.duration_minutes}
-          />
-        </Field>
-        <Field name="modality" label="Modalidade" error={errors?.modality?.[0]}>
-          <select
-            {...field("modality")}
-            defaultValue={values.modality}
-            onChange={(event) => setModality(event.target.value)}
-            className={selectClass}
-          >
-            {Object.entries(lessonModalityLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <div hidden={modality !== "online"}>
-          <Field
-            name="meeting_url"
-            label="Link do Google Meet (opcional)"
-            error={errors?.meeting_url?.[0]}
-          >
-            <Input
-              {...field("meeting_url")}
-              type="url"
-              defaultValue={values.meeting_url}
-              disabled={modality !== "online"}
-            />
-          </Field>
-        </div>
-        {editing && (
-          <Field name="status" label="Situação" error={errors?.status?.[0]}>
-            <select
-              {...field("status")}
-              defaultValue={values.status}
-              className={selectClass}
+        <div className={editing ? "" : "grid items-start gap-4 xl:grid-cols-2"}>
+          {keys.map((key, index) => (
+            <fieldset
+              key={key}
+              className={
+                editing
+                  ? "min-w-0"
+                  : "min-w-0 rounded-xl border px-4 pb-4 only:xl:max-w-2xl only:xl:col-span-2"
+              }
             >
-              {editableLessonStatusSchema.options.map((status) => (
-                <option key={status} value={status}>
-                  {lessonStatusLabels[status]}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
-        {!editing && (
-          <div className="grid gap-3 border-t pt-2 sm:col-span-2">
-            <label className="flex min-h-11 w-fit cursor-pointer items-center gap-3 font-semibold">
-              <input
-                {...field("repeat_weekly")}
-                className="size-5 accent-primary"
-                type="checkbox"
-                checked={repeatWeekly}
-                onChange={(event) => setRepeatWeekly(event.target.checked)}
-              />
-              Repetir toda semana
-            </label>
-            {errors?.repeat_weekly && (
-              <p id="repeat_weekly-erro" className="text-sm text-destructive">
-                {errors.repeat_weekly[0]}
-              </p>
-            )}
-            {repeatWeekly && (
-              <>
-                <p aria-live="polite" className="text-sm text-muted-foreground">
-                  {Number.isFinite(weekday) && time
-                    ? weeklySchedule(weekday, time)
-                    : "Escolha a data e o horário da primeira aula."}
-                </p>
-                <div className="sm:max-w-64">
-                  <Field
-                    name="end_date"
-                    label="Repetir até (opcional)"
-                    error={errors?.end_date?.[0]}
+              {!editing && (
+                <legend className="px-1.5 text-lg font-bold text-brown">
+                  Dia {index + 1}
+                </legend>
+              )}
+              {keys.length > 1 && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    aria-label={`Remover dia ${index + 1}`}
+                    onClick={() => setKeys(keys.filter((item) => item !== key))}
                   >
-                    <Input
-                      {...field("end_date")}
-                      type="date"
-                      min={date || undefined}
-                      defaultValue={values.end_date}
-                    />
-                  </Field>
+                    <Trash2 aria-hidden="true" /> Remover
+                  </Button>
                 </div>
-              </>
-            )}
-          </div>
+              )}
+              <Alert variant="error" message={state.days?.[key]?.message} />
+              <DayFields
+                dayKey={key}
+                initialValues={initialValues}
+                subjects={subjects}
+                editing={editing}
+                timeZone={timeZone}
+                errors={state.days?.[key]?.fields}
+              />
+            </fieldset>
+          ))}
+        </div>
+        {!editing && (
+          <Button
+            className="w-fit"
+            type="button"
+            variant="outline"
+            onClick={() => setKeys([...keys, nextKey.current++])}
+          >
+            <Plus aria-hidden="true" /> Adicionar outro dia
+          </Button>
         )}
       </fieldset>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-t pt-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Salvando…" : "Salvar aula"}
+          {pending
+            ? "Salvando…"
+            : keys.length > 1
+              ? "Salvar aulas"
+              : "Salvar aula"}
         </Button>
         <Button asChild variant="outline">
           <Link href={backHref}>Voltar para a agenda</Link>
