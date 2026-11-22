@@ -1,5 +1,6 @@
 export function monthlyTotals(
-  month: string,
+  currentMonth: string,
+  selectedMonth: string,
   pending: { lessonDate: string; amount: number }[],
   payments: {
     paid_on: string;
@@ -7,19 +8,29 @@ export function monthlyTotals(
     reversed_at: string | null;
   }[],
 ) {
+  let receivable = 0;
+  let overdue = 0;
+  for (const charge of pending) {
+    receivable += charge.amount;
+    if (charge.lessonDate.slice(0, 7) < currentMonth) overdue += charge.amount;
+  }
+
   return {
-    receivable: pending.reduce(
-      (sum, charge) =>
-        sum + (charge.lessonDate.slice(0, 7) === month ? charge.amount : 0),
-      0,
-    ),
+    receivable,
+    overdue,
     received: payments.reduce(
       (sum, payment) =>
         sum +
-        (!payment.reversed_at && payment.paid_on.slice(0, 7) === month
+        (!payment.reversed_at && payment.paid_on.slice(0, 7) === selectedMonth
           ? payment.amount_cents
           : 0),
       0,
     ),
   };
+}
+
+export function shiftMonth(month: string, offset: number) {
+  const date = new Date(`${month}-01T00:00:00Z`);
+  date.setUTCMonth(date.getUTCMonth() + offset);
+  return date.toISOString().slice(0, 7);
 }
