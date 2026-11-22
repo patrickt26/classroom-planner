@@ -73,6 +73,7 @@ begin
     current_week_start + sample.start_offset, current_week_start + sample.end_offset
   from (values
     ('Aluno A', 2, time '14:00', 60, 'presencial', null, 0, null),
+    ('Aluno A', 4, time '10:30', 45, 'online', example_meeting_url, 0, 45),
     ('Aluno C', 4, time '16:00', 45, 'online', example_meeting_url, 0, null),
     ('Aluno B', 6, time '11:00', 50, 'presencial', null, 12, 26)
   ) as sample(student_name, weekday, start_time, duration_minutes, modality, meeting_url, start_offset, end_offset)
