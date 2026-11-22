@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (link.success) {
     const client = await createClient();
     const { error } = await client.auth.verifyOtp(link.data);
-    if (!error) path = link.data.type === "recovery" ? "/nova-senha" : "/mais";
+    if (!error) path = link.data.type === "recovery" ? "/nova-senha" : "/";
   }
   const response = new NextResponse(null, {
     status: 303,

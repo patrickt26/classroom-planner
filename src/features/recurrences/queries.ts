@@ -47,3 +47,15 @@ export async function listPendingMakeups() {
     throw new Error("Não foi possível carregar as reposições pendentes.");
   return data;
 }
+
+export async function countPendingMakeups(workspaceId: string) {
+  const client = await createClient();
+  const { count, error } = await client
+    .from("lessons")
+    .select("id", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .eq("status", "reposicao_pendente");
+  if (error)
+    throw new Error("Não foi possível contar as reposições pendentes.");
+  return count ?? 0;
+}

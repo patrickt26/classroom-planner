@@ -16,7 +16,7 @@ export async function PendingMakeups({
 }) {
   const pending = await listPendingMakeups();
   return (
-    <section className="grid gap-2">
+    <section id="reposicoes" className="grid scroll-mt-4 gap-2">
       <h2 className="text-xl font-bold text-brown">Reposições pendentes</h2>
       {!pending.length && (
         <p className="text-sm text-muted-foreground">

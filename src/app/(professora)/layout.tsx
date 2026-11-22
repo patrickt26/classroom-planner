@@ -12,7 +12,12 @@ export default async function TeacherLayout({
     <TeacherShell
       workspaceName={workspace.name}
       workspaceBrand={workspace.brand}
-      links={{ students: "/alunos", calendar: "/agenda", more: "/mais" }}
+      links={{
+        today: "/",
+        students: "/alunos",
+        calendar: "/agenda",
+        more: "/mais",
+      }}
     >
       {children}
     </TeacherShell>

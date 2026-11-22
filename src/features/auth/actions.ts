@@ -34,7 +34,7 @@ export async function login(
       variant: "error",
       message: "Confira o e-mail, a senha e a confirmação do cadastro.",
     };
-  redirect("/mais");
+  redirect("/");
 }
 
 export async function signup(
@@ -57,7 +57,7 @@ export async function signup(
       variant: "error",
       message: "Não foi possível criar a conta. Tente novamente.",
     };
-  if (data.session) redirect("/mais");
+  if (data.session) redirect("/");
   return {
     variant: "info",
     message: "Confira seu e-mail para confirmar o cadastro.",
@@ -106,7 +106,7 @@ export async function resetPassword(
       message:
         "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.",
     };
-  redirect("/mais");
+  redirect("/");
 }
 
 export async function logout() {
