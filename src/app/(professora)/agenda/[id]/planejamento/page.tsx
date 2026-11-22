@@ -1,9 +1,9 @@
-import Form from "next/form";
 import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { PreviousLessonNote } from "@/features/lesson-notes/components/previous-lesson-note";
 import { saveLessonPlan } from "@/features/lesson-plans/actions";
+import { CopyLessonPlanForm } from "@/features/lesson-plans/components/copy-lesson-plan-form";
 import { LessonPlanForm } from "@/features/lesson-plans/components/lesson-plan-form";
 import { getLessonPlanning } from "@/features/lesson-plans/queries";
 import { agendaHref, localLessonDateTime } from "@/features/lessons/calendar";
@@ -55,35 +55,14 @@ export default async function LessonPlanningPage({
       )}
       {previousNote && <PreviousLessonNote note={previousNote} />}
       {!!previousLessons.length && (
-        <Form
-          action={`/agenda/${id}/planejamento`}
-          className="grid items-end gap-2 rounded-xl border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:p-6"
-        >
-          <div className="grid min-w-0 gap-1.5">
-            <label htmlFor="source-plan" className="text-sm font-semibold">
-              Plano anterior
-            </label>
-            <select
-              key={copy ? String(copiar) : ""}
-              id="source-plan"
-              name="copiar"
-              required
-              defaultValue={copy ? String(copiar) : ""}
-              className="min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">Selecione uma aula</option>
-              {previousLessons.map((source) => (
-                <option key={source.id} value={source.id}>
-                  {source.students?.name} · {source.subjects?.name} ·{" "}
-                  {formatter.format(new Date(source.starts_at))}
-                </option>
-              ))}
-            </select>
-          </div>
-          <Button type="submit" variant="outline">
-            Duplicar plano
-          </Button>
-        </Form>
+        <CopyLessonPlanForm
+          key={id}
+          lessonId={id}
+          lesson={lesson}
+          previousLessons={previousLessons}
+          copySourceId={copy ? String(copiar) : ""}
+          timeZone={timeZone}
+        />
       )}
       {copy && (
         <Alert

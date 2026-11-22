@@ -13,7 +13,7 @@ export async function getLessonPlanning(id: string, source: unknown) {
   const { data: lesson, error } = await client
     .from("lessons")
     .select(
-      "student_id, starts_at, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans(objective, content, activities, materials)",
+      "student_id, subject_id, starts_at, students!lessons_workspace_id_student_id_fkey(name, grade_id, grades!students_workspace_id_grade_id_fkey(name)), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans(objective, content, activities, materials)",
     )
     .eq("workspace_id", workspace.workspace_id)
     .eq("id", parsedId.data)
@@ -28,7 +28,7 @@ export async function getLessonPlanning(id: string, source: unknown) {
     const previous = client
       .from("lessons")
       .select(
-        "id, starts_at, students!lessons_workspace_id_student_id_fkey(name), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans!inner(lesson_id)",
+        "id, student_id, subject_id, starts_at, students!lessons_workspace_id_student_id_fkey(name, grade_id, grades!students_workspace_id_grade_id_fkey(name)), subjects!lessons_workspace_id_subject_id_fkey(name), lesson_plans!inner(objective)",
       )
       .eq("workspace_id", workspace.workspace_id)
       .lt("starts_at", lesson.starts_at)

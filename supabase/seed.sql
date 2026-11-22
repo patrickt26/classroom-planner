@@ -201,6 +201,21 @@ begin
   update public.subjects set archived_at = now() where workspace_id = ws and id = archived_subject_id;
   update public.grades set archived_at = now() where workspace_id = ws and name = '7º ano';
 
+  -- Additional plans for the copy filters, including an archived subject and grade.
+  insert into public.lesson_plans (workspace_id, lesson_id, objective, content, activities)
+  select ws, lessons.id, sample.objective, sample.content, sample.activities
+  from (values
+    ('Aluno B', -9, time '11:00', 'Resolver problemas de multiplicação por agrupamento',
+      'Multiplicação como adição de parcelas iguais.',
+      'Organizar fichas em grupos do mesmo tamanho e registrar as multiplicações.'),
+    ('Aluno C', -10, time '09:00', 'Identificar a ideia principal de um texto curto',
+      'Título, tema e informações centrais.',
+      'Ler um parágrafo e escrever uma frase que resuma a ideia principal.')
+  ) as sample(student_name, day_offset, start_time, objective, content, activities)
+  join public.students on students.workspace_id = ws and students.name = sample.student_name
+  join public.lessons on lessons.workspace_id = ws and lessons.student_id = students.id
+    and lessons.starts_at = (current_week_start + sample.day_offset + sample.start_time) at time zone workspace_time_zone;
+
   -- A previous month with both a pending charge and a recorded payment.
   insert into public.lessons (
     workspace_id, student_id, subject_id, starts_at, duration_minutes, modality, status
