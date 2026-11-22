@@ -64,9 +64,15 @@ select throws_ok(format('select record_payment(%L,%L,array[%L]::uuid[],current_d
   :'ws', :'student_user', :'third', 'other', ''), '42501', null, 'Responsável não registra pagamento');
 
 set local request.jwt.claim.sub = :'teacher';
+update lessons set status = 'agendada' where workspace_id = :'ws' and id = :'second';
+select is((select payment_id from charges where lesson_id = :'second'), :'payment'::uuid,
+  'Desmarcar a aula preserva a cobrança paga até o estorno');
 select ok(reverse_payment(:'ws', :'payment'), 'Estorno aceito');
 select ok((select reversed_at is not null from payments where id = :'payment'), 'Estorno preservado no histórico');
-select is((select count(*) from charges where student_id = :'ws' and payment_id is null), 2::bigint, 'Estorno libera todas as cobranças');
+select is((select count(*) from charges where lesson_id = :'first' and payment_id is null), 1::bigint,
+  'Estorno reabre a cobrança da aula realizada');
+select is((select count(*) from charges where lesson_id = :'second'), 0::bigint,
+  'Estorno remove a cobrança da aula que deixou de ser realizada');
 select record_payment(:'ws', :'ws', array[:'first']::uuid[], current_date-1, 'transfer', '') as replacement \gset
 select is(reverse_payment(:'ws', :'payment'), false, 'Repetir estorno não altera pagamento posterior');
 select is((select payment_id from charges where lesson_id = :'first'), :'replacement'::uuid, 'Uma aula pode ser quitada depois do estorno');
