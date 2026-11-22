@@ -2,8 +2,6 @@ import { Video } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ActionForm } from "@/features/recurrences/action-form";
-import { changeOccurrence } from "@/features/recurrences/actions";
 import { cn } from "@/lib/utils";
 import {
   addDays,
@@ -13,6 +11,7 @@ import {
 } from "../calendar";
 import { lessonModalityLabels, lessonStatusLabels } from "../form-state";
 import { canEditLesson, type WeekLesson } from "../queries";
+import { OccurrenceActions } from "./occurrence-actions";
 
 function LessonCard({
   lesson,
@@ -68,7 +67,7 @@ function LessonCard({
         </Badge>
       </div>
       <div className="flex flex-wrap gap-x-1 px-1 lg:gap-x-0">
-        {editable && (
+        {(editable || lesson.recurrence_id) && (
           <Button asChild variant="link" className="underline lg:px-1">
             <Link
               href={`/agenda/${lesson.id}/editar`}
@@ -94,47 +93,7 @@ function LessonCard({
       {lesson.rescheduled_from_id && (
         <p className="px-2 pb-2 text-xs">Aula de reposição</p>
       )}
-      {(lesson.status === "falta" || cancelled) && !lesson.hasMakeup && (
-        <div className="p-1">
-          <ActionForm
-            action={changeOccurrence.bind(null, lesson.id)}
-            label="Solicitar reposição"
-          >
-            <input type="hidden" name="status" value="reposicao_pendente" />
-          </ActionForm>
-        </div>
-      )}
-      {!editable &&
-        (lesson.status === "agendada" || lesson.status === "confirmada") && (
-          <details className="px-2 pb-2">
-            <summary className="min-h-11 cursor-pointer py-2 text-sm">
-              Alterar situação
-            </summary>
-            <ActionForm
-              action={changeOccurrence.bind(null, lesson.id)}
-              label="Aplicar"
-            >
-              <label className="text-sm">
-                Situação
-                <select
-                  className="min-h-11 w-full rounded border bg-card"
-                  name="status"
-                  defaultValue=""
-                  required
-                >
-                  <option value="">Selecione</option>
-                  {(
-                    ["confirmada", "realizada", "falta", "cancelada"] as const
-                  ).map((s) => (
-                    <option value={s} key={s}>
-                      {lessonStatusLabels[s]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </ActionForm>
-          </details>
-        )}
+      <OccurrenceActions lesson={lesson} canChangeStatus={!editable} />
     </li>
   );
 }

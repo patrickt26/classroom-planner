@@ -76,6 +76,15 @@ export async function getEditableLesson(id: string) {
     .eq("id", lessonId.data)
     .maybeSingle();
   if (error) throw new Error("Não foi possível carregar a aula.");
+  if (data?.recurrence_id) {
+    const { count, error } = await client
+      .from("lessons")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", workspace.workspace_id)
+      .eq("rescheduled_from_id", data.id);
+    if (error) throw new Error("Não foi possível carregar a reposição.");
+    return { ...data, hasMakeup: Boolean(count), canDelete: false };
+  }
   if (!data || !canEditLesson(data)) notFound();
   const { data: canDelete, error: eligibilityError } = await client.rpc(
     "can_delete_lesson",
@@ -86,7 +95,7 @@ export async function getEditableLesson(id: string) {
   );
   if (eligibilityError)
     throw new Error("Não foi possível verificar se a aula pode ser excluída.");
-  return { ...data, canDelete };
+  return { ...data, hasMakeup: false, canDelete };
 }
 
 export async function getLessonOptions(currentStudentId?: string) {

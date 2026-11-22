@@ -21,13 +21,19 @@ const scheduleFields = {
     .nullish(),
 };
 
-export const recurrenceSchema = z
+export const recurrenceSettingsSchema = z
   .object({
     ...scheduleFields,
     day_of_week: z.number().int().min(0).max(6),
     start_time: z.iso.time(),
-    start_date: z.iso.date(),
     end_date: z.iso.date().nullish(),
+  })
+  .omit({ student_id: true });
+
+export const recurrenceSchema = recurrenceSettingsSchema
+  .extend({
+    student_id: scheduleFields.student_id,
+    start_date: z.iso.date(),
   })
   .refine(({ start_date, end_date }) => !end_date || end_date >= start_date, {
     path: ["end_date"],

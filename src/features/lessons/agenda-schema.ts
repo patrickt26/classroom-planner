@@ -16,6 +16,20 @@ export const agendaDateSchema = z.iso
     "Informe uma data válida.",
   );
 
+export const weeklyLessonSchema = z.discriminatedUnion("repeat_weekly", [
+  z.object({ repeat_weekly: z.literal("") }),
+  z
+    .object({
+      repeat_weekly: z.literal("on"),
+      date: agendaDateSchema,
+      end_date: z.union([z.literal(""), agendaDateSchema]),
+    })
+    .refine(({ date, end_date }) => !end_date || end_date >= date, {
+      path: ["end_date"],
+      message: "A data final deve ser igual ou posterior à data da aula.",
+    }),
+]);
+
 export const lessonFormSchema = (timeZone: string) =>
   z
     .object({
