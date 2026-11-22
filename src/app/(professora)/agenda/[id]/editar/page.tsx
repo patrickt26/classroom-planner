@@ -71,7 +71,7 @@ export default async function EditLessonPage({
           timeZone={time_zone}
           {...options}
           editing
-          action={saveLesson.bind(null, id)}
+          action={saveLesson.bind(null, id, null)}
           backHref={agendaHref(date)}
           initialValues={{
             student_id: lesson.student_id,

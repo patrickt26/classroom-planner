@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 
-export async function listLessonsWithoutNotes(workspaceId: string) {
+export async function listLessonsWithoutNotes(
+  workspaceId: string,
+  studentId?: string,
+) {
   const client = await createClient();
   const query = client
     .from("lessons")
@@ -15,6 +18,7 @@ export async function listLessonsWithoutNotes(workspaceId: string) {
     .is("lesson_notes", null)
     .order("starts_at", { ascending: false })
     .order("id");
+  if (studentId) query.eq("student_id", studentId);
 
   const pageSize = 100;
   const lessons = [];

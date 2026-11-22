@@ -22,16 +22,18 @@ export function PaymentForm({
   charges,
   today,
   month,
+  fromStudentPage = false,
 }: {
   id: string;
   name: string;
   charges: PendingCharge[];
   today: string;
   month?: string;
+  fromStudentPage?: boolean;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [error, submit, pending] = useActionState(
-    recordPayment.bind(null, id, month),
+    recordPayment.bind(null, id, month, fromStudentPage),
     "",
   );
   const chosen = charges.filter((charge) => selected.includes(charge.lessonId));

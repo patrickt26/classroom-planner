@@ -33,6 +33,7 @@ type LessonFormProps = {
   students: Option[];
   subjects: Option[];
   backHref: string;
+  backLabel?: string;
   timeZone: string;
   editing?: boolean;
 };
@@ -197,6 +198,7 @@ export function LessonForm({
   students,
   subjects,
   backHref,
+  backLabel = "Voltar para a agenda",
   editing,
   timeZone,
 }: LessonFormProps) {
@@ -322,7 +324,7 @@ export function LessonForm({
               : "Salvar aula"}
         </Button>
         <Button asChild variant="outline">
-          <Link href={backHref}>Voltar para a agenda</Link>
+          <Link href={backHref}>{backLabel}</Link>
         </Button>
       </div>
     </form>

@@ -43,14 +43,19 @@ begin
   from (values
     ('Aluno A', '2º ano', 8000, false),
     ('Aluno B', '4º ano', 0, true),
-    ('Aluno C', '7º ano', 9050, false)
+    ('Aluno C', '7º ano', 9050, false),
+    -- Two subjects and no pending items before scheduling from the student page.
+    ('Aluno D', '5º ano', 8000, false)
   ) as sample(name, grade, rate, is_free)
   join public.grades on grades.workspace_id = ws and grades.name = sample.grade;
 
   insert into public.student_subjects (workspace_id, student_id, subject_id)
   select ws, students.id, subjects.id from public.students
   join public.subjects using (workspace_id)
-  where students.workspace_id = ws and subjects.name = 'Matemática';
+  where students.workspace_id = ws and (
+    subjects.name = 'Matemática'
+    or (students.name = 'Aluno D' and subjects.name = 'Língua Portuguesa')
+  );
 
   insert into public.guardians (workspace_id, name)
   values (ws, 'Responsável A'), (ws, 'Responsável C');
