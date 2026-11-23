@@ -1,3 +1,4 @@
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { Tables } from "@/types/database";
@@ -68,16 +69,16 @@ export function RecurrenceForm({
             defaultValue={row.duration_minutes}
           />
         </label>
-        <label htmlFor="series-end">
-          Repetir até (opcional)
-          <Input
+        <div className="min-w-0">
+          <label htmlFor="series-end">Repetir até (opcional)</label>
+          <DatePicker
             id="series-end"
-            type="date"
+            label="Repetir até"
             name="end_date"
             min={row.start_date}
             defaultValue={row.end_date ?? ""}
           />
-        </label>
+        </div>
         <label htmlFor="series-modality">
           Modalidade
           <Select
