@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { weeklySchedule } from "@/features/recurrences/schedule";
@@ -70,26 +71,42 @@ function DayFields({
   subjects,
   editing,
   errors,
+  onDateChange,
 }: {
   dayKey: number;
   initialValues: LessonDay;
   subjects: Option[];
   editing?: boolean;
   errors?: LessonFieldErrors;
+  onDateChange: () => void;
 }) {
   const [day, setDay] = useState(initialValues);
   const weekday = new Date(`${day.date}T00:00:00Z`).getUTCDay();
 
-  function field(name: keyof LessonDay) {
+  function fieldProps(name: keyof LessonDay) {
     const id = `day.${dayKey}.${name}`;
     return {
       id,
       name: id,
       value: day[name],
-      onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-        setDay({ ...day, [name]: event.target.value }),
       "aria-invalid": Boolean(errors?.[name]),
       "aria-describedby": errors?.[name] ? `${id}-erro` : undefined,
+    };
+  }
+  function field(name: keyof LessonDay) {
+    return {
+      ...fieldProps(name),
+      onChange: (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+        setDay({ ...day, [name]: event.target.value }),
+    };
+  }
+  function dateField(name: "date" | "end_date") {
+    return {
+      ...fieldProps(name),
+      onValueChange: (value: string) => {
+        onDateChange();
+        setDay({ ...day, [name]: value });
+      },
     };
   }
   function label(name: keyof LessonDay, text: string) {
@@ -104,7 +121,7 @@ function DayFields({
     <div className="grid gap-4 sm:grid-cols-2">
       <input type="hidden" name="day_id" value={dayKey} />
       <Field {...label("date", "Data")}>
-        <Input {...field("date")} type="date" required />
+        <DatePicker {...dateField("date")} label="Data" required />
       </Field>
       <Field {...label("time", "Horário de início")}>
         <Input {...field("time")} type="time" step="any" required />
@@ -172,9 +189,9 @@ function DayFields({
               </p>
               <div className="sm:max-w-64">
                 <Field {...label("end_date", "Repetir até (opcional)")}>
-                  <Input
-                    {...field("end_date")}
-                    type="date"
+                  <DatePicker
+                    {...dateField("end_date")}
+                    label="Repetir até"
                     min={day.date || undefined}
                   />
                 </Field>
@@ -289,6 +306,7 @@ export function LessonForm({
                 subjects={subjects}
                 editing={editing}
                 errors={state.days?.[key]?.fields}
+                onDateChange={dismissConflict}
               />
             </fieldset>
           ))}

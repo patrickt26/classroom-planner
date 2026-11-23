@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import {
@@ -88,14 +89,24 @@ export function StudentForm({
                 <label htmlFor={name} className="text-sm font-semibold">
                   {label}
                 </label>
-                <Input
-                  id={name}
-                  name={name}
-                  type={type}
-                  defaultValue={values[name]}
-                  required={name === "name"}
-                  {...errorProps(name)}
-                />
+                {type === "date" ? (
+                  <DatePicker
+                    id={name}
+                    name={name}
+                    label={label}
+                    defaultValue={values[name]}
+                    {...errorProps(name)}
+                  />
+                ) : (
+                  <Input
+                    id={name}
+                    name={name}
+                    type={type}
+                    defaultValue={values[name]}
+                    required={name === "name"}
+                    {...errorProps(name)}
+                  />
+                )}
                 <FieldError name={name} errors={errors?.[name]} />
               </div>
             ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 
 export function MakeupDateFields({
@@ -18,18 +19,18 @@ export function MakeupDateFields({
 
   return (
     <>
-      <label htmlFor={`${id}-date`}>
-        Nova data
-        <Input
+      <div>
+        <label htmlFor={`${id}-date`}>Nova data</label>
+        <DatePicker
           id={`${id}-date`}
-          type="date"
+          label="Nova data"
           name="date"
           required
           min={originalDate}
           value={date}
-          onChange={(event) => setDate(event.currentTarget.value)}
+          onValueChange={setDate}
         />
-      </label>
+      </div>
       <label htmlFor={`${id}-time`}>
         Novo horário
         <Input

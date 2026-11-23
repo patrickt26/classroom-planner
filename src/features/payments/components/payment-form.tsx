@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { PendingCharge } from "@/features/charges/queries";
 import { formatReais } from "@/features/students/form-state";
@@ -118,21 +118,18 @@ export function PaymentForm({
             <span>{formatReais.format(total / 100)}</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label
-              htmlFor={`paid-on-${id}`}
-              className="grid min-w-0 gap-1 font-medium"
-            >
-              Data do pagamento
-              <Input
+            <div className="grid min-w-0 gap-1 font-medium">
+              <label htmlFor={`paid-on-${id}`}>Data do pagamento</label>
+              <DatePicker
                 id={`paid-on-${id}`}
+                label="Data do pagamento"
                 name="paidOn"
-                type="date"
                 required
                 min={chosen.at(-1)?.lessonDate}
                 max={today}
                 defaultValue={today}
               />
-            </label>
+            </div>
             <label
               htmlFor={`payment-method-${id}`}
               className="grid min-w-0 gap-1 font-medium"
