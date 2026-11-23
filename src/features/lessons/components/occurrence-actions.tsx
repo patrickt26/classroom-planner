@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/select";
 import { ActionForm } from "@/features/recurrences/action-form";
 import { changeOccurrence } from "@/features/recurrences/actions";
 import type { Tables } from "@/types/database";
@@ -31,10 +32,13 @@ export function OccurrenceActions({
               action={changeOccurrence.bind(null, lesson.id)}
               label="Aplicar"
             >
-              <label className="text-sm">
+              <label
+                htmlFor={`occurrence-status-${lesson.id}`}
+                className="text-sm"
+              >
                 Situação
-                <select
-                  className="min-h-11 w-full rounded border bg-card"
+                <Select
+                  id={`occurrence-status-${lesson.id}`}
                   name="status"
                   defaultValue=""
                   required
@@ -47,7 +51,7 @@ export function OccurrenceActions({
                       {lessonStatusLabels[s]}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </ActionForm>
           </details>

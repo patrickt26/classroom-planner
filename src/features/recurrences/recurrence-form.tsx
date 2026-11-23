@@ -1,28 +1,25 @@
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { Tables } from "@/types/database";
 import { ActionForm } from "./action-form";
 import { saveRecurrence } from "./actions";
 import { weekdays } from "./schedule";
 
 type Option = { id: string; name: string };
-const selectClass =
-  "block min-h-11 w-full min-w-0 rounded-lg border bg-card px-2";
 export function RecurrenceForm({
   row,
   subjects,
-  timeZone,
 }: {
   row: Tables<"recurrences">;
   subjects: Option[];
-  timeZone: string;
 }) {
   return (
     <ActionForm action={saveRecurrence.bind(null, row.id)} label="Salvar série">
       <div className="grid gap-3 sm:grid-cols-2 [&_label]:min-w-0 [&_label]:text-sm [&_label]:font-medium">
-        <label>
+        <label htmlFor="series-subject">
           Disciplina
-          <select
-            className={selectClass}
+          <Select
+            id="series-subject"
             required
             name="subject_id"
             defaultValue={row.subject_id}
@@ -33,12 +30,12 @@ export function RecurrenceForm({
                 {s.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
-        <label>
+        <label htmlFor="series-weekday">
           Dia da semana
-          <select
-            className={selectClass}
+          <Select
+            id="series-weekday"
             name="day_of_week"
             defaultValue={row.day_of_week}
           >
@@ -47,10 +44,10 @@ export function RecurrenceForm({
                 {d}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label htmlFor="series-time">
-          Horário ({timeZone})
+          Horário
           <Input
             id="series-time"
             type="time"
@@ -81,16 +78,16 @@ export function RecurrenceForm({
             defaultValue={row.end_date ?? ""}
           />
         </label>
-        <label>
+        <label htmlFor="series-modality">
           Modalidade
-          <select
-            className={selectClass}
+          <Select
+            id="series-modality"
             name="modality"
             defaultValue={row.modality}
           >
             <option value="presencial">Presencial</option>
             <option value="online">Online</option>
-          </select>
+          </Select>
         </label>
         <label htmlFor="series-meeting">
           Google Meet para aula online (opcional)

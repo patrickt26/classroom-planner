@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { formatGuardianPhone } from "../phone";
 import type { GuardianFormState, GuardianFormValues } from "../schema";
 
 const fields = [
@@ -12,6 +13,23 @@ const fields = [
   { name: "relationship", label: "Parentesco ou vínculo", maxLength: 80 },
   { name: "phone", label: "Telefone", maxLength: 40 },
 ] as const;
+
+function maskPhone(input: HTMLInputElement) {
+  const { value, selectionStart } = input;
+  const formatted = formatGuardianPhone(value);
+  if (formatted === value) return;
+
+  input.value = formatted;
+  if (selectionStart === null || selectionStart === value.length) return;
+
+  let remaining = value.slice(0, selectionStart).replace(/[^+\d]/g, "").length;
+  let caret = 0;
+  while (caret < formatted.length && remaining > 0) {
+    if (/[+\d]/.test(formatted.charAt(caret))) remaining--;
+    caret++;
+  }
+  input.setSelectionRange(caret, caret);
+}
 
 export function GuardianForm({
   action,
@@ -82,7 +100,12 @@ export function GuardianFields({
               id={`guardian-${name}`}
               name={prefix + name}
               type={isPhone ? "tel" : "text"}
-              defaultValue={values[name]}
+              defaultValue={
+                isPhone ? formatGuardianPhone(values[name]) : values[name]
+              }
+              onChange={
+                isPhone ? (event) => maskPhone(event.currentTarget) : undefined
+              }
               maxLength={maxLength}
               required={!isPhone}
               aria-invalid={Boolean(error)}

@@ -40,7 +40,7 @@ export default async function EditSeriesPage({
           As alterações se aplicam às próximas aulas agendadas ou confirmadas da
           série.
         </p>
-        <RecurrenceForm row={row} subjects={subjects} timeZone={time_zone} />
+        <RecurrenceForm row={row} subjects={subjects} />
         <details className="border-t pt-2">
           <summary className="min-h-11 cursor-pointer py-2.5 font-semibold">
             Encerrar série

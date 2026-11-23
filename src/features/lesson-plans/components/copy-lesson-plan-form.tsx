@@ -3,12 +3,11 @@
 import Form from "next/form";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import type { getLessonPlanning } from "../queries";
 
 type LessonPlanning = Awaited<ReturnType<typeof getLessonPlanning>>;
 
-const selectClassName =
-  "min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const all = "all";
 const noGrade = "no-grade";
 
@@ -80,14 +79,13 @@ export function CopyLessonPlanForm({
           <label htmlFor="plan-subject" className="text-sm font-semibold">
             Matéria
           </label>
-          <select
+          <Select
             id="plan-subject"
             value={subject}
             onChange={(event) => {
               setSubject(event.target.value);
               setSourceId("");
             }}
-            className={selectClassName}
           >
             <option value={all}>Todas</option>
             {[...subjects].map(([id, name]) => (
@@ -95,20 +93,19 @@ export function CopyLessonPlanForm({
                 {name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="grid min-w-0 gap-1.5">
           <label htmlFor="plan-grade" className="text-sm font-semibold">
             Série
           </label>
-          <select
+          <Select
             id="plan-grade"
             value={grade}
             onChange={(event) => {
               setGrade(event.target.value);
               setSourceId("");
             }}
-            className={selectClassName}
           >
             <option value={all}>Todas</option>
             {[...grades].map(([id, name]) => (
@@ -116,7 +113,7 @@ export function CopyLessonPlanForm({
                 {name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
       <div className="grid min-w-0 items-end gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
@@ -124,14 +121,13 @@ export function CopyLessonPlanForm({
           <label htmlFor="source-plan" className="text-sm font-semibold">
             Plano anterior
           </label>
-          <select
+          <Select
             id="source-plan"
             name="copiar"
             required
             disabled={!matchingLessons.length}
             value={selected?.id ?? ""}
             onChange={(event) => setSourceId(event.target.value)}
-            className={selectClassName}
           >
             <option value="">
               {matchingLessons.length
@@ -151,7 +147,7 @@ export function CopyLessonPlanForm({
                 </optgroup>
               ) : null,
             )}
-          </select>
+          </Select>
         </div>
         <Button type="submit" variant="outline" disabled={!selected}>
           Copiar plano

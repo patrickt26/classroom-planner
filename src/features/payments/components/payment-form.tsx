@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { PendingCharge } from "@/features/charges/queries";
 import { formatReais } from "@/features/students/form-state";
 import { recordPayment } from "../actions";
@@ -132,13 +133,16 @@ export function PaymentForm({
                 defaultValue={today}
               />
             </label>
-            <label className="grid min-w-0 gap-1 font-medium">
+            <label
+              htmlFor={`payment-method-${id}`}
+              className="grid min-w-0 gap-1 font-medium"
+            >
               Forma de pagamento
-              <select
+              <Select
+                id={`payment-method-${id}`}
                 name="method"
                 required
                 defaultValue=""
-                className="min-h-11 rounded-lg border border-input bg-card px-2"
               >
                 <option value="" disabled>
                   Selecione
@@ -148,7 +152,7 @@ export function PaymentForm({
                     {label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           </div>
           <label className="grid gap-1 font-medium">

@@ -45,7 +45,6 @@ export default async function NewLessonPage({
       <div className="space-y-4 rounded-xl border bg-card p-4 sm:p-6">
         {options.students.length > 0 && options.subjects.length > 0 ? (
           <LessonForm
-            timeZone={time_zone}
             {...options}
             action={saveLesson.bind(null, null, student?.id ?? null)}
             backHref={backHref}

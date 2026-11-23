@@ -12,6 +12,7 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { weeklySchedule } from "@/features/recurrences/schedule";
 import { editableLessonStatusSchema } from "../agenda-schema";
 import {
@@ -34,12 +35,8 @@ type LessonFormProps = {
   subjects: Option[];
   backHref: string;
   backLabel?: string;
-  timeZone: string;
   editing?: boolean;
 };
-
-const selectClass =
-  "min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive md:text-sm";
 
 function Field({
   id,
@@ -71,14 +68,12 @@ function DayFields({
   dayKey,
   initialValues,
   subjects,
-  timeZone,
   editing,
   errors,
 }: {
   dayKey: number;
   initialValues: LessonDay;
   subjects: Option[];
-  timeZone: string;
   editing?: boolean;
   errors?: LessonFieldErrors;
 }) {
@@ -111,30 +106,30 @@ function DayFields({
       <Field {...label("date", "Data")}>
         <Input {...field("date")} type="date" required />
       </Field>
-      <Field {...label("time", `Horário de início (${timeZone})`)}>
+      <Field {...label("time", "Horário de início")}>
         <Input {...field("time")} type="time" step="any" required />
       </Field>
       <Field {...label("subject_id", "Disciplina")}>
-        <select {...field("subject_id")} required className={selectClass}>
+        <Select {...field("subject_id")} required>
           <option value="">Selecione uma disciplina</option>
           {subjects.map(({ id, name }) => (
             <option key={id} value={id}>
               {name}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field {...label("duration_minutes", "Duração em minutos")}>
         <Input {...field("duration_minutes")} type="number" min={1} required />
       </Field>
       <Field {...label("modality", "Modalidade")}>
-        <select {...field("modality")} className={selectClass}>
+        <Select {...field("modality")}>
           {Object.entries(lessonModalityLabels).map(([value, text]) => (
             <option key={value} value={value}>
               {text}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       {day.modality === "online" && (
         <Field {...label("meeting_url", "Link do Google Meet (opcional)")}>
@@ -143,13 +138,13 @@ function DayFields({
       )}
       {editing ? (
         <Field {...label("status", "Situação")}>
-          <select {...field("status")} className={selectClass}>
+          <Select {...field("status")}>
             {editableLessonStatusSchema.options.map((status) => (
               <option key={status} value={status}>
                 {lessonStatusLabels[status]}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       ) : (
         <div className="grid gap-2 border-t pt-2 sm:col-span-2">
@@ -200,7 +195,6 @@ export function LessonForm({
   backHref,
   backLabel = "Voltar para a agenda",
   editing,
-  timeZone,
 }: LessonFormProps) {
   const [state, submit, pending] = useActionState<LessonFormState, FormData>(
     action,
@@ -224,7 +218,7 @@ export function LessonForm({
       <Alert variant="error" message={state.message} />
       <fieldset disabled={pending} className="grid min-w-0 gap-5">
         <Field id="student_id" label="Aluno" error={state.studentError}>
-          <select
+          <Select
             id="student_id"
             name="student_id"
             required
@@ -234,7 +228,6 @@ export function LessonForm({
             aria-describedby={
               state.studentError ? "student_id-erro" : undefined
             }
-            className={selectClass}
           >
             <option value="">Selecione um aluno</option>
             {students.map(({ id, name }) => (
@@ -242,7 +235,7 @@ export function LessonForm({
                 {name}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <div className={editing ? "" : "grid items-start gap-4 xl:grid-cols-2"}>
           {keys.map((key, index) => (
@@ -295,7 +288,6 @@ export function LessonForm({
                 initialValues={initialValues}
                 subjects={subjects}
                 editing={editing}
-                timeZone={timeZone}
                 errors={state.days?.[key]?.fields}
               />
             </fieldset>

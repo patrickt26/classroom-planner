@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { lessonStatusLabels } from "@/features/lessons/form-state";
 import { eventTypeSchema, listStudentTimeline } from "../queries";
 
@@ -55,12 +56,11 @@ export async function StudentTimeline({
           <label htmlFor="timeline-type" className="text-sm font-semibold">
             Tipo de atividade
           </label>
-          <select
+          <Select
             id="timeline-type"
             name="tipo"
             key={filters.tipo ?? ""}
             defaultValue={filters.tipo ?? ""}
-            className="min-h-11 w-full rounded-md border border-input bg-card px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <option value="">Todos os tipos</option>
             {eventTypeSchema.options.map((type) => (
@@ -68,7 +68,7 @@ export async function StudentTimeline({
                 {eventLabels[type]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <Button type="submit" variant="outline">
           Filtrar

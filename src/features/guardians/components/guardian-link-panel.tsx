@@ -5,6 +5,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { linkGuardian } from "../actions";
+import { formatGuardianPhone } from "../phone";
 import { getAvailableGuardian, searchAvailableGuardians } from "../queries";
 import { GuardianLinkForm } from "./guardian-link-form";
 
@@ -59,7 +60,9 @@ export async function GuardianLinkPanel({
           <div className="wrap-anywhere">
             <p className="font-semibold">{selected.name}</p>
             {selected.phone && (
-              <p className="text-sm text-muted-foreground">{selected.phone}</p>
+              <p className="text-sm text-muted-foreground">
+                {formatGuardianPhone(selected.phone)}
+              </p>
             )}
           </div>
           <GuardianLinkForm
@@ -110,7 +113,7 @@ export async function GuardianLinkPanel({
                       </span>
                       {guardian.phone && (
                         <span className="text-sm text-muted-foreground">
-                          {guardian.phone}
+                          {formatGuardianPhone(guardian.phone)}
                         </span>
                       )}
                     </Link>
