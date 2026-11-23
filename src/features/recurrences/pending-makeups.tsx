@@ -59,7 +59,6 @@ export async function PendingMakeups({
                     originalDate={date}
                     originalTime={originalTime}
                     today={today}
-                    timeZone={timeZone}
                   />
                 </ActionForm>
               </details>

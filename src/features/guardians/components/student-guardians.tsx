@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { removeGuardian, saveGuardian } from "../actions";
+import { formatGuardianPhone } from "../phone";
 import { listStudentGuardians } from "../queries";
 import { normalizePhone } from "../schema";
 import { GuardianForm, RemoveGuardianForm } from "./guardian-form";
@@ -166,7 +167,9 @@ export async function StudentGuardians({
                     )}
                   </div>
                   {guardian.phone && (
-                    <p className="wrap-anywhere text-sm">{guardian.phone}</p>
+                    <p className="wrap-anywhere text-sm">
+                      {formatGuardianPhone(guardian.phone)}
+                    </p>
                   )}
                   {phone && (
                     <div className="flex flex-wrap gap-2">

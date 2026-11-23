@@ -6,6 +6,7 @@ import { useActionState, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import {
   initialStudentGuardian,
   type StudentFormState,
@@ -102,10 +103,9 @@ export function StudentForm({
               <label htmlFor="grade_id" className="text-sm font-semibold">
                 Ano escolar
               </label>
-              <select
+              <Select
                 id="grade_id"
                 name="grade_id"
-                className={fieldClassName}
                 defaultValue={values.grade_id}
                 {...errorProps("grade_id")}
               >
@@ -115,7 +115,7 @@ export function StudentForm({
                     {name}
                   </option>
                 ))}
-              </select>
+              </Select>
               <FieldError name="grade_id" errors={errors?.grade_id} />
             </div>
           </div>
@@ -151,7 +151,7 @@ export function StudentForm({
                 id="hourly_rate"
                 name="hourly_rate"
                 inputMode="decimal"
-                placeholder="80,50"
+                placeholder="R$"
                 defaultValue={values.hourly_rate}
                 disabled={isFree}
                 required={!isFree}

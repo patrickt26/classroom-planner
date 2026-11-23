@@ -68,7 +68,6 @@ export default async function EditLessonPage({
       <h1 className="mb-5 text-3xl font-bold text-brown">Editar aula</h1>
       <div className="rounded-xl border bg-card p-4 sm:p-6">
         <LessonForm
-          timeZone={time_zone}
           {...options}
           editing
           action={saveLesson.bind(null, id, null)}

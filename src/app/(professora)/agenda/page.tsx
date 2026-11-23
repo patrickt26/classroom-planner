@@ -4,6 +4,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { agendaDateSchema } from "@/features/lessons/agenda-schema";
 import {
   addDays,
@@ -139,12 +140,11 @@ export default async function AgendaPage({
           Filtrar por aluno
         </label>
         <div className="flex gap-2">
-          <select
+          <Select
             key={`${week}:${studentId ?? ""}`}
             id="agenda-student"
             name="aluno"
             defaultValue={studentId ?? ""}
-            className="min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
           >
             <option value="">Todos os alunos</option>
             {students.map(({ id, name, archived_at }) => (
@@ -153,7 +153,7 @@ export default async function AgendaPage({
                 {archived_at && " (arquivado)"}
               </option>
             ))}
-          </select>
+          </Select>
           <Button type="submit" variant="outline">
             Filtrar
           </Button>

@@ -8,13 +8,11 @@ export function MakeupDateFields({
   originalDate,
   originalTime,
   today,
-  timeZone,
 }: {
   id: string;
   originalDate: string;
   originalTime: string;
   today: string;
-  timeZone: string;
 }) {
   const [date, setDate] = useState(today < originalDate ? originalDate : today);
 
@@ -33,7 +31,7 @@ export function MakeupDateFields({
         />
       </label>
       <label htmlFor={`${id}-time`}>
-        Novo horário ({timeZone})
+        Novo horário
         <Input
           id={`${id}-time`}
           type="time"
