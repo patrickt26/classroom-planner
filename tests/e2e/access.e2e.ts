@@ -47,7 +47,7 @@ test("professora convidada define a senha pelo e-mail e entra em uma nova sessã
   const { HTML } = (await message.json()) as { HTML: string };
   await page.setContent(HTML);
   await page
-    .getByRole("link", { name: "Aceitar convite e definir senha" })
+    .getByRole("link", { name: "Aceitar convite e criar senha" })
     .click();
   await expect(page).toHaveURL("http://localhost:3000/nova-senha");
   await page.getByLabel("Nova senha", { exact: false }).fill(password);
