@@ -1,7 +1,8 @@
 import { expect, test } from "vitest";
-import { lessonFormSchema } from "./agenda-schema";
+import { firstAgendaDate, lessonFormSchema } from "./agenda-schema";
 import {
   addDays,
+  agendaHref,
   calendarDayStart,
   lessonStartInstant,
   localLessonDateTime,
@@ -24,6 +25,22 @@ test("navigates weeks across a year boundary", () => {
   const start = weekStart("2027-01-03");
   expect(start).toBe("2026-12-28");
   expect(addDays(start, 7)).toBe("2027-01-04");
+});
+
+test("keeps Sunday in the selected week when opening an agenda link", () => {
+  const sunday = "2027-01-03";
+  const href = new URL(agendaHref(sunday, "salva"), "https://example.test");
+  expect(href.searchParams.get("semana")).toBe(sunday);
+  expect(weekStart(sunday, "sunday")).toBe(sunday);
+  expect(weekStart("2027-01-09", "sunday")).toBe(sunday);
+  expect(weekStart(addDays(sunday, -7), "sunday")).toBe("2026-12-27");
+  expect(weekStart(addDays(sunday, 7), "sunday")).toBe("2027-01-10");
+});
+
+test("starts the next full Sunday week after the earliest agenda date", () => {
+  const firstWeek = weekStart(firstAgendaDate, "sunday");
+  expect(firstWeek).toBe("0000-12-31");
+  expect(addDays(firstWeek, 7)).toBe("0001-01-07");
 });
 
 test("uses the historical São Paulo offset and skips nonexistent local times", () => {

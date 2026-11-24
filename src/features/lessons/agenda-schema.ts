@@ -9,10 +9,12 @@ export const editableLessonStatusSchema = z.enum([
   "falta",
 ]);
 
+export const firstAgendaDate = "0001-01-01";
+
 export const agendaDateSchema = z.iso
   .date()
   .refine(
-    (date) => date >= "0001-01-01" && date <= "9999-12-26",
+    (date) => date >= firstAgendaDate && date <= "9999-12-26",
     "Informe uma data válida.",
   );
 

@@ -690,6 +690,7 @@ export type Database = {
           settings: NonNullable<Json>;
           time_zone: string;
           updated_at: string;
+          week_start: Database["public"]["Enums"]["week_start_day"];
           workspace_id: string;
         };
         ComputedFields: never;
@@ -699,6 +700,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           time_zone?: string;
           updated_at?: string;
+          week_start?: Database["public"]["Enums"]["week_start_day"];
           workspace_id?: string;
         };
         Update: {
@@ -707,6 +709,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           time_zone?: string;
           updated_at?: string;
+          week_start?: Database["public"]["Enums"]["week_start_day"];
           workspace_id?: string;
         };
         Relationships: [];
@@ -912,6 +915,7 @@ export type Database = {
         | "falta"
         | "reposicao_pendente";
       payment_method: "pix" | "cash" | "transfer" | "other";
+      week_start_day: "monday" | "sunday";
       workspace_role: "teacher" | "student" | "guardian";
     };
     CompositeTypes: {
@@ -1053,6 +1057,7 @@ export const Constants = {
         "reposicao_pendente",
       ],
       payment_method: ["pix", "cash", "transfer", "other"],
+      week_start_day: ["monday", "sunday"],
       workspace_role: ["teacher", "student", "guardian"],
     },
   },
