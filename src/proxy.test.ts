@@ -95,6 +95,8 @@ test.each([
   "/entrar",
   "/criar-conta",
   "/recuperar-senha",
+  "/privacidade",
+  "/termos",
   "/confirmar?type=recovery",
   "/tema",
   "/tema/mais",
