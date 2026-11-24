@@ -1,5 +1,6 @@
 "use server";
 
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { FormFeedback } from "@/components/ui/alert";
@@ -24,7 +25,10 @@ export async function saveCatalogItem(
   const change = z
     .discriminatedUnion("intent", [
       z.object({ intent: z.literal("save"), name: catalogNameSchema }),
-      z.object({ intent: z.literal("archive"), id: z.uuid() }),
+      z.object({
+        intent: z.enum(["archive", "unarchive", "delete"]),
+        id: z.uuid(),
+      }),
     ])
     .safeParse({
       intent: form.get("intent") ?? "save",
@@ -42,7 +46,7 @@ export async function saveCatalogItem(
   const items = client.from(parsed.data.table);
   const update = (
     id: string,
-    changes: { name: string } | { archived_at: string },
+    changes: { name: string } | { archived_at: string | null },
   ) =>
     items
       .update(changes)
@@ -51,15 +55,36 @@ export async function saveCatalogItem(
       .select("id")
       .maybeSingle();
 
-  const { data, error } =
-    change.data.intent === "archive"
-      ? await update(change.data.id, { archived_at: new Date().toISOString() })
-      : parsed.data.id
+  let result: PostgrestSingleResponse<{ id: string } | string | null>;
+  switch (change.data.intent) {
+    case "save":
+      result = parsed.data.id
         ? await update(parsed.data.id, { name: change.data.name })
         : await items
             .insert({ workspace_id, name: change.data.name })
             .select("id")
             .single();
+      break;
+    case "archive":
+    case "unarchive":
+      result = await update(change.data.id, {
+        archived_at:
+          change.data.intent === "archive" ? new Date().toISOString() : null,
+      });
+      break;
+    case "delete":
+      result = await client.rpc("delete_catalog_item", {
+        target_workspace_id: workspace_id,
+        catalog_table: parsed.data.table,
+        item_id: change.data.id,
+      });
+      if (result.error?.code === "23503") {
+        revalidatePath("/configuracoes");
+        return { variant: "error", message: result.error.message };
+      }
+      break;
+  }
+  const { data, error } = result;
 
   if (error?.code === "23505")
     return {
@@ -75,7 +100,11 @@ export async function saveCatalogItem(
   revalidatePath("/", "layout");
   return {
     variant: "success",
-    message:
-      change.data.intent === "archive" ? "Item arquivado." : "Nome salvo.",
+    message: {
+      archive: "Item arquivado.",
+      unarchive: "Item desarquivado.",
+      save: "Nome salvo.",
+      delete: "Item excluído.",
+    }[change.data.intent],
   };
 }

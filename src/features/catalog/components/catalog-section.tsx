@@ -3,11 +3,25 @@
 import { useActionState, useId } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { saveCatalogItem } from "../actions";
 import { type CatalogTable, catalogNameMaxLength } from "../schema";
 
-type Item = { id: string; name: string; archived_at: string | null };
+type Item = {
+  id: string;
+  name: string;
+  archived_at: string | null;
+  inUse: boolean;
+};
 
 function CatalogItemForm({
   table,
@@ -23,9 +37,10 @@ function CatalogItemForm({
     null,
   );
   const fieldId = useId();
+  const formId = useId();
 
   return (
-    <form action={action} className="grid gap-2">
+    <form id={formId} action={action} className="grid gap-2">
       <label htmlFor={fieldId} className="text-sm font-medium">
         Nome da {label}
       </label>
@@ -41,19 +56,63 @@ function CatalogItemForm({
         <Button type="submit" name="intent" value="save" disabled={pending}>
           {item ? "Salvar nome" : "Adicionar"}
         </Button>
-        {item && !item.archived_at && (
+        {item && (
           <Button
             type="submit"
             name="intent"
-            value="archive"
+            value={item.archived_at ? "unarchive" : "archive"}
             variant="outline"
             formNoValidate
             disabled={pending}
           >
-            Arquivar
+            {item.archived_at ? "Desarquivar" : "Arquivar"}
           </Button>
         )}
+        {item && !item.inUse && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button" variant="destructive" disabled={pending}>
+                Excluir
+              </Button>
+            </DialogTrigger>
+            <DialogContent showCloseButton={false}>
+              <DialogTitle className="wrap-anywhere">
+                Excluir a {label} “{item.name}”?
+              </DialogTitle>
+              <DialogDescription>A exclusão é permanente.</DialogDescription>
+              <Alert
+                variant="error"
+                message={
+                  feedback?.variant === "error" ? feedback.message : undefined
+                }
+              />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={pending}>
+                    Manter {label}
+                  </Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  form={formId}
+                  name="intent"
+                  value="delete"
+                  formNoValidate
+                  variant="destructive"
+                  disabled={pending}
+                >
+                  {pending ? "Excluindo…" : "Confirmar exclusão"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
+      {item?.inUse && (
+        <p className="text-sm text-muted-foreground">
+          Esta {label} está em uso. Arquivar preserva os registros vinculados.
+        </p>
+      )}
       <Alert
         variant="error"
         message={feedback?.variant === "error" ? feedback.message : undefined}
