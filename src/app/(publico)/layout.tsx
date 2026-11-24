@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  robots: { index: true, follow: true },
+  alternates: { canonical: "./" },
+};
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
