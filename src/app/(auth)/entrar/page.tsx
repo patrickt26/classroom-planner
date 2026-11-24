@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import type { FormFeedback } from "@/components/ui/alert";
 import { AuthScreen } from "@/features/auth/components/auth-screen";
+import { platformName } from "@/lib/platform";
+
+export const metadata: Metadata = {
+  title: `Entrar | ${platformName}`,
+  description:
+    "Acesse seu espaço de professora particular para organizar alunos, agendar e planejar aulas e acompanhar cobranças.",
+};
 export default async function Page({
   searchParams,
 }: {
@@ -10,8 +18,7 @@ export default async function Page({
     aviso === "link"
       ? {
           variant: "error",
-          message:
-            "O link expirou ou já foi usado. Solicite um novo link de recuperação.",
+          message: "O link expirou ou já foi usado. Solicite um novo link.",
         }
       : aviso === "acesso"
         ? {

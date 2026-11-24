@@ -10,6 +10,7 @@ import {
   passwordSchema,
   signupSchema,
 } from "./schema";
+import { signupEnabled } from "./signup-enabled";
 
 async function confirmationUrl() {
   const origin = (await headers()).get("origin");
@@ -41,6 +42,11 @@ export async function signup(
   _: FormFeedback,
   form: FormData,
 ): Promise<FormFeedback> {
+  if (!signupEnabled)
+    return {
+      variant: "info",
+      message: "O cadastro está disponível por convite.",
+    };
   const input = signupSchema.safeParse(Object.fromEntries(form));
   if (!input.success)
     return {

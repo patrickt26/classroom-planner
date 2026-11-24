@@ -17,6 +17,7 @@ Por que essa stack: [docs/decisions/0001-stack.md](docs/decisions/0001-stack.md)
 - Cada issue vira **um PR pequeno**, que explica **o quê**, **onde** e **por quê** ([template](.github/pull_request_template.md)).
 - Regras para quem contribui, inclusive agentes de código: [AGENTS.md](AGENTS.md).
 - Decisões de arquitetura ficam registradas em [docs/decisions](docs/decisions).
+- Para reproduzir os testes ponta a ponta ou publicar uma versão, siga o [checklist de deploy](docs/checklist-de-deploy.md).
 
 ## Marcos
 
