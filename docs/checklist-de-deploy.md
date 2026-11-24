@@ -23,7 +23,7 @@ order by t.tablename;
 
 ## Vercel
 
-- [x] Aplicação publicada em [classroom-planner-phi.vercel.app](https://classroom-planner-phi.vercel.app), com funções em São Paulo (`gru1`).
+- [x] Aplicação publicada na URL de produção (consultar o painel da Vercel), com funções em São Paulo (`gru1`).
 - [ ] Conferir Node.js 26, o pnpm definido em `package.json` e o comando de build `pnpm build` no projeto Next.js.
 - [ ] Configurar estas variáveis no ambiente **Production**, antes do build. Refazer o deploy após alterar qualquer valor público.
 
@@ -64,7 +64,7 @@ As chaves administrativas do Supabase e as credenciais SMTP ficam fora das vari�
 
 - [ ] Configurar domínio próprio com SPF, DKIM e DMARC para melhorar a entregabilidade. Os e-mails estão chegando à aba Promoções do Gmail. [Autenticação de domínio na Brevo](https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC)
 - [ ] Reavaliar como desativar o rastreamento de cliques nos e-mails de autenticação. O plano Brevo Free em uso não permite desativá-lo.
-- [ ] Avaliar os PRs de atualização de versão principal do Dependabot após o lançamento. [PR #105](https://github.com/patrickt26/classroom-planner/pull/105), [PR #106](https://github.com/patrickt26/classroom-planner/pull/106) e [PR #107](https://github.com/patrickt26/classroom-planner/pull/107).
+- [x] Atualizações de versão principal do Dependabot resolvidas. Os PRs #107 e #106 foram mesclados, e o PR #105 foi substituído pela atualização para o Node.js 26 (#116 e #124).
 
 ## Como reproduzir os E2E em ambiente descartável
 
