@@ -28,7 +28,7 @@ Por que essa stack: [docs/decisions/0001-stack.md](docs/decisions/0001-stack.md)
 
 ## Rodando localmente
 
-Use Node.js 22 (a partir de 22.12), 24 ou 26+ e pnpm na versão indicada em `package.json`.
+Use Node.js 26 e pnpm na versão indicada em `package.json`.
 Com o Corepack instalado, execute `corepack enable pnpm` para que o comando
 `pnpm` use a versão do projeto. Você também pode usar `corepack pnpm` no
 lugar de `pnpm`.

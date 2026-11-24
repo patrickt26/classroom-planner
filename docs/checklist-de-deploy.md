@@ -24,7 +24,7 @@ order by t.tablename;
 ## Vercel
 
 - [x] Aplicação publicada em [classroom-planner-phi.vercel.app](https://classroom-planner-phi.vercel.app), com funções em São Paulo (`gru1`).
-- [ ] Conferir Node.js 24, o pnpm definido em `package.json` e o comando de build `pnpm build` no projeto Next.js.
+- [ ] Conferir Node.js 26, o pnpm definido em `package.json` e o comando de build `pnpm build` no projeto Next.js.
 - [ ] Configurar estas variáveis no ambiente **Production**, antes do build. Refazer o deploy após alterar qualquer valor público.
 
 | Variável | Valor em produção |
