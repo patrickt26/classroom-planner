@@ -9,6 +9,7 @@ import { type LessonPlanState, lessonPlanSchema } from "./schema";
 export async function saveLessonPlan(
   lessonId: string,
   editing: boolean,
+  fromToday: boolean,
   previous: LessonPlanState,
   form: FormData,
 ): Promise<LessonPlanState> {
@@ -54,5 +55,7 @@ export async function saveLessonPlan(
         "Não foi possível salvar o plano. Confira se a aula ainda está na agenda.",
     };
 
-  redirect(`/agenda/${id.data}/planejamento?salvo=1`);
+  redirect(
+    `/agenda/${id.data}/planejamento?salvo=1${fromToday === true ? "&origem=hoje" : ""}`,
+  );
 }

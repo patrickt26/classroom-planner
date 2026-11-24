@@ -23,10 +23,12 @@ export function CopyLessonPlanForm({
   lesson,
   previousLessons,
   copySourceId,
+  fromToday,
   timeZone,
 }: Pick<LessonPlanning, "lesson" | "previousLessons" | "timeZone"> & {
   lessonId: string;
   copySourceId: string;
+  fromToday: boolean;
 }) {
   const [subject, setSubject] = useState(lesson.subject_id);
   const [grade, setGrade] = useState(lesson.students?.grade_id ?? noGrade);
@@ -73,6 +75,7 @@ export function CopyLessonPlanForm({
       action={`/agenda/${lessonId}/planejamento`}
       className="grid min-w-0 gap-4 rounded-xl border bg-card p-4 sm:p-6"
     >
+      {fromToday && <input type="hidden" name="origem" value="hoje" />}
       <h2 className="font-semibold text-brown">Copiar plano de outra aula</h2>
       <div className="grid min-w-0 gap-3 sm:grid-cols-2">
         <div className="grid min-w-0 gap-1.5">

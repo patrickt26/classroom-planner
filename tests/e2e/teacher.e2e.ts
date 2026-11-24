@@ -2,6 +2,31 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "playwright/test";
 import { login } from "./login";
 
+test("professora abre o plano de uma aula da Hoje, salva e volta", async ({
+  page,
+}) => {
+  await login(page, "professora.exemplo@example.test", "senha-de-teste");
+  const plan = page.getByRole("link", {
+    name: "Ver plano da aula de Aluno C às 09:30",
+    exact: true,
+  });
+  await plan.click();
+  await expect(page).toHaveURL(/\/agenda\/[^/]+\/planejamento\?origem=hoje$/);
+  await expect(
+    page.getByRole("heading", { name: "Planejamento da aula" }),
+  ).toBeVisible();
+  const back = page.getByRole("link", { name: "Voltar para Hoje" });
+  await expect(back).toHaveAttribute("href", "/");
+
+  await page.getByLabel("Objetivo").fill("Comparar frações com apoio visual.");
+  await page.getByRole("button", { name: "Salvar plano" }).click();
+  await expect(page.getByText("Plano salvo.", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/planejamento\?salvo=1&origem=hoje$/);
+  await back.click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(plan).toBeVisible();
+});
+
 test("professora cadastra um aluno, realiza uma aula e recebe o pagamento", async ({
   page,
 }) => {
