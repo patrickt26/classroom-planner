@@ -52,6 +52,10 @@ content_path = "./supabase/templates/confirmation.html"
 subject = "Redefina sua senha"
 content_path = "./supabase/templates/recovery.html"
 
+[auth.email.template.invite]
+subject = "Convite para o seu espaço de professora"
+content_path = "./supabase/templates/invite.html"
+
 [edge_runtime]
 enabled = true
 policy = "per_worker"

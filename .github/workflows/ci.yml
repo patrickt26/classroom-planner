@@ -44,7 +44,20 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm audit --prod --audit-level=high
+      - name: Iniciar Supabase local com as migrações e o seed fictício
+        run: pnpm exec supabase start
+      - name: Usar as variáveis públicas do banco descartável no build
+        run: |
+          pnpm exec supabase status -o json | jq -er '
+            "NEXT_PUBLIC_SUPABASE_URL=" + (.API_URL | strings),
+            "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=" + (.PUBLISHABLE_KEY | strings)
+          ' >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SIGNUP_ENABLED=false" >> "$GITHUB_ENV"
       - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Testar os fluxos no build de produção
+        run: |
+          E2E_SUPABASE_SECRET_KEY="$(pnpm exec supabase status -o json | jq -er .SECRET_KEY)" pnpm test:e2e
 
   database:
     name: Banco de dados

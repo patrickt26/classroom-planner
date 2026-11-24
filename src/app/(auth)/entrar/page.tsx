@@ -18,8 +18,7 @@ export default async function Page({
     aviso === "link"
       ? {
           variant: "error",
-          message:
-            "O link expirou ou já foi usado. Solicite um novo link de recuperação.",
+          message: "O link expirou ou já foi usado. Solicite um novo link.",
         }
       : aviso === "acesso"
         ? {
