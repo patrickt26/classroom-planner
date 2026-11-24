@@ -59,6 +59,9 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 ## Regras obrigatórias
 
 ### Privacidade e dados
+
+Como o repositório é público, não escreva URLs de produção, referências de projeto do Supabase nem IDs de painel no repositório. Use uma descrição genérica e indique o painel onde o valor pode ser consultado.
+
 1. **Nunca** use dados reais de pessoas no código, testes, seeds, exemplos ou documentação. Use nomes inventados ("Aluno A", "Beatriz", "Professora Exemplo").
 2. Nome, marca, slogan e cabeçalho da professora vêm das **configurações do workspace** no banco. Nunca escreva o nome de uma professora real no código.
 3. **Nunca** commite segredos. Variáveis novas vão em `.env.example` sem valor. A chave `service_role` do Supabase nunca vai para o navegador.
