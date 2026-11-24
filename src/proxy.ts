@@ -1,7 +1,9 @@
+import { randomBytes } from "node:crypto";
 import type { NextRequest } from "next/server";
+import { contentSecurityPolicy } from "./lib/content-security-policy";
 import { updateSession } from "./lib/supabase/middleware";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requiresSession =
     pathname === "/" ||
@@ -18,7 +20,11 @@ export function proxy(request: NextRequest) {
     pathname === "/nova-senha" ||
     pathname === "/nova-senha/";
 
-  return updateSession(request, requiresSession);
+  const policy = contentSecurityPolicy(randomBytes(16).toString("base64"));
+  request.headers.set("Content-Security-Policy", policy);
+  const response = await updateSession(request, requiresSession);
+  response.headers.set("Content-Security-Policy", policy);
+  return response;
 }
 
 export const config = {
