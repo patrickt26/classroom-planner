@@ -199,6 +199,8 @@ begin
   from public.students where workspace_id = ws and name = 'Aluno C';
 
   insert into public.grades (workspace_id, name) values (ws, 'Reforço de alfabetização');
+  -- Unused archived subject for restoring or permanently deleting from Settings.
+  insert into public.subjects (workspace_id, name, archived_at) values (ws, 'Oficina de escrita', now());
   update public.subjects set archived_at = now() where workspace_id = ws and id = archived_subject_id;
   update public.grades set archived_at = now() where workspace_id = ws and name = '7º ano';
 

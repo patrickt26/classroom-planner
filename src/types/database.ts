@@ -759,6 +759,14 @@ export type Database = {
         };
         Returns: boolean;
       };
+      delete_catalog_item: {
+        Args: {
+          catalog_table: string;
+          item_id: string;
+          target_workspace_id: string;
+        };
+        Returns: string;
+      };
       delete_lesson: {
         Args: { target_lesson_id: string; target_workspace_id: string };
         Returns: string;
