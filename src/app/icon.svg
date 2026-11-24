@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <title>Planejamento de aulas</title>
+  <rect width="180" height="180" rx="36" fill="#2F4366"/>
+  <g fill="none" stroke="#E59D2C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="41" y="47" width="98" height="91" rx="13"/>
+    <path d="M41 75h98M65 38v18m50-18v18m-45 50 13 13 27-27"/>
+  </g>
+</svg>
