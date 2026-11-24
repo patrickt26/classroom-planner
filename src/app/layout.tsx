@@ -6,6 +6,8 @@ import "./globals.css";
 
 const arimo = Arimo({ subsets: ["latin"], variable: "--font-arimo" });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Planejamento de aulas",
   description: "Organização do dia a dia de professoras particulares.",

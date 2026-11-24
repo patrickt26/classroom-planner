@@ -1,7 +1,11 @@
-import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import {
+  unstable_doesMiddlewareMatch,
+  unstable_getResponseFromNextConfig,
+} from "next/experimental/testing/server";
 import { NextRequest } from "next/server";
-import { beforeEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
+import nextConfig from "../next.config";
 import { config, proxy } from "./proxy";
 
 const { getClaims } = vi.hoisted(() => ({ getClaims: vi.fn() }));
@@ -18,6 +22,74 @@ beforeEach(() => {
 function request(path: string) {
   return new NextRequest(new URL(path, "http://localhost:3000"));
 }
+
+afterEach(() => vi.unstubAllEnvs());
+
+test.each([
+  "/",
+  "/entrar",
+  "/agenda/nova",
+  "/_next/static/chunks/app.js",
+  "/marca.svg",
+])("sets global security headers for %s", async (path) => {
+  const { headers } = await unstable_getResponseFromNextConfig({
+    url: request(path).url,
+    nextConfig,
+  });
+  expect(headers.get("strict-transport-security")).toBe(
+    "max-age=63072000; includeSubDomains",
+  );
+  expect(headers.get("x-content-type-options")).toBe("nosniff");
+  expect(headers.get("x-frame-options")).toBe("DENY");
+  expect(headers.get("referrer-policy")).toBe(
+    "strict-origin-when-cross-origin",
+  );
+  expect(headers.get("permissions-policy")).toContain(
+    "camera=(), microphone=(), geolocation=()",
+  );
+  expect(headers.get("content-security-policy")?.split("; ")).toContain(
+    "script-src 'none'",
+  );
+});
+
+test("forwards a fresh script nonce to Next.js and sends the same policy to the browser", async () => {
+  vi.stubEnv("NODE_ENV", "production");
+  vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://project.example.test");
+  const login = request("/entrar");
+  login.headers.set("Content-Security-Policy", "script-src 'unsafe-inline'");
+  const { headers } = await proxy(login);
+  const policy = headers.get("content-security-policy");
+  expect(headers.get("x-middleware-request-content-security-policy")).toBe(
+    policy,
+  );
+  expect(policy?.split("; ")).toEqual(
+    expect.arrayContaining([
+      "default-src 'self'",
+      expect.stringMatching(
+        /^script-src 'self' 'nonce-[A-Za-z0-9+/]{22}==' 'strict-dynamic'$/,
+      ),
+      "connect-src 'self' https://project.example.test wss://project.example.test",
+      "img-src 'self' data: blob:",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+    ]),
+  );
+  const redirect = await proxy(request("/agenda"));
+  expect(redirect.headers.get("content-security-policy")).toContain("'nonce-");
+  expect(redirect.headers.get("content-security-policy")).not.toBe(policy);
+});
+
+test("allows local Supabase and React debugging during development", async () => {
+  vi.stubEnv("NODE_ENV", "development");
+  const { headers } = await proxy(request("/entrar"));
+  const policy = headers.get("content-security-policy");
+  expect(policy).toContain(
+    "connect-src 'self' http://localhost:54321 ws://localhost:54321",
+  );
+  expect(policy).toContain("'unsafe-eval'");
+});
 
 test.each([
   "/entrar",
