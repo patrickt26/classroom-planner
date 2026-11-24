@@ -29,7 +29,8 @@ begin
     jsonb_build_object('sub', teacher_id, 'email', 'professora.exemplo@example.test'), now(), now());
 
   select workspace_id into strict ws from public.memberships where user_id = teacher_id;
-  update public.workspaces set name = 'Espaço de exemplo' where workspace_id = ws
+  update public.workspaces set name = 'Espaço de exemplo', week_start = 'monday'
+  where workspace_id = ws
   returning time_zone into strict workspace_time_zone;
   current_week_start := date_trunc('week', now() at time zone workspace_time_zone)::date;
   current_local_date := (now() at time zone workspace_time_zone)::date;

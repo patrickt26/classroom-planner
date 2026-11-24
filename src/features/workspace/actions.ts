@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { FormFeedback } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
+import { Constants } from "@/types/database";
 import { requireTeacherWorkspace } from "./queries";
 
 const workspaceSchema = z.object({
   name: z.string().trim().min(1).max(100),
   brand: z.string().trim().max(100),
+  week_start: z.enum(Constants.public.Enums.week_start_day),
 });
 export async function saveWorkspace(
   _: FormFeedback,
@@ -18,7 +20,9 @@ export async function saveWorkspace(
   if (!input.success)
     return {
       variant: "error",
-      message: "Preencha o nome e use até 100 caracteres por campo.",
+      message: input.error.flatten().fieldErrors.week_start
+        ? "Escolha segunda-feira ou domingo para o início da semana."
+        : "Preencha o nome e use até 100 caracteres por campo.",
     };
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();

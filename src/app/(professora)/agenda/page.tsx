@@ -5,7 +5,10 @@ import { z } from "zod";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { agendaDateSchema } from "@/features/lessons/agenda-schema";
+import {
+  agendaDateSchema,
+  firstAgendaDate,
+} from "@/features/lessons/agenda-schema";
 import {
   addDays,
   agendaHref,
@@ -53,6 +56,11 @@ const noticeSchema = z.enum([
 
 export const metadata = { title: "Agenda | Planejamento de aulas" };
 
+function clampAgendaDate(date: string) {
+  if (date < firstAgendaDate) return firstAgendaDate;
+  return date;
+}
+
 export default async function AgendaPage({
   searchParams,
 }: {
@@ -62,19 +70,24 @@ export default async function AgendaPage({
     aluno?: string | string[];
   }>;
 }) {
-  const { time_zone } = await requireTeacherWorkspace();
+  const { time_zone, week_start } = await requireTeacherWorkspace();
   const params = await searchParams;
   const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
-  const week = weekStart(agendaDateSchema.catch(today).parse(params.semana));
-  const currentWeek = week === weekStart(today);
+  const date = agendaDateSchema.catch(today).parse(params.semana);
+  const week = weekStart(date, week_start);
+  const currentWeek = week === weekStart(today, week_start);
+  const firstDay = clampAgendaDate(week);
   const weekEnd = addDays(week, 6);
   const previous = addDays(week, -7);
   const next = addDays(week, 7);
+  const days = Array.from({ length: 7 }, (_, index) =>
+    addDays(week, index),
+  ).filter((day) => day >= firstDay);
   const studentFilter = z.uuid().safeParse(params.aluno);
   const requestedStudent = studentFilter.data?.toLowerCase();
   const students = await listAgendaStudents();
   const studentId = students.find(({ id }) => id === requestedStudent)?.id;
-  const lessons = await listWeekLessons(week, studentId);
+  const lessons = await listWeekLessons(firstDay, next, studentId);
   const notice = noticeSchema.safeParse(params.aviso);
 
   return (
@@ -82,7 +95,7 @@ export default async function AgendaPage({
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-brown">Agenda</h1>
         <Button asChild className="px-4">
-          <Link href={`/agenda/nova?data=${currentWeek ? today : week}`}>
+          <Link href={`/agenda/nova?data=${currentWeek ? today : firstDay}`}>
             <Plus aria-hidden="true" /> Nova aula
           </Link>
         </Button>
@@ -98,10 +111,14 @@ export default async function AgendaPage({
         className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-2 sm:px-3"
       >
         <div className="flex flex-1 items-center justify-between gap-2 sm:justify-start">
-          {agendaDateSchema.safeParse(previous).success && (
+          {week > firstAgendaDate && (
             <Button asChild variant="outline" size="icon">
               <Link
-                href={agendaHref(previous, undefined, studentId)}
+                href={agendaHref(
+                  clampAgendaDate(previous),
+                  undefined,
+                  studentId,
+                )}
                 aria-label="Semana anterior"
               >
                 <ChevronLeft aria-hidden="true" />
@@ -109,7 +126,7 @@ export default async function AgendaPage({
             </Button>
           )}
           <p className="text-center text-sm font-semibold sm:min-w-52">
-            {weekFormatter.formatRange(new Date(week), new Date(weekEnd))}
+            {weekFormatter.formatRange(new Date(firstDay), new Date(weekEnd))}
           </p>
           {agendaDateSchema.safeParse(next).success && (
             <Button asChild variant="outline" size="icon">
@@ -135,7 +152,7 @@ export default async function AgendaPage({
         )}
       </nav>
       <Form action="/agenda" className="grid gap-2 sm:max-w-sm">
-        <input type="hidden" name="semana" value={week} />
+        <input type="hidden" name="semana" value={firstDay} />
         <label htmlFor="agenda-student" className="text-sm font-semibold">
           Filtrar por aluno
         </label>
@@ -161,7 +178,7 @@ export default async function AgendaPage({
       </Form>
       <WeeklyAgenda
         timeZone={time_zone}
-        week={week}
+        days={days}
         today={today}
         lessons={lessons}
       />

@@ -1,7 +1,13 @@
 "use client";
 
 import { CalendarDays } from "lucide-react";
-import { type ComponentProps, useEffect, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { DayPicker } from "react-day-picker";
 import { ptBR } from "react-day-picker/locale";
 import { Button } from "@/components/ui/button";
@@ -12,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { WeekStartContext } from "@/features/workspace/week-start-context";
 
 type DatePickerProps = Pick<
   ComponentProps<typeof Input>,
@@ -64,6 +71,7 @@ export function DatePicker({
   onValueChange,
   ...inputProps
 }: DatePickerProps) {
+  const weekStart = useContext(WeekStartContext);
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] = useState(defaultValue);
   const input = useRef<HTMLInputElement>(null);
@@ -157,7 +165,7 @@ export function DatePicker({
             required
             autoFocus
             locale={ptBR}
-            weekStartsOn={1}
+            weekStartsOn={weekStart === "sunday" ? 0 : 1}
             captionLayout="dropdown"
             navLayout="after"
             reverseYears

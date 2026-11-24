@@ -34,6 +34,15 @@ export default async function SettingsPage() {
                 maxLength: 100,
                 defaultValue: workspace.brand,
               },
+              {
+                name: "week_start",
+                label: "Primeiro dia da semana",
+                defaultValue: workspace.week_start,
+                options: [
+                  { value: "monday", label: "Segunda-feira" },
+                  { value: "sunday", label: "Domingo" },
+                ],
+              },
             ]}
             submit="Salvar alterações"
           />

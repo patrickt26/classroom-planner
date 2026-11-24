@@ -76,11 +76,15 @@ export async function listAgendaStudents() {
   }
 }
 
-export async function listWeekLessons(week: string, studentId?: string) {
+export async function listWeekLessons(
+  firstDay: string,
+  nextWeek: string,
+  studentId?: string,
+) {
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
-  const start = calendarDayStart(week, workspace.time_zone);
-  const end = calendarDayStart(addDays(week, 7), workspace.time_zone);
+  const start = calendarDayStart(firstDay, workspace.time_zone);
+  const end = calendarDayStart(nextWeek, workspace.time_zone);
   const query = client
     .from("lessons")
     .select(

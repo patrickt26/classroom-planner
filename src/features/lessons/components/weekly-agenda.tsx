@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  addDays,
   formatCalendarDay,
   formatLessonTime,
   localLessonDateTime,
@@ -131,12 +130,12 @@ function LessonCard({
 }
 
 export function WeeklyAgenda({
-  week,
+  days,
   today,
   lessons,
   timeZone,
 }: {
-  week: string;
+  days: string[];
   today: string;
   lessons: WeekLesson[];
   timeZone: string;
@@ -147,8 +146,7 @@ export function WeeklyAgenda({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 xl:gap-1">
-      {Array.from({ length: 7 }, (_, index) => {
-        const date = addDays(week, index);
+      {days.map((date) => {
         const dayLessons = byDay.get(date) ?? [];
         const isToday = date === today;
 

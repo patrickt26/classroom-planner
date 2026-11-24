@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { TeacherShell } from "@/features/navigation/components/teacher-shell";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
+import { WeekStartProvider } from "@/features/workspace/week-start-context";
 
 export default async function TeacherLayout({
   children,
@@ -20,7 +21,9 @@ export default async function TeacherLayout({
         settings: "/configuracoes",
       }}
     >
-      {children}
+      <WeekStartProvider value={workspace.week_start}>
+        {children}
+      </WeekStartProvider>
     </TeacherShell>
   );
 }

@@ -8,7 +8,7 @@ export const requireTeacherWorkspace = cache(async () => {
   if (!auth?.claims.sub) redirect("/entrar");
   const { data, error } = await client
     .from("memberships")
-    .select("workspaces(workspace_id,name,brand,time_zone)")
+    .select("workspaces(workspace_id,name,brand,time_zone,week_start)")
     .eq("user_id", auth.claims.sub)
     .eq("role", "teacher")
     .order("workspace_id")

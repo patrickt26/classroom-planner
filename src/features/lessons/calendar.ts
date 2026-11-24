@@ -1,4 +1,5 @@
 import { cache } from "react";
+import type { Enums } from "@/types/database";
 
 const localDateTime = cache(
   (timeZone: string) =>
@@ -51,9 +52,13 @@ export function addDays(date: string, days: number) {
   return value.toISOString().slice(0, 10);
 }
 
-export function weekStart(date: string) {
+export function weekStart(
+  date: string,
+  firstDay: Enums<"week_start_day"> = "monday",
+) {
   const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
-  return addDays(date, -((weekday + 6) % 7));
+  const firstWeekday = firstDay === "sunday" ? 0 : 1;
+  return addDays(date, -((weekday - firstWeekday + 7) % 7));
 }
 
 export function calendarDayStart(date: string, timeZone: string) {
@@ -81,7 +86,7 @@ export function formatLessonTime(date: Date, timeZone: string) {
 
 export function agendaHref(date?: string, notice?: string, studentId?: string) {
   const query = new URLSearchParams();
-  if (date) query.set("semana", weekStart(date));
+  if (date) query.set("semana", date);
   if (notice) query.set("aviso", notice);
   if (studentId) query.set("aluno", studentId);
   return query.size ? `/agenda?${query}` : "/agenda";
