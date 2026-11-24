@@ -80,8 +80,7 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 13. Não crie botões, telas ou números falsos. Se algo ainda não funciona, não aparece.
 14. **Responsivo:** toda tela nasce mobile-first, mas precisa funcionar bem em **375px** (celular), **768px** (tablet) e **1280px** (computador).
     No computador, aproveite a largura (ex.: lista e detalhe lado a lado, conteúdo com largura máxima) em vez de esticar a tela do celular.
-    A exigência de prints por issue está suspensa até o lançamento (#19), inclusive para as issues #64 a #69, cujo rodapé ainda pede prints.
-    Durante a pausa, descreva a verificação na seção **Como testar** do PR, sem anexar prints.
+    A partir do Marco 2, inclua em cada PR que altera telas os prints das telas afetadas em 375px, 768px e 1280px. Indique os arquivos na seção **Como testar** do PR.
 
 ### Escopo
 15. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
@@ -108,11 +107,11 @@ pnpm test                      # testes de unidade
 pnpm screenshots <N> <nome>=<rota> ... # prints em 375, 768 e 1280px
 ```
 
-### Prints de tela para o lançamento
+### Prints de tela por issue
 
-A issue #19 prevê os prints de todas as telas para a documentação do lançamento. A exigência de prints por issue volta no Marco 2, após a #19.
+Use o app local com o Supabase local populado pelo seed fictício. Os prints do Marco 1 estão na [galeria de lançamento](docs/lancamento.md).
 
-Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o Supabase local populado pelo seed e o servidor já rodando em `http://localhost:3000`, execute `pnpm screenshots 19 hoje=/ alunos=/alunos`. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`.
+Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o servidor já rodando em `http://localhost:3000`, execute `pnpm screenshots <N> hoje=/ alunos=/alunos` com o número do card e as rotas afetadas. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`.
 
 ## Política de verificação
 
