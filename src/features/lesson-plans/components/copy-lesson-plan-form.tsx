@@ -87,7 +87,7 @@ export function CopyLessonPlanForm({
               setSourceId("");
             }}
           >
-            <option value={all}>Todas</option>
+            <option value={all}>Qualquer matéria</option>
             {[...subjects].map(([id, name]) => (
               <option key={id} value={id}>
                 {name}
@@ -107,7 +107,7 @@ export function CopyLessonPlanForm({
               setSourceId("");
             }}
           >
-            <option value={all}>Todas</option>
+            <option value={all}>Qualquer série</option>
             {[...grades].map(([id, name]) => (
               <option key={id} value={id}>
                 {name}

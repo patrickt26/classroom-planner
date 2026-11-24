@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id) values
   ('07000000-0000-4000-8000-000000000001'),
@@ -15,10 +15,16 @@ returning id as guardian_b \gset
 
 delete from grades where workspace_id = :'ws_b' and name = '1º ano';
 insert into grades (workspace_id, name) values (:'ws_b', 'Ano personalizado');
+update subjects set name = 'todas' where workspace_id = :'ws_b' and name = 'Todas';
 select private.populate_student_defaults(:'ws_b');
 select is(
   (select count(*) from grades where workspace_id = :'ws_b'), 10::bigint,
   'A reposição dos padrões preserva os anos existentes e preenche o ano que falta'
+);
+select is(
+  (select array_agg(name) from subjects where workspace_id = :'ws_b' and lower(trim(name)) = 'todas'),
+  array['todas']::text[],
+  'A reposição dos padrões preserva a matéria todas sem duplicá-la'
 );
 
 set local role authenticated;
@@ -31,7 +37,7 @@ select results_eq(
 );
 select results_eq(
   'select name from subjects order by name',
-  'select name from unnest(array[''Língua Portuguesa'', ''Matemática'', ''Ciências'', ''História'', ''Geografia'']) name order by name',
+  'select name from unnest(array[''Língua Portuguesa'', ''Matemática'', ''Ciências'', ''História'', ''Geografia'', ''Todas'']) name order by name',
   'A nova professora vê as disciplinas padrão do seu espaço'
 );
 select throws_ok(
