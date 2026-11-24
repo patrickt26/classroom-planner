@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const linkSchema = z.object({
   token_hash: z.string().min(1).max(512),
-  type: z.enum(["signup", "recovery"]),
+  type: z.enum(["signup", "recovery", "invite"]),
 });
 
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (link.success) {
     const client = await createClient();
     const { error } = await client.auth.verifyOtp(link.data);
-    if (!error) path = link.data.type === "recovery" ? "/nova-senha" : "/";
+    if (!error) path = link.data.type === "signup" ? "/" : "/nova-senha";
   }
   const response = new NextResponse(null, {
     status: 303,
