@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import type { Database } from "@/types/database";
 import { getSupabaseConfig } from "./config";
 
@@ -22,3 +23,9 @@ export async function createClient() {
     },
   });
 }
+
+export const getAuthenticatedUserId = cache(async () => {
+  const client = await createClient();
+  const { data } = await client.auth.getClaims();
+  return data?.claims.sub;
+});

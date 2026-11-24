@@ -5,9 +5,7 @@ import { updateSession } from "./lib/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  // /privacidade e /termos ficam fora da lista de rotas protegidas.
   const requiresSession =
-    pathname === "/" ||
     pathname === "/cobrancas" ||
     pathname.startsWith("/cobrancas/") ||
     pathname === "/alunos" ||
