@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import type { FormFeedback } from "@/components/ui/alert";
 import { AuthScreen } from "@/features/auth/components/auth-screen";
+
+export const metadata: Metadata = {
+  title: "Entrar | Planejamento de aulas",
+  description:
+    "Acesse seu espaço de professora particular para organizar alunos, agendar e planejar aulas e acompanhar cobranças.",
+};
 export default async function Page({
   searchParams,
 }: {

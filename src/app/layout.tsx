@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Planejamento de aulas",
   description: "Organização do dia a dia de professoras particulares.",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
