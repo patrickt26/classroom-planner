@@ -86,6 +86,9 @@ Organize por **funcionalidade** (`features/students`, `features/lessons`...), n�
 15. **Um PR resolve uma issue.** Não inclua mudanças fora do escopo da issue; se encontrar algo, abra uma nova issue.
 16. Leia a issue inteira (contexto, escopo, fora do escopo, critérios de aceite) antes de começar.
 
+### Versionamento
+17. Todo PR que muda algo para quem usa acrescenta uma linha em `## [Não lançado]` no `CHANGELOG.md`. Se mudar algo descrito no README, atualize o README no mesmo PR. Para fechar um marco, mova as linhas para a nova versão e atualize a versão no `package.json`. Depois do merge, crie a tag no commit do merge e a Release no GitHub.
+
 ## Identidade visual
 
 - Cores: marinho `#2F4366` (texto, botões), marrom `#8B3B08` (títulos, marca), mostarda `#E59D2C` e amarelo `#F3D58D` (**apenas** fundos, destaques e ícones; não passam contraste para texto), bege `#EBDCC5` (divisórias), fundo off-white `#FBF7F0`, texto secundário `#5B6170`.
