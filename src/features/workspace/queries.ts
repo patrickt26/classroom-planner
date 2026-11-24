@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthenticatedUserId } from "@/lib/supabase/server";
 
 export const requireTeacherWorkspace = cache(async () => {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) redirect("/entrar");
   const client = await createClient();
-  const { data: auth } = await client.auth.getClaims();
-  if (!auth?.claims.sub) redirect("/entrar");
   const { data, error } = await client
     .from("memberships")
     .select("workspaces(workspace_id,name,brand,time_zone,week_start)")
-    .eq("user_id", auth.claims.sub)
+    .eq("user_id", userId)
     .eq("role", "teacher")
     .order("workspace_id")
     .limit(1)

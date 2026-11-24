@@ -26,8 +26,6 @@ import { formatReais } from "@/features/students/form-state";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Hoje | Planejamento de aulas" };
-
 function TodayLesson({
   lesson,
   timeZone,
@@ -103,7 +101,7 @@ function TodayLesson({
   );
 }
 
-export default async function TodayPage() {
+export async function TodayPage() {
   const { workspace_id, time_zone } = await requireTeacherWorkspace();
   const date = localLessonDateTime(new Date(), time_zone).slice(0, 10);
   const [lessons, pendingNotes, pendingMakeups, pendingTotal] =

@@ -92,6 +92,7 @@ test("allows local Supabase and React debugging during development", async () =>
 });
 
 test.each([
+  "/",
   "/entrar",
   "/criar-conta",
   "/recuperar-senha",
@@ -111,7 +112,6 @@ test.each([
 });
 
 test.each([
-  "/",
   "/mais",
   "/mais/perfil",
   "/configuracoes",

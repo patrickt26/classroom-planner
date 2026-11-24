@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Arimo } from "next/font/google";
 import type { ReactNode } from "react";
+import { platformName, siteUrl } from "@/lib/platform";
 
 import "./globals.css";
 
@@ -9,7 +10,8 @@ const arimo = Arimo({ subsets: ["latin"], variable: "--font-arimo" });
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Planejamento de aulas",
+  title: platformName,
+  metadataBase: siteUrl,
   description: "Organização do dia a dia de professoras particulares.",
   robots: { index: false, follow: false },
 };
