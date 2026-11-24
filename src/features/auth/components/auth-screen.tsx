@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Alert, type FormFeedback } from "@/components/ui/alert";
+import { LegalLinks } from "@/features/legal/components/legal-links";
 import { login, recover, resetPassword, signup } from "../actions";
 import { AccountForm } from "./account-form";
 
@@ -79,6 +80,7 @@ export function AuthScreen({
           </Link>
         )}
       </nav>
+      {(mode === "login" || mode === "reset") && <LegalLinks />}
     </>
   );
 }

@@ -21,9 +21,19 @@ const fieldClassName =
   "min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring aria-invalid:border-destructive md:text-sm";
 
 const textFields = [
-  { name: "name", label: "Nome do aluno", type: "text" },
-  { name: "birth_date", label: "Data de nascimento", type: "date" },
-  { name: "school", label: "Escola", type: "text" },
+  {
+    name: "name",
+    label: "Nome do aluno",
+    type: "text",
+    hint: "Pode usar um apelido",
+  },
+  {
+    name: "birth_date",
+    label: "Data de nascimento",
+    type: "date",
+    hint: "Opcional",
+  },
+  { name: "school", label: "Escola", type: "text", hint: "Opcional" },
 ] as const;
 
 function FieldError({
@@ -66,10 +76,15 @@ export function StudentForm({
   const [isFree, setIsFree] = useState(initialValues.is_free);
   const { values, errors } = state;
 
-  function errorProps(name: keyof StudentFormValues) {
-    return errors?.[name]?.length
-      ? { "aria-invalid": true, "aria-describedby": `${name}-error` }
-      : {};
+  function fieldProps(name: keyof StudentFormValues, hintId?: string) {
+    const hasError = Boolean(errors?.[name]?.length);
+    const description = [hintId, hasError && `${name}-error`]
+      .filter(Boolean)
+      .join(" ");
+    return {
+      "aria-invalid": hasError || undefined,
+      "aria-describedby": description || undefined,
+    };
   }
 
   return (
@@ -84,7 +99,7 @@ export function StudentForm({
       <fieldset disabled={pending} className="grid min-w-0 gap-5">
         <div key={state.attempt} className="grid min-w-0 gap-5">
           <div className="grid gap-5 sm:grid-cols-2">
-            {textFields.map(({ name, label, type }) => (
+            {textFields.map(({ name, label, type, hint }) => (
               <div className="grid min-w-0 gap-2" key={name}>
                 <label htmlFor={name} className="text-sm font-semibold">
                   {label}
@@ -95,7 +110,7 @@ export function StudentForm({
                     name={name}
                     label={label}
                     defaultValue={values[name]}
-                    {...errorProps(name)}
+                    {...fieldProps(name, `${name}-hint`)}
                   />
                 ) : (
                   <Input
@@ -104,9 +119,15 @@ export function StudentForm({
                     type={type}
                     defaultValue={values[name]}
                     required={name === "name"}
-                    {...errorProps(name)}
+                    {...fieldProps(name, `${name}-hint`)}
                   />
                 )}
+                <p
+                  id={`${name}-hint`}
+                  className="text-sm text-muted-foreground"
+                >
+                  {hint}
+                </p>
                 <FieldError name={name} errors={errors?.[name]} />
               </div>
             ))}
@@ -118,7 +139,7 @@ export function StudentForm({
                 id="grade_id"
                 name="grade_id"
                 defaultValue={values.grade_id}
-                {...errorProps("grade_id")}
+                {...fieldProps("grade_id")}
               >
                 <option value="">Selecione o ano</option>
                 {grades.map(({ id, name }) => (
@@ -131,7 +152,7 @@ export function StudentForm({
             </div>
           </div>
 
-          <fieldset className="min-w-0" {...errorProps("subject_ids")}>
+          <fieldset className="min-w-0" {...fieldProps("subject_ids")}>
             <legend className="mb-1 text-sm font-semibold">Disciplinas</legend>
             <div className="flex flex-wrap gap-x-4">
               {subjects.map(({ id, name }) => (
@@ -166,7 +187,7 @@ export function StudentForm({
                 defaultValue={values.hourly_rate}
                 disabled={isFree}
                 required={!isFree}
-                {...(!isFree && errorProps("hourly_rate"))}
+                {...(!isFree && fieldProps("hourly_rate"))}
               />
               {!isFree && (
                 <FieldError name="hourly_rate" errors={errors?.hourly_rate} />
@@ -194,8 +215,11 @@ export function StudentForm({
               rows={3}
               defaultValue={values.notes}
               className={fieldClassName}
-              {...errorProps("notes")}
+              {...fieldProps("notes", "notes-hint")}
             />
+            <p id="notes-hint" className="text-sm text-muted-foreground">
+              Evite registrar diagnósticos ou informações de saúde
+            </p>
             <FieldError name="notes" errors={errors?.notes} />
           </div>
         </div>
