@@ -1,1 +1,46 @@
-<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup">Confirmar cadastro</a></p>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirme seu e-mail no Classroom Planner</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #FBF7F0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FBF7F0">
+      <tr>
+        <td align="center" style="padding: 24px 12px;">
+          <!--[if mso]>
+          <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0">
+            <tr><td>
+          <![endif]-->
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="max-width: 560px; table-layout: fixed; border: 1px solid #EBDCC5; border-radius: 12px;">
+            <tr>
+              <td style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #2F4366; font-size: 16px; line-height: 24px;">
+                <p style="margin: 0 0 16px; font-weight: bold;">Classroom Planner</p>
+                <h1 style="margin: 0 0 16px; color: #8B3B08; font-size: 24px; line-height: 30px;">Confirme seu e-mail</h1>
+                <p style="margin: 0 0 8px;">Olá!</p>
+                <p style="margin: 0 0 20px;">Confirme seu endereço de e-mail para concluir o cadastro no Classroom Planner.</p>
+                <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup" style="display: inline-block; padding: 12px 16px; background-color: #2F4366; border-radius: 8px; color: #FFFFFF; font-weight: bold; line-height: 20px; text-align: center; text-decoration: none;">Confirmar cadastro</a>
+                <p style="margin: 20px 0 4px; font-size: 14px; line-height: 20px;">Você também pode copiar e colar este link no navegador:</p>
+                <p style="margin: 0 0 16px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; word-break: break-all;">{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup</p>
+                <p style="margin: 0; font-size: 14px; line-height: 20px;">Este link expira em 1 hora e só pode ser usado uma vez. Se você não esperava este e-mail, pode ignorá-lo.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 24px; border-top: 1px solid #EBDCC5; font-family: Arial, Helvetica, sans-serif; color: #5B6170; font-size: 14px; line-height: 24px;">
+                Classroom Planner<br>
+                <a href="{{ .SiteURL }}/privacidade" style="color: #2F4366; text-decoration: underline;">Privacidade</a>
+                &nbsp;&middot;&nbsp;
+                <a href="{{ .SiteURL }}/termos" style="color: #2F4366; text-decoration: underline;">Termos</a>
+              </td>
+            </tr>
+          </table>
+          <!--[if mso]>
+            </td></tr>
+          </table>
+          <![endif]-->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

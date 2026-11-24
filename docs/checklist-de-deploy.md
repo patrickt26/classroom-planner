@@ -40,8 +40,17 @@ As chaves administrativas do Supabase e as credenciais SMTP ficam fora das vari�
 
 - [ ] Em URL Configuration, definir **Site URL** como a origem HTTPS da aplicação, sem barra final. Em **Redirect URLs**, cadastrar a URL exata dessa origem seguida de `/confirmar`.
 - [ ] Desativar **Allow new users to sign up** (`enable_signup = false`). Manter login por e-mail e senha habilitado, exigir senha mínima de oito caracteres e conferir os limites de tentativas de login e de envio de e-mails. O captcha é opcional para este piloto por convite.
-- [ ] Nos templates de e-mail, copiar o conteúdo de `supabase/templates/confirmation.html` para **Confirm signup**, de `invite.html` para **Invite user** e de `recovery.html` para **Reset password**. Preservar o tipo e o token de cada link. O convite usa a Site URL porque o envio pelo painel pode ocorrer sem uma URL de retorno. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
+- [ ] Em **Authentication → Email Templates**, colar o HTML completo e preencher o assunto de cada template conforme a tabela abaixo. Salvar os três templates. Preservar as variáveis, o token e o tipo de cada link. O convite usa a Site URL porque o envio pelo painel pode ocorrer sem uma URL de retorno. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
+
+| Template no painel | Arquivo em `supabase/templates/` | Assunto |
+| --- | --- | --- |
+| Invite user | `invite.html` | Seu convite para o Classroom Planner |
+| Confirm signup | `confirmation.html` | Confirme seu e-mail no Classroom Planner |
+| Reset password | `recovery.html` | Redefinir sua senha do Classroom Planner |
+
 - [ ] Validar o remetente em Brevo ou Resend. Em **Custom SMTP** do Supabase, preencher remetente, host, porta, usuário e senha SMTP fornecidos pelo provedor. Desativar rastreamento de cliques nesses e-mails para preservar o link de uso único. [SMTP no Supabase](https://supabase.com/docs/guides/auth/auth-smtp)
+
+Um remetente `@gmail.com` via Brevo tende a cair na aba Promoções do Gmail. Para melhorar a entregabilidade, use um domínio próprio com SPF, DKIM e DMARC quando essa infraestrutura estiver disponível. [Autenticação de domínio na Brevo](https://help.brevo.com/hc/en-us/articles/12163873383186-Authenticate-your-domain-with-Brevo-Brevo-code-DKIM-DMARC)
 
 ## Verificação na URL publicada
 
