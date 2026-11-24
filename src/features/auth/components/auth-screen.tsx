@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Alert, type FormFeedback } from "@/components/ui/alert";
+import { LegalLinks } from "@/features/legal/components/legal-links";
+import { platformName } from "@/lib/platform";
 import { login, recover, resetPassword, signup } from "../actions";
+import { signupEnabled } from "../signup-enabled";
 import { AccountForm } from "./account-form";
 
 const email = {
@@ -60,7 +63,10 @@ export function AuthScreen({
   const { title, ...form } = screens[mode];
   return (
     <>
-      <h1 className="text-3xl font-bold text-brown">{title}</h1>
+      <header className="space-y-1">
+        {mode === "login" && <p className="font-semibold">{platformName}</p>}
+        <h1 className="text-3xl font-bold text-brown">{title}</h1>
+      </header>
       {notice && <Alert {...notice} />}
       <AccountForm {...form} />
       <nav className="grid text-center text-sm font-medium underline underline-offset-4">
@@ -69,9 +75,11 @@ export function AuthScreen({
             <Link className="p-3.5" href="/recuperar-senha">
               Esqueci minha senha
             </Link>
-            <Link className="p-3.5" href="/criar-conta">
-              Criar conta
-            </Link>
+            {signupEnabled && (
+              <Link className="p-3.5" href="/criar-conta">
+                Criar conta
+              </Link>
+            )}
           </>
         ) : (
           <Link className="p-3.5" href="/entrar">
@@ -79,6 +87,7 @@ export function AuthScreen({
           </Link>
         )}
       </nav>
+      {(mode === "login" || mode === "reset") && <LegalLinks />}
     </>
   );
 }

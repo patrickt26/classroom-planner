@@ -41,6 +41,12 @@ export function LessonNoteForm({
         disabled={pending}
         className="grid min-w-0 gap-4"
       >
+        <p
+          id="lesson-note-privacy-hint"
+          className="text-sm text-muted-foreground"
+        >
+          Evite registrar diagnósticos ou informações de saúde
+        </p>
         {lessonNoteFields.map(({ name, label }) => (
           <div key={name} className="grid min-w-0 gap-1.5">
             <label htmlFor={name} className="text-sm font-semibold">
@@ -55,6 +61,7 @@ export function LessonNoteForm({
               className="min-h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
               id={name}
               name={name}
+              aria-describedby="lesson-note-privacy-hint"
               rows={2}
               maxLength={lessonNoteLimit}
               required={name === "worked_on"}

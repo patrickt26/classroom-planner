@@ -3,6 +3,7 @@ import { logout } from "@/features/auth/actions";
 import { AccountForm } from "@/features/auth/components/account-form";
 import { CatalogSection } from "@/features/catalog/components/catalog-section";
 import { listCatalogItems } from "@/features/catalog/queries";
+import { LegalLinks } from "@/features/legal/components/legal-links";
 import { saveWorkspace } from "@/features/workspace/actions";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
@@ -54,6 +55,7 @@ export default async function SettingsPage() {
           <form action={logout}>
             <Button variant="outline">Sair</Button>
           </form>
+          <LegalLinks />
         </section>
       </div>
     </>
