@@ -26,7 +26,7 @@ import { formatReais } from "@/features/students/form-state";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { cn } from "@/lib/utils";
 
-function TodayLesson({
+export function TodayLesson({
   lesson,
   timeZone,
 }: {
@@ -84,6 +84,18 @@ function TodayLesson({
               </a>
             </Button>
           )}
+          <Button asChild variant="outline">
+            <Link
+              prefetch={false}
+              href={`/agenda/${lesson.id}/planejamento?origem=hoje`}
+            >
+              Ver plano
+              <span className="sr-only">
+                {" "}
+                da aula de {student} às {startTime}
+              </span>
+            </Link>
+          </Button>
           {noteLabel && (
             <Button asChild variant="outline">
               <Link prefetch={false} href={`/agenda/${lesson.id}/registro`}>

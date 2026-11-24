@@ -17,10 +17,15 @@ export default async function LessonPlanningPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{
     copiar?: string | string[];
+    origem?: string | string[];
     salvo?: string | string[];
   }>;
 }) {
-  const [{ id }, { copiar, salvo }] = await Promise.all([params, searchParams]);
+  const [{ id }, { copiar, origem, salvo }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const fromToday = origem === "hoje";
   const { lesson, previousLessons, copy, previousNote, timeZone } =
     await getLessonPlanning(id, copiar);
   const plan = lesson.lesson_plans;
@@ -37,7 +42,9 @@ export default async function LessonPlanningPage({
     <div className="grid max-w-4xl gap-5">
       <header className="grid gap-1">
         <Button asChild variant="link" className="w-fit px-0 underline">
-          <Link href={agenda}>Voltar para a agenda</Link>
+          <Link href={fromToday ? "/" : agenda}>
+            {fromToday ? "Voltar para Hoje" : "Voltar para a agenda"}
+          </Link>
         </Button>
         <h1 className="text-3xl font-bold text-brown">Planejamento da aula</h1>
         <p className="wrap-anywhere font-semibold">
@@ -61,6 +68,7 @@ export default async function LessonPlanningPage({
           lesson={lesson}
           previousLessons={previousLessons}
           copySourceId={copy ? String(copiar) : ""}
+          fromToday={fromToday}
           timeZone={timeZone}
         />
       )}
@@ -78,7 +86,7 @@ export default async function LessonPlanningPage({
       )}
       <LessonPlanForm
         key={plan ? "saved" : copy ? String(copiar) : "new"}
-        action={saveLessonPlan.bind(null, id, Boolean(plan))}
+        action={saveLessonPlan.bind(null, id, Boolean(plan), fromToday)}
         initialValues={
           plan ??
           copy ?? { objective: "", content: "", activities: "", materials: "" }
