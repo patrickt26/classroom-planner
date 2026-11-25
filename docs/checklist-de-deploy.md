@@ -2,6 +2,8 @@
 
 Use este roteiro ao publicar a versão aprovada. As caixas marcadas registram as etapas confirmadas no lançamento do Marco 1.
 
+Se houver suspeita de exposição de dados durante ou após a publicação, siga o [roteiro de resposta a incidentes](incidente-de-dados.md).
+
 ## Banco de produção
 
 - [ ] Criar um projeto Supabase em São Paulo (`sa-east-1`). Confirmar no painel a referência do projeto de produção.
