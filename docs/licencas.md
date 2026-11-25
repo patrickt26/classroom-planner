@@ -56,3 +56,31 @@ Uma alternativa para as imagens estáticas do app é servi-las diretamente, sem 
 - **Lucide** — `lucide-react` declara ISC. A licença oficial também identifica os ícones derivados de Feather, que estão sob MIT. Ambas exigem a preservação dos avisos aplicáveis ao redistribuir cópias. [Licença oficial do Lucide e dos ícones derivados de Feather](https://github.com/lucide-icons/lucide/blob/main/LICENSE)
 
 Além da fonte e da biblioteca de ícones acima, a revisão do código não identificou logos, imagens ou textos atribuídos a terceiros na interface. Os ícones locais `src/app/icon.svg` e `src/app/apple-icon.png` mostram o mesmo calendário com um visto, nas cores do app. O SVG é composto de formas desenhadas no próprio arquivo, sem referências externas. É um desenho gerado com IA para o projeto (PR #108), com coordenadas próprias, sem copiar o arquivo do ícone `calendar-check` do Lucide; a figura (calendário com visto) é genérica, e a licença do Lucide (ISC/MIT) também permitiria o uso.
+
+## Componentes do shadcn/ui
+
+Componentes em `src/components/ui` foram copiados ou adaptados do [shadcn/ui](https://ui.shadcn.com), que é distribuído sob a licença MIT, conforme o [ADR 0002](decisions/0002-base-shadcn.md). A licença pede que o aviso abaixo acompanhe as cópias. Conferida em 25/11/2026 no [repositório oficial](https://github.com/shadcn-ui/ui/blob/main/LICENSE.md).
+
+```text
+MIT License
+
+Copyright (c) 2023 shadcn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
