@@ -2,6 +2,7 @@
 do $$
 declare
   teacher_id uuid := '60000000-0000-4000-8000-000000000001';
+  first_access_id uuid := '60000000-0000-4000-8000-000000000002';
   ws uuid;
   workspace_time_zone text;
   current_week_start date;
@@ -18,15 +19,21 @@ begin
     id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data,
     raw_user_meta_data, confirmation_token, recovery_token, email_change,
     email_change_token_new, created_at, updated_at
-  ) values (
-    teacher_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-    'professora.exemplo@example.test', extensions.crypt('senha-de-teste', extensions.gen_salt('bf')),
+  ) select
+    sample.id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+    sample.email, extensions.crypt('senha-de-teste', extensions.gen_salt('bf')),
     now(), '{"provider":"email","providers":["email"]}',
     '{}', '', '', '', '', now(), now()
-  );
+  from (values
+    (teacher_id, 'professora.exemplo@example.test'),
+    (first_access_id, 'primeiro.acesso@example.test')
+  ) as sample(id, email);
   insert into auth.identities (user_id, provider_id, provider, identity_data, created_at, updated_at)
-  values (teacher_id, teacher_id::text, 'email',
-    jsonb_build_object('sub', teacher_id, 'email', 'professora.exemplo@example.test'), now(), now());
+  select id, id::text, 'email', jsonb_build_object('sub', id, 'email', email), now(), now()
+  from auth.users where id in (teacher_id, first_access_id);
+
+  -- Mesma versão de src/features/legal/version.ts.
+  insert into public.terms_acceptances (user_id, terms_version) values (teacher_id, '2026-11-24');
 
   select workspace_id into strict ws from public.memberships where user_id = teacher_id;
   update public.workspaces set name = 'Espaço de exemplo', week_start = 'monday'

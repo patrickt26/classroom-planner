@@ -6,6 +6,10 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ## [Não lançado]
 
+### Adicionado
+
+- A professora aceita os Termos de uso e a Política de privacidade no primeiro acesso e quando a versão muda. A data e a versão do aceite ficam em Configurações (#118).
+
 ### Alterado
 
 - A política de privacidade detalha os fornecedores, o contato do encarregado e o prazo de exclusão dos dados. O rodapé da página inicial e das páginas públicas reúne os termos, a política e o contato de privacidade (#117).

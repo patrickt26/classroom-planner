@@ -16,6 +16,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/mais/") ||
     pathname === "/configuracoes" ||
     pathname.startsWith("/configuracoes/") ||
+    pathname === "/aceitar-termos" ||
+    pathname === "/aceitar-termos/" ||
     pathname === "/nova-senha" ||
     pathname === "/nova-senha/";
 

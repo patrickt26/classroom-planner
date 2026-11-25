@@ -47,16 +47,19 @@ function parseTargets(routes) {
   return targets;
 }
 
-async function login(page) {
+async function login(page, firstAccess = false) {
   const loginUrl = `${baseUrl}/entrar`;
   await page.goto(loginUrl);
-  // Conta fictícia de supabase/seed.sql.
-  await page
-    .getByLabel("E-mail", { exact: true })
-    .fill("professora.exemplo@example.test");
+  // Contas fictícias de supabase/seed.sql.
+  const email = firstAccess
+    ? "primeiro.acesso@example.test"
+    : "professora.exemplo@example.test";
+  await page.getByLabel("E-mail", { exact: true }).fill(email);
   await page.getByLabel("Senha", { exact: true }).fill("senha-de-teste");
   await Promise.all([
-    page.waitForURL(`${baseUrl}/`),
+    page.waitForURL(
+      new URL(firstAccess ? "/aceitar-termos" : "/", baseUrl).href,
+    ),
     page.getByRole("button", { name: "Entrar", exact: true }).click(),
   ]).catch((cause) => {
     throw new Error(
@@ -93,6 +96,11 @@ async function capture(
         );
       }
 
+      if (url.pathname === "/aceitar-termos") {
+        await page
+          .getByRole("heading", { name: "Aceitar termos", exact: true })
+          .waitFor();
+      }
       if (release || publicPages) {
         await page
           .getByRole("heading", {
@@ -142,7 +150,7 @@ async function captureScreenshots([issue, ...routes]) {
     throw new Error(usage);
   }
 
-  const targets = parseTargets(routes);
+  let targets = parseTargets(routes);
   const loginUrl = `${baseUrl}/entrar`;
   await fetch(loginUrl, {
     method: "HEAD",
@@ -167,6 +175,16 @@ async function captureScreenshots([issue, ...routes]) {
     }
 
     if (!release) {
+      const firstAccess = targets.filter(
+        ({ url }) => url.pathname === "/aceitar-termos",
+      );
+      if (!publicPages && firstAccess.length > 0) {
+        await login(page, true);
+        await capture(page, firstAccess, `issue-${issue}`);
+        targets = targets.filter((target) => !firstAccess.includes(target));
+        if (targets.length === 0) return;
+        await page.context().clearCookies();
+      }
       if (!publicPages) await login(page);
       await capture(page, targets, `issue-${issue}`, { publicPages });
       return;

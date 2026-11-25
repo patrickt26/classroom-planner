@@ -4,15 +4,18 @@ import { AccountForm } from "@/features/auth/components/account-form";
 import { CatalogSection } from "@/features/catalog/components/catalog-section";
 import { listCatalogItems } from "@/features/catalog/queries";
 import { LegalLinks } from "@/features/legal/components/legal-links";
+import { getCurrentAcceptance } from "@/features/legal/queries";
 import { saveWorkspace } from "@/features/workspace/actions";
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 
 export default async function SettingsPage() {
-  const [workspace, subjects, grades] = await Promise.all([
+  const [workspace, subjects, grades, acceptance] = await Promise.all([
     requireTeacherWorkspace(),
     listCatalogItems("subjects"),
     listCatalogItems("grades"),
+    getCurrentAcceptance(),
   ]);
+  const acceptedAt = acceptance && new Date(acceptance.accepted_at);
   return (
     <>
       <h1 className="mb-7 text-3xl font-bold text-brown">Configurações</h1>
@@ -56,6 +59,23 @@ export default async function SettingsPage() {
             <Button variant="outline">Sair</Button>
           </form>
           <footer className="border-t pt-2 text-muted-foreground">
+            {acceptance && acceptedAt && (
+              <p className="text-sm">
+                Termos aceitos em{" "}
+                <time dateTime={acceptance.accepted_at}>
+                  {acceptedAt.toLocaleDateString("pt-BR", {
+                    timeZone: workspace.time_zone,
+                  })}{" "}
+                  às{" "}
+                  {acceptedAt.toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: workspace.time_zone,
+                  })}
+                </time>{" "}
+                (versão {acceptance.terms_version})
+              </p>
+            )}
             <LegalLinks />
           </footer>
         </section>
