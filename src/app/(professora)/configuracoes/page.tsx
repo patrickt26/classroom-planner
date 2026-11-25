@@ -16,6 +16,7 @@ export default async function SettingsPage() {
     getCurrentAcceptance(),
   ]);
   const acceptedAt = acceptance && new Date(acceptance.accepted_at);
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
   return (
     <>
       <h1 className="mb-7 text-3xl font-bold text-brown">Configurações</h1>
@@ -78,6 +79,35 @@ export default async function SettingsPage() {
             )}
             <LegalLinks />
           </footer>
+        </section>
+        <section className="grid gap-4 rounded-xl border bg-card p-5 sm:p-7">
+          <h2 className="text-xl font-semibold">Seus dados</h2>
+          <p className="text-sm text-muted-foreground">
+            O arquivo JSON inclui os alunos, responsáveis, aulas, registros
+            pedagógicos, cobranças e outros dados do seu espaço, além do e-mail
+            da conta e da data do aceite dos termos.
+          </p>
+          <Button asChild variant="outline" className="justify-self-start">
+            <a href="/configuracoes/dados" download>
+              Baixar meus dados
+            </a>
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            {contactEmail ? (
+              <>
+                Para excluir a conta e todos os dados, escreva para{" "}
+                <a
+                  className="inline-flex min-h-11 max-w-full items-center break-all underline underline-offset-4"
+                  href={`mailto:${contactEmail}`}
+                >
+                  {contactEmail}
+                </a>
+                .
+              </>
+            ) : (
+              "Para excluir a conta e todos os dados, solicite o contato a quem enviou seu convite para o piloto."
+            )}
+          </p>
         </section>
       </div>
     </>
