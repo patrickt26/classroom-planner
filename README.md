@@ -6,7 +6,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 
 ## O que o app faz hoje
 
-- **Acesso por convite.** A professora entra em seu próprio espaço de trabalho e pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
+- **Acesso por convite.** Após definir a senha, a professora aceita os Termos de uso e a Política de privacidade para entrar no espaço. O app solicita novo aceite quando a versão muda. A data e a versão aceitas ficam em Configurações. A professora pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
 - **Hoje.** Veja as aulas do dia, abra o planejamento direto pelo cartão da aula e confira os registros, as reposições e as cobranças pendentes.
 - **Alunos e responsáveis.** Cadastre, encontre, edite e arquive alunos, mantenha os vínculos com responsáveis e acompanhe o histórico de aulas na ficha do aluno.
 - **Agenda.** Agende aulas avulsas ou semanais em vários dias, filtre por aluno, veja avisos de conflito de horários e agende reposições.
@@ -50,6 +50,8 @@ Abra [localhost:3000](http://localhost:3000) para ver a apresentação do app. E
 
 O seed cria as datas de exemplo em relação ao dia, à semana e ao mês em que é aplicado.
 
+Para testar o primeiro acesso, entre com `primeiro.acesso@example.test` e a mesma senha fictícia. Essa conta começa com o aceite pendente. A conta principal já aceitou a versão vigente.
+
 - **Hoje:** aulas no dia da carga e pendências de registro, reposição e cobrança.
 - **Alunos:** quatro fichas fictícias com responsáveis vinculados, incluindo um responsável compartilhado. A linha do tempo mostra exemplos de falta, reposição realizada e registro pós-aula. Abra o registro para consultar o histórico de edições.
 - **Agenda:** aulas avulsas e recorrentes, presenciais e online, e uma reposição pendente. A semana anterior tem exemplos de aula realizada, cancelada e com falta, além de aulas com planejamento e registro.
@@ -68,7 +70,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje e o fluxo de cadastro de aluno até o pagamento da aula.
+O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o aceite inicial e de uma nova versão dos termos, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje e o fluxo de cadastro de aluno até o pagamento da aula.
 
 ### Migrações e tipos
 

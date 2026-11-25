@@ -1,7 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, expect, test, vi } from "vitest";
 import { LandingPage } from "../../features/landing/components/landing-page";
-import { LegalLinks } from "../../features/legal/components/legal-links";
 import { legalVersion } from "../../features/legal/version";
 import PublicLayout from "./layout";
 import PrivacyPage from "./privacidade/page";
@@ -49,15 +48,6 @@ test.each([
     /href="mailto:privacidade@example.test"[^>]*>Contato de privacidade<\/a>/,
   );
   expect(footer).not.toContain("Ao entrar, você concorda");
-});
-
-test("exibe o aviso de concordância somente quando solicitado pelo login", () => {
-  expect(renderToStaticMarkup(<LegalLinks showLoginAgreement />)).toContain(
-    "Ao entrar, você concorda",
-  );
-  expect(renderToStaticMarkup(<LegalLinks />)).not.toContain(
-    "Ao entrar, você concorda",
-  );
 });
 
 test("exibe o nome e o e-mail configurados para o encarregado", () => {

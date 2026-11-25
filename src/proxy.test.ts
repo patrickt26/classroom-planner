@@ -118,6 +118,7 @@ test.each([
   "/configuracoes/perfil",
   "/cobrancas",
   "/nova-senha",
+  "/aceitar-termos",
   "/alunos",
   "/alunos/novo",
   "/alunos/id/editar",

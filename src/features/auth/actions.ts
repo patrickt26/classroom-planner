@@ -112,7 +112,7 @@ export async function resetPassword(
       message:
         "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.",
     };
-  redirect("/");
+  redirect("/aceitar-termos");
 }
 
 export async function logout() {
