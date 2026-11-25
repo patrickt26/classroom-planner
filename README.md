@@ -12,7 +12,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 - **Agenda.** Agende aulas avulsas ou semanais em vários dias, filtre por aluno, veja avisos de conflito de horários e agende reposições.
 - **Planejamento e registro pós-aula.** Crie um plano ou copie de outra aula, consulte os próximos passos da última aula com registro e registre o que foi trabalhado, com histórico de edições.
 - **Cobranças.** Aulas pagas por hora geram cobranças ao serem realizadas. Confira valores a receber, em atraso e recebidos no mês, registre pagamentos de uma ou várias aulas e faça estornos.
-- **Configurações.** Ajuste o nome e a marca do espaço, escolha quando a semana começa e gerencie matérias e séries.
+- **Configurações.** Ajuste o nome e a marca do espaço, escolha quando a semana começa e gerencie matérias e séries. Em **Seus dados**, baixe um JSON com os dados cadastrados e da conta ou consulte o contato para pedir a exclusão por e-mail.
 
 A página inicial apresenta a plataforma. O rodapé da página inicial e das páginas públicas reúne o contato de privacidade e os links para a [Política de Privacidade](src/app/(publico)/privacidade/page.tsx) e os [Termos de Uso](src/app/(publico)/termos/page.tsx).
 
@@ -38,7 +38,7 @@ pnpm exec supabase start
 pnpm exec supabase status
 ```
 
-Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_SUPABASE_URL` com `API_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` com `PUBLISHABLE_KEY` da instância local. O Studio e o Analytics estão desativados na configuração local.
+Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_SUPABASE_URL` com `API_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` com `PUBLISHABLE_KEY` da instância local. Para exibir o contato de privacidade localmente, use um endereço fictício, como `privacidade@example.test`, em `NEXT_PUBLIC_CONTACT_EMAIL`. O Studio e o Analytics estão desativados na configuração local.
 
 ```sh
 pnpm dev
@@ -70,7 +70,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o aceite inicial e de uma nova versão dos termos, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje e o fluxo de cadastro de aluno até o pagamento da aula.
+O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o aceite inicial e de uma nova versão dos termos, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje, o fluxo de cadastro de aluno até o pagamento da aula e a exportação isolada dos dados de duas professoras fictícias.
 
 ### Migrações e tipos
 

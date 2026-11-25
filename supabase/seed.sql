@@ -3,6 +3,8 @@ do $$
 declare
   teacher_id uuid := '60000000-0000-4000-8000-000000000001';
   first_access_id uuid := '60000000-0000-4000-8000-000000000002';
+  export_teacher_id uuid := '60000000-0000-4000-8000-000000000003';
+  export_ws uuid;
   ws uuid;
   workspace_time_zone text;
   current_week_start date;
@@ -26,14 +28,30 @@ begin
     '{}', '', '', '', '', now(), now()
   from (values
     (teacher_id, 'professora.exemplo@example.test'),
-    (first_access_id, 'primeiro.acesso@example.test')
+    (first_access_id, 'primeiro.acesso@example.test'),
+    (export_teacher_id, 'professora.exportacao@example.test')
   ) as sample(id, email);
   insert into auth.identities (user_id, provider_id, provider, identity_data, created_at, updated_at)
   select id, id::text, 'email', jsonb_build_object('sub', id, 'email', email), now(), now()
-  from auth.users where id in (teacher_id, first_access_id);
+  from auth.users where id in (teacher_id, first_access_id, export_teacher_id);
 
   -- Mesma versão de src/features/legal/version.ts.
-  insert into public.terms_acceptances (user_id, terms_version) values (teacher_id, '2026-11-24');
+  insert into public.terms_acceptances (user_id, terms_version)
+  values (teacher_id, '2026-11-24'), (export_teacher_id, '2026-11-24');
+
+  select workspace_id into strict export_ws from public.memberships where user_id = export_teacher_id;
+  insert into public.students (workspace_id, name, hourly_rate, is_free, notes)
+  values (export_ws, 'Aluno do segundo espaço', 0, true, 'Observação fictícia do segundo espaço.');
+
+  insert into public.guardians (workspace_id, name)
+  values (export_ws, 'Responsável do segundo espaço');
+  insert into public.student_guardians (workspace_id, student_id, guardian_id, relationship, is_financial_guardian)
+  select export_ws, students.id, guardians.id, 'Tutor', true
+  from public.students
+  join public.guardians using (workspace_id)
+  where students.workspace_id = export_ws
+    and students.name = 'Aluno do segundo espaço'
+    and guardians.name = 'Responsável do segundo espaço';
 
   select workspace_id into strict ws from public.memberships where user_id = teacher_id;
   update public.workspaces set name = 'Espaço de exemplo', week_start = 'monday'
