@@ -8,7 +8,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 
 - **Acesso por convite.** A professora entra em seu próprio espaço de trabalho e pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
 - **Hoje.** Veja as aulas do dia, abra o planejamento direto pelo cartão da aula e confira os registros, as reposições e as cobranças pendentes.
-- **Alunos e responsáveis.** Cadastre, encontre, edite e arquive alunos, mantenha os vínculos com responsáveis e acompanhe o histórico de aulas na ficha do aluno.
+- **Alunos e responsáveis.** Confirme a autorização do responsável ao cadastrar um aluno. Na ficha, consulte a data da autorização, registre-a para alunos antigos e acompanhe o histórico de aulas. Você também pode buscar, editar e arquivar alunos e manter os vínculos com responsáveis.
 - **Agenda.** Agende aulas avulsas ou semanais em vários dias, filtre por aluno, veja avisos de conflito de horários e agende reposições.
 - **Planejamento e registro pós-aula.** Crie um plano ou copie de outra aula, consulte os próximos passos da última aula com registro e registre o que foi trabalhado, com histórico de edições.
 - **Cobranças.** Aulas pagas por hora geram cobranças ao serem realizadas. Confira valores a receber, em atraso e recebidos no mês, registre pagamentos de uma ou várias aulas e faça estornos.

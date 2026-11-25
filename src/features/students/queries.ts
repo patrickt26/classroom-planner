@@ -69,7 +69,7 @@ export async function getStudent(id: string) {
   const { data, error } = await client
     .from("students")
     .select(
-      "id, name, birth_date, grade_id, school, hourly_rate, is_free, notes, archived_at, grades(name), student_subjects(subject_id, subjects(name))",
+      "id, name, birth_date, grade_id, school, hourly_rate, is_free, notes, archived_at, guardian_consent_at, grades(name), student_subjects(subject_id, subjects(name))",
     )
     .eq("workspace_id", workspace.workspace_id)
     .eq("id", studentId.data)

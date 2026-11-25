@@ -104,3 +104,11 @@ export const studentFormSchema = z
     },
   )
   .pipe(z.object({ student: studentSchema, subject_ids: z.array(z.uuid()) }));
+
+export const studentRegistrationFormSchema = studentFormSchema.and(
+  z.object({
+    guardian_consent_confirmed: z.literal(true, {
+      error: "Confirme a autorização do responsável para cadastrar o aluno.",
+    }),
+  }),
+);

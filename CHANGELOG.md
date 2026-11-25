@@ -6,6 +6,10 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ## [Não lançado]
 
+### Adicionado
+
+- O cadastro de aluno exige a confirmação da autorização do responsável. A ficha mostra a data e permite registrar a autorização de alunos antigos (#119).
+
 ### Alterado
 
 - A política de privacidade detalha os fornecedores, o contato do encarregado e o prazo de exclusão dos dados. O rodapé da página inicial e das páginas públicas reúne os termos, a política e o contato de privacidade (#117).

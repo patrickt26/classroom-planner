@@ -592,6 +592,7 @@ export type Database = {
           birth_date: string | null;
           created_at: string;
           grade_id: string | null;
+          guardian_consent_at: string | null;
           hourly_rate: number;
           id: string;
           is_free: boolean;
@@ -607,6 +608,7 @@ export type Database = {
           birth_date?: string | null;
           created_at?: string;
           grade_id?: string | null;
+          guardian_consent_at?: string | null;
           hourly_rate: number;
           id?: string;
           is_free?: boolean;
@@ -621,6 +623,7 @@ export type Database = {
           birth_date?: string | null;
           created_at?: string;
           grade_id?: string | null;
+          guardian_consent_at?: string | null;
           hourly_rate?: number;
           id?: string;
           is_free?: boolean;
@@ -812,6 +815,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      record_guardian_consent: {
+        Args: { target_student_id: string; target_workspace_id: string };
+        Returns: boolean;
+      };
       record_payment: {
         Args: {
           lesson_ids: string[];
@@ -864,6 +871,7 @@ export type Database = {
         Args: {
           existing_guardian_id?: string;
           financial_guardian?: boolean;
+          guardian_consent_confirmed?: boolean;
           guardian_name?: string;
           guardian_phone?: string;
           guardian_relationship?: string;

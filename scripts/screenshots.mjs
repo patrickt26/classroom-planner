@@ -7,7 +7,7 @@ const baseUrl = "http://localhost:3000";
 const widths = [375, 768, 1280];
 const height = 900;
 const usage =
-  "Uso: pnpm screenshots lancamento ou pnpm screenshots <N> [--public] <nome>=<rota> ...";
+  "Uso: pnpm screenshots lancamento ou pnpm screenshots <N> [--public | --full] <nome>=<rota> ...";
 const hideDevOverlay = "nextjs-portal { display: none !important; }";
 // Position fixed navigation against the full page so it cannot cover content.
 const releaseStyle = `
@@ -70,7 +70,7 @@ async function capture(
   page,
   targets,
   folder,
-  { release = false, publicPages = false } = {},
+  { release = false, publicPages = false, full = false } = {},
 ) {
   const directory = fileURLToPath(
     new URL(`../docs/screenshots/${folder}/`, import.meta.url),
@@ -115,15 +115,17 @@ async function capture(
             `A tela ${name} contém um endereço fora do domínio de teste.`,
           );
         }
+      } else {
+        await page.getByRole("heading", { level: 1 }).waitFor();
       }
 
       const filename = `${name}-${width}.png`;
       await page.screenshot({
         path: join(directory, filename),
-        fullPage: release || publicPages,
+        fullPage: release || publicPages || full,
         animations: "disabled",
         caret: release ? "hide" : "initial",
-        style: release ? releaseStyle : hideDevOverlay,
+        style: release || full ? releaseStyle : hideDevOverlay,
       });
       console.log(`docs/screenshots/${folder}/${filename}`);
     }
@@ -133,7 +135,8 @@ async function capture(
 async function captureScreenshots([issue, ...routes]) {
   const release = issue === "lancamento";
   const publicPages = !release && routes[0] === "--public";
-  if (publicPages) routes.shift();
+  const full = !release && routes[0] === "--full";
+  if (publicPages || full) routes.shift();
   if (
     release
       ? routes.length > 0
@@ -168,7 +171,7 @@ async function captureScreenshots([issue, ...routes]) {
 
     if (!release) {
       if (!publicPages) await login(page);
-      await capture(page, targets, `issue-${issue}`, { publicPages });
+      await capture(page, targets, `issue-${issue}`, { publicPages, full });
       return;
     }
 

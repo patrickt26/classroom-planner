@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import {
@@ -9,7 +10,7 @@ import {
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { StudentFormState, StudentFormValues } from "./form-state";
-import { studentFormSchema } from "./schema";
+import { studentFormSchema, studentRegistrationFormSchema } from "./schema";
 
 const registrationGuardianSchema = z.discriminatedUnion("mode", [
   guardianLinkSchema.extend({
@@ -37,6 +38,7 @@ export async function saveStudent(
     school: readText(form, "school"),
     hourly_rate: readText(form, "hourly_rate"),
     is_free: form.get("is_free") === "on",
+    guardian_consent_confirmed: form.get("guardian_consent_confirmed") === "on",
     notes: readText(form, "notes"),
     subject_ids: form
       .getAll("subject_ids")
@@ -47,7 +49,10 @@ export async function saveStudent(
   const state: StudentFormState = { values, attempt };
   if (!studentId.success) return { ...state, message: "Cadastro inválido." };
 
-  const input = studentFormSchema.safeParse(values);
+  const schema = studentId.data
+    ? studentFormSchema
+    : studentRegistrationFormSchema;
+  const input = schema.safeParse(values);
   if (!input.success) state.errors = z.flattenError(input.error).fieldErrors;
 
   let guardian: z.output<typeof registrationGuardianSchema> | undefined;
@@ -95,6 +100,7 @@ export async function saveStudent(
     student_notes: student.notes ?? undefined,
     selected_subject_ids: subject_ids,
     ...(guardian && {
+      guardian_consent_confirmed: values.guardian_consent_confirmed,
       existing_guardian_id:
         guardian.mode === "existing" ? guardian.id : undefined,
       guardian_name: guardian.mode === "new" ? guardian.name : undefined,
@@ -147,6 +153,22 @@ export async function saveStudent(
       ? "/alunos?situacao=arquivados&aviso=salvo"
       : "/alunos?aviso=salvo",
   );
+}
+
+export async function recordGuardianConsent(id: string): Promise<string> {
+  const studentId = z.uuid().safeParse(id);
+  if (!studentId.success) return "Cadastro inválido.";
+
+  const workspace = await requireTeacherWorkspace();
+  const client = await createClient();
+  const { data, error } = await client.rpc("record_guardian_consent", {
+    target_workspace_id: workspace.workspace_id,
+    target_student_id: studentId.data,
+  });
+  if (error || !data)
+    return "Não foi possível registrar a autorização. Tente novamente.";
+  revalidatePath(`/alunos/${studentId.data}`);
+  return "";
 }
 
 export async function changeStudentStatus(

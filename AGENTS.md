@@ -118,6 +118,7 @@ pnpm screenshots <N> <nome>=<rota> ... # prints em 375, 768 e 1280px
 Use o app local com o Supabase local populado pelo seed fictício. Os prints do Marco 1 estão na [galeria de lançamento](docs/lancamento.md).
 
 Instale o navegador com `pnpm exec playwright install chromium` na primeira execução ou após atualizar o Playwright. Com o servidor já rodando em `http://localhost:3000`, execute `pnpm screenshots <N> hoje=/ alunos=/alunos` com o número do card e as rotas afetadas. O script faz login com a professora fictícia do seed e salva os arquivos em `docs/screenshots/issue-<N>/<nome>-<largura>.png`.
+Para capturar a página autenticada inteira, use `--full` antes das rotas, como em `pnpm screenshots <N> --full alunos=/alunos`.
 
 ## Política de verificação
 

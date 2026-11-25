@@ -39,15 +39,15 @@ begin
   select id into strict math_subject_id from public.subjects
   where workspace_id = ws and name = 'Matemática';
 
-  insert into public.students (workspace_id, name, grade_id, hourly_rate, is_free)
-  select ws, sample.name, grades.id, sample.rate, sample.is_free
+  insert into public.students (workspace_id, name, grade_id, hourly_rate, is_free, guardian_consent_at)
+  select ws, sample.name, grades.id, sample.rate, sample.is_free, sample.consent_at
   from (values
-    ('Aluno A', '2º ano', 8000, false),
-    ('Aluno B', '4º ano', 0, true),
-    ('Aluno C', '7º ano', 9050, false),
+    ('Aluno A', '2º ano', 8000, false, now()),
+    ('Aluno B', '4º ano', 0, true, null),
+    ('Aluno C', '7º ano', 9050, false, now()),
     -- Two subjects and no pending items before scheduling from the student page.
-    ('Aluno D', '5º ano', 8000, false)
-  ) as sample(name, grade, rate, is_free)
+    ('Aluno D', '5º ano', 8000, false, null)
+  ) as sample(name, grade, rate, is_free, consent_at)
   join public.grades on grades.workspace_id = ws and grades.name = sample.grade;
 
   insert into public.student_subjects (workspace_id, student_id, subject_id)

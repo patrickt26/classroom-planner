@@ -17,10 +17,12 @@ insert into subjects (workspace_id, name) values (:'other_ws', 'Matéria de exem
 set local request.jwt.claim.sub = '63000000-0000-4000-8000-000000000001';
 insert into grades (workspace_id, name) values (:'ws', 'Série de exemplo') returning id as grade \gset
 insert into subjects (workspace_id, name) values (:'ws', 'Matéria de exemplo') returning id as subject \gset
+reset role;
 insert into students (workspace_id, name, grade_id, hourly_rate)
 values (:'ws', 'Aluno A', :'grade', 1000) returning id as student \gset
 insert into students (workspace_id, name, hourly_rate)
 values (:'ws', 'Aluno B', 1000) returning id as other_student \gset
+set local role authenticated;
 insert into student_subjects (workspace_id, student_id, subject_id) values (:'ws', :'student', :'subject');
 insert into lessons (workspace_id, student_id, subject_id, starts_at, duration_minutes, modality)
 values (:'ws', :'student', :'subject', now(), 60, 'presencial') returning id as lesson \gset

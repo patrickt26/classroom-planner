@@ -58,8 +58,10 @@ insert into grades (workspace_id, name) values (:'ws', 'Série do aluno') return
 insert into subjects (workspace_id, name) values (:'ws', 'Matéria do aluno') returning id as linked \gset
 insert into subjects (workspace_id, name) values (:'ws', 'Matéria da aula') returning id as taught \gset
 insert into subjects (workspace_id, name) values (:'ws', 'Matéria da recorrência') returning id as recurring \gset
+reset role;
 insert into students (workspace_id, name, grade_id, hourly_rate)
 values (:'ws', 'Aluno A', :'grade', 1000) returning id as student \gset
+set local role authenticated;
 insert into student_subjects (workspace_id, student_id, subject_id) values (:'ws', :'student', :'linked');
 insert into lessons (workspace_id, student_id, subject_id, starts_at, duration_minutes, modality, status)
 values (:'ws', :'student', :'taught', now() - interval '1 month', 60, 'presencial', 'falta') returning id as lesson \gset

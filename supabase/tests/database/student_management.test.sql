@@ -41,9 +41,10 @@ select results_eq(
   'A nova professora vê as disciplinas padrão do seu espaço'
 );
 select throws_ok(
-  format('select save_student(%L, ''Sem responsável'', 100, false, ''{}'')', :'ws_a'),
+  format('select save_student(%L, ''Sem responsável'', 100, false, ''{}'', guardian_consent_confirmed => true)', :'ws_a'),
   '23514', 'student_guardian_required', 'A RPC recusa novo aluno sem responsável'
 );
+reset role;
 select throws_ok(
   format(
     'do $test$ begin insert into students (workspace_id, name, hourly_rate) values (%L, ''Sem responsável'', 100); set constraints student_requires_guardian immediate; end $test$',
@@ -51,11 +52,12 @@ select throws_ok(
   ),
   '23514', 'student_guardian_required', 'Uma gravação direta também exige responsável antes do commit'
 );
+set local role authenticated;
 select ok(
   save_student(
     :'ws_a', 'Aluno A', 8050, false, array[:'math_a'::uuid],
     guardian_name => 'Responsável A', guardian_phone => '+5511999900010',
-    guardian_relationship => 'Mãe', financial_guardian => true
+    guardian_relationship => 'Mãe', financial_guardian => true, guardian_consent_confirmed => true
   ),
   'Cadastra aluno com disciplina e novo responsável'
 );
@@ -71,7 +73,7 @@ select ok(
   'O novo contato é vinculado como responsável financeiro'
 );
 select ok(
-  save_student(:'ws_a', 'Aluno B', 8000, false, '{}'::uuid[], existing_guardian_id => :'guardian_a', guardian_relationship => 'Mãe'),
+  save_student(:'ws_a', 'Aluno B', 8000, false, '{}'::uuid[], existing_guardian_id => :'guardian_a', guardian_relationship => 'Mãe', guardian_consent_confirmed => true),
   'Cadastra outro aluno reaproveitando o mesmo contato'
 );
 select id as student_b from students where workspace_id = :'ws_a' and name = 'Aluno B' \gset
@@ -81,7 +83,7 @@ select is(
 );
 select throws_ok(
   format(
-    'select save_student(%L, ''Aluno inválido'', 8000, false, ''{}'', existing_guardian_id => %L, guardian_relationship => ''Tutor'')',
+    'select save_student(%L, ''Aluno inválido'', 8000, false, ''{}'', existing_guardian_id => %L, guardian_relationship => ''Tutor'', guardian_consent_confirmed => true)',
     :'ws_a', :'guardian_b'
   ),
   '23503', 'student_guardian_unavailable', 'Recusa um contato de outro espaço'
@@ -89,7 +91,7 @@ select throws_ok(
 select is_empty('select 1 from students where name = ''Aluno inválido''', 'A falha não deixa aluno sem vínculo');
 select throws_ok(
   format(
-    'select save_student(%L, ''Aluno inválido'', 8000, false, array[%L::uuid], guardian_name => ''Responsável inválido'', guardian_relationship => ''Tutor'')',
+    'select save_student(%L, ''Aluno inválido'', 8000, false, array[%L::uuid], guardian_name => ''Responsável inválido'', guardian_relationship => ''Tutor'', guardian_consent_confirmed => true)',
     :'ws_a', :'math_b'
   ),
   '23503', null, 'Uma disciplina inválida desfaz toda a criação'
@@ -114,10 +116,10 @@ select is(
 select is_empty('select 1 from student_subjects', 'Remover a seleção remove os vínculos anteriores');
 select throws_ok(
   format(
-    'select save_student(%L, ''Aluno B'', 100, false, ''{}'', guardian_name => ''Responsável B'', guardian_relationship => ''Tutor'')',
+    'select save_student(%L, ''Aluno B'', 100, false, ''{}'', guardian_name => ''Responsável B'', guardian_relationship => ''Tutor'', guardian_consent_confirmed => true)',
     :'ws_b'
   ),
-  '42501', null, 'A função respeita a RLS na criação de aluno'
+  '42501', null, 'A função exige uma professora do espaço na criação de aluno'
 );
 
 select * from finish();

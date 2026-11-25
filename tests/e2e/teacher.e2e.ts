@@ -45,6 +45,11 @@ test("professora cadastra um aluno, realiza uma aula e recebe o pagamento", asyn
     await page.getByLabel("Valor por hora (R$)").fill("80,00");
     await page.getByLabel("Nome do responsável").fill("Responsável de exemplo");
     await page.getByLabel("Parentesco ou vínculo").fill("Mãe");
+    const consent = page.getByLabel(
+      "Tenho a autorização de um dos pais ou do responsável para cadastrar estes dados",
+    );
+    await expect(consent).not.toBeChecked();
+    await consent.check();
     await page.getByRole("button", { name: "Salvar aluno" }).click();
     await expect(
       page.getByText("Aluno cadastrado.", { exact: true }),

@@ -11,7 +11,10 @@ import { localLessonDateTime } from "@/features/lessons/calendar";
 import { PaymentForm } from "@/features/payments/components/payment-form";
 import { listStudentRecurrences } from "@/features/recurrences/queries";
 import { weeklySchedule } from "@/features/recurrences/schedule";
-import { BackToStudents } from "@/features/students/components/student-form";
+import {
+  BackToStudents,
+  GuardianConsentForm,
+} from "@/features/students/components/student-form";
 import { formatReais } from "@/features/students/form-state";
 import { getStudent } from "@/features/students/queries";
 import { StudentTimeline } from "@/features/timeline/components/student-timeline";
@@ -228,6 +231,21 @@ export default async function StudentPage({
                 </Detail>
               )}
             </dl>
+            {student.guardian_consent_at ? (
+              <p className="text-sm text-muted-foreground">
+                Autorização registrada em{" "}
+                <time dateTime={student.guardian_consent_at}>
+                  {new Date(student.guardian_consent_at).toLocaleDateString(
+                    "pt-BR",
+                    {
+                      timeZone: time_zone,
+                    },
+                  )}
+                </time>
+              </p>
+            ) : (
+              <GuardianConsentForm studentId={student.id} />
+            )}
           </section>
         </div>
 
