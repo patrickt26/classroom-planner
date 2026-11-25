@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LegalLinks } from "@/features/legal/components/legal-links";
 import { platformName } from "@/lib/platform";
 import { TodayPreview } from "./today-preview";
 
@@ -234,17 +235,12 @@ export function LandingPage() {
           className={`${container} flex flex-wrap items-center justify-between gap-x-8 gap-y-1 py-4`}
         >
           <p className="font-bold">{platformName}</p>
-          <nav aria-label="Rodapé" className="flex flex-wrap gap-x-5 text-sm">
-            <Link className={textLink} href="/privacidade">
-              Privacidade
-            </Link>
-            <Link className={textLink} href="/termos">
-              Termos de uso
-            </Link>
-            <Link className={textLink} href="/entrar">
+          <div className="flex flex-wrap items-center gap-x-5">
+            <LegalLinks showContact />
+            <Link className={`${textLink} text-sm`} href="/entrar">
               Entrar
             </Link>
-          </nav>
+          </div>
         </div>
       </footer>
     </>

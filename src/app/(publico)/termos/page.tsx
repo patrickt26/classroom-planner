@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import {
+  legalVersion,
+  legalVersionLabel,
+} from "../../../features/legal/version";
 
 export const metadata: Metadata = { title: "Termos de uso" };
 
@@ -9,7 +13,7 @@ export default function TermsPage() {
         <h1 className="text-3xl font-bold text-brown">Termos de uso</h1>
         <p className="text-sm text-muted-foreground">
           Última atualização em{" "}
-          <time dateTime="2026-11-23">23 de novembro de 2026</time>
+          <time dateTime={legalVersion}>{legalVersionLabel}</time>
         </p>
       </header>
       <div className="grid gap-6 leading-relaxed [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-brown">

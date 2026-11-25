@@ -7,7 +7,7 @@ const baseUrl = "http://localhost:3000";
 const widths = [375, 768, 1280];
 const height = 900;
 const usage =
-  "Uso: pnpm screenshots lancamento ou pnpm screenshots <N> <nome>=<rota> ...";
+  "Uso: pnpm screenshots lancamento ou pnpm screenshots <N> [--public] <nome>=<rota> ...";
 const hideDevOverlay = "nextjs-portal { display: none !important; }";
 // Position fixed navigation against the full page so it cannot cover content.
 const releaseStyle = `
@@ -66,7 +66,12 @@ async function login(page) {
   });
 }
 
-async function capture(page, targets, folder, release) {
+async function capture(
+  page,
+  targets,
+  folder,
+  { release = false, publicPages = false } = {},
+) {
   const directory = fileURLToPath(
     new URL(`../docs/screenshots/${folder}/`, import.meta.url),
   );
@@ -79,7 +84,7 @@ async function capture(page, targets, folder, release) {
       if (
         !response?.ok() ||
         destination.origin !== baseUrl ||
-        (release
+        (release || publicPages
           ? destination.href !== url.href
           : destination.pathname === "/entrar")
       ) {
@@ -88,7 +93,7 @@ async function capture(page, targets, folder, release) {
         );
       }
 
-      if (release) {
+      if (release || publicPages) {
         await page
           .getByRole("heading", {
             level: 1,
@@ -96,7 +101,8 @@ async function capture(page, targets, folder, release) {
             exact: true,
           })
           .waitFor();
-        const text = await page.locator("body").textContent();
+        // biome-ignore lint/performance/useDomNodeTextContent: Os separadores do texto renderizado evitam colar e-mails ao texto vizinho.
+        const text = await page.locator("body").innerText();
         const contacts = await page
           .locator('a[href^="mailto:"]')
           .evaluateAll((links) => links.map((link) => link.href));
@@ -114,7 +120,7 @@ async function capture(page, targets, folder, release) {
       const filename = `${name}-${width}.png`;
       await page.screenshot({
         path: join(directory, filename),
-        fullPage: release,
+        fullPage: release || publicPages,
         animations: "disabled",
         caret: release ? "hide" : "initial",
         style: release ? releaseStyle : hideDevOverlay,
@@ -126,6 +132,8 @@ async function capture(page, targets, folder, release) {
 
 async function captureScreenshots([issue, ...routes]) {
   const release = issue === "lancamento";
+  const publicPages = !release && routes[0] === "--public";
+  if (publicPages) routes.shift();
   if (
     release
       ? routes.length > 0
@@ -148,24 +156,27 @@ async function captureScreenshots([issue, ...routes]) {
   try {
     const page = await browser.newPage({
       viewport: { width: widths[0], height },
-      serviceWorkers: release ? "block" : "allow",
+      serviceWorkers: release || publicPages ? "block" : "allow",
     });
+    if (release || publicPages) {
+      await page.route("**/*", (route) =>
+        new URL(route.request().url()).origin === baseUrl
+          ? route.continue()
+          : route.abort(),
+      );
+    }
+
     if (!release) {
-      await login(page);
-      await capture(page, targets, `issue-${issue}`, false);
+      if (!publicPages) await login(page);
+      await capture(page, targets, `issue-${issue}`, { publicPages });
       return;
     }
 
-    await page.route("**/*", (route) =>
-      new URL(route.request().url()).origin === baseUrl
-        ? route.continue()
-        : route.abort(),
-    );
     await capture(
       page,
       parseTargets(["inicio=/", "login=/entrar", "privacidade=/privacidade"]),
       issue,
-      true,
+      { release: true },
     );
 
     await login(page);
@@ -191,7 +202,7 @@ async function captureScreenshots([issue, ...routes]) {
         "configuracoes=/configuracoes",
       ]),
       issue,
-      true,
+      { release: true },
     );
   } finally {
     await browser.close();

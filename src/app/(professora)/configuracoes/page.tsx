@@ -55,7 +55,9 @@ export default async function SettingsPage() {
           <form action={logout}>
             <Button variant="outline">Sair</Button>
           </form>
-          <LegalLinks />
+          <footer className="border-t pt-2 text-muted-foreground">
+            <LegalLinks />
+          </footer>
         </section>
       </div>
     </>
