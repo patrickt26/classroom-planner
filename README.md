@@ -105,3 +105,7 @@ O repositório é uma vitrine do projeto e de como ele é desenvolvido, do plane
 - As decisões de arquitetura ficam registradas nos [ADRs](docs/decisions).
 - Para reproduzir os testes ponta a ponta ou publicar uma versão, siga o [checklist de deploy](docs/checklist-de-deploy.md).
 - Em caso de suspeita de exposição de dados, siga o [roteiro de resposta a incidentes](docs/incidente-de-dados.md).
+
+## Licença
+
+Todos os direitos reservados. O código está disponível publicamente apenas para consulta. Consulte o [aviso de direitos autorais](LICENSE) e a [conferência de licenças de terceiros](docs/licencas.md).
