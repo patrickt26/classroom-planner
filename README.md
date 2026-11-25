@@ -104,3 +104,4 @@ O repositório é uma vitrine do projeto e de como ele é desenvolvido, do plane
 - Quem contribui, incluindo agentes de código, segue as regras do [AGENTS.md](AGENTS.md).
 - As decisões de arquitetura ficam registradas nos [ADRs](docs/decisions).
 - Para reproduzir os testes ponta a ponta ou publicar uma versão, siga o [checklist de deploy](docs/checklist-de-deploy.md).
+- Em caso de suspeita de exposição de dados, siga o [roteiro de resposta a incidentes](docs/incidente-de-dados.md).
