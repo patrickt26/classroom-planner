@@ -27,6 +27,7 @@ order by t.tablename;
 
 - [x] Aplicação publicada na URL de produção (consultar o painel da Vercel), com funções em São Paulo (`gru1`).
 - [ ] Conferir Node.js 26, o pnpm definido em `package.json` e o comando de build `pnpm build` no projeto Next.js.
+- [ ] Ao incluir uma nova dependência, refazer a conferência de licenças em produção e desenvolvimento, verificar os binários da plataforma de deploy e atualizar o [registro de licenças](licencas.md).
 - [ ] Configurar estas variáveis no ambiente **Production**, antes do build. Refazer o deploy após alterar qualquer valor público.
 
 | Variável | Valor em produção |
