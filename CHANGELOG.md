@@ -6,6 +6,10 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ## [Não lançado]
 
+### Alterado
+
+- A política de privacidade detalha os fornecedores, o contato do encarregado e o prazo de exclusão dos dados. O rodapé da página inicial e das páginas públicas reúne os termos, a política e o contato de privacidade (#117).
+
 ## [1.0.0] - 2026-11-24
 
 ### Adicionado

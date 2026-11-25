@@ -87,7 +87,11 @@ export function AuthScreen({
           </Link>
         )}
       </nav>
-      {(mode === "login" || mode === "reset") && <LegalLinks />}
+      {(mode === "login" || mode === "reset") && (
+        <footer className="border-t pt-2 text-muted-foreground">
+          <LegalLinks showLoginAgreement={mode === "login"} />
+        </footer>
+      )}
     </>
   );
 }

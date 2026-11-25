@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
+import {
+  legalVersion,
+  legalVersionLabel,
+} from "../../../features/legal/version";
 
 export const metadata: Metadata = { title: "Política de privacidade" };
 
 export default function PrivacyPage() {
+  const officerName = process.env.NEXT_PUBLIC_PRIVACY_OFFICER_NAME?.trim();
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
+
   return (
     <>
       <header className="mb-6 space-y-2">
@@ -11,7 +18,7 @@ export default function PrivacyPage() {
         </h1>
         <p className="text-sm text-muted-foreground">
           Última atualização em{" "}
-          <time dateTime="2026-11-23">23 de novembro de 2026</time>
+          <time dateTime={legalVersion}>{legalVersionLabel}</time>
         </p>
       </header>
       <div className="grid gap-6 leading-relaxed [&_h2]:mb-2 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-brown">
@@ -62,13 +69,29 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section className="space-y-3">
-          <h2>Onde os dados ficam e quem os processa</h2>
+          <h2>Empresas que tratam os dados</h2>
+          <ul className="list-disc space-y-2 ps-5">
+            <li>
+              <strong>Supabase.</strong> Fornece o banco de dados e a
+              autenticação. Recebe todos os dados do aplicativo. O banco fica na
+              região de São Paulo, Brasil, e a empresa está sediada nos Estados
+              Unidos.
+            </li>
+            <li>
+              <strong>Vercel.</strong> Hospeda e executa o aplicativo. Recebe as
+              requisições e os logs técnicos. As funções são executadas na
+              região de São Paulo, Brasil, e a empresa está sediada nos Estados
+              Unidos.
+            </li>
+            <li>
+              <strong>Brevo.</strong> Envia os e-mails de convite e de troca de
+              senha. Recebe o e-mail da professora e o conteúdo da mensagem. A
+              empresa está sediada na União Europeia.
+            </li>
+          </ul>
           <p>
-            O Supabase fornece o banco de dados e a autenticação. A Vercel
-            hospeda e executa a aplicação. Para o piloto, o banco principal e as
-            funções da aplicação têm São Paulo, Brasil, como região prevista. Os
-            fornecedores podem processar informações de infraestrutura em outros
-            países.
+            Os fornecedores podem processar informações de infraestrutura em
+            outros países.
           </p>
           <p>
             O banco usa políticas de acesso por linha (RLS) para isolar os
@@ -78,13 +101,24 @@ export default function PrivacyPage() {
         </section>
         <section>
           <h2>Por quanto tempo guardamos os dados</h2>
-          <p>
-            Guardamos os dados enquanto forem necessários para manter a conta e
-            prestar o serviço. Após o encerramento ou um pedido de exclusão,
-            eliminamos os dados conforme o pedido e a legislação. Quando houver
-            obrigação legal de guardar algum registro, conservamos esse registro
-            pelo prazo exigido.
-          </p>
+          <ul className="list-disc space-y-2 ps-5">
+            <li>
+              Guardamos os dados da conta e do espaço enquanto a conta estiver
+              ativa.
+            </li>
+            <li>
+              Apagamos os dados em até 30 dias após o pedido de exclusão ou o
+              encerramento da conta.
+            </li>
+            <li>
+              A professora deve baixar antes os dados que precisar guardar por
+              obrigação própria, como registros de cobrança.
+            </li>
+            <li>
+              As cópias de segurança e os logs técnicos expiram conforme o ciclo
+              de cada fornecedor.
+            </li>
+          </ul>
         </section>
         <section>
           <h2>Cookies</h2>
@@ -102,6 +136,23 @@ export default function PrivacyPage() {
             a professora. Para dados da conta da professora ou ajuda com o
             pedido, use o contato abaixo.
           </p>
+        </section>
+        <section>
+          <h2>Encarregado pelo tratamento de dados</h2>
+          {officerName && <p>Nome do encarregado: {officerName}</p>}
+          {contactEmail ? (
+            <a
+              className="inline-flex min-h-11 max-w-full items-center break-all underline underline-offset-4"
+              href={`mailto:${contactEmail}`}
+            >
+              {contactEmail}
+            </a>
+          ) : (
+            <p>
+              Para falar com o encarregado, solicite o contato a quem enviou seu
+              convite para o piloto.
+            </p>
+          )}
         </section>
       </div>
     </>

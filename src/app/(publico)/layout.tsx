@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { LegalLinks } from "../../features/legal/components/legal-links";
 
 export const metadata: Metadata = {
   robots: { index: true, follow: true },
@@ -20,24 +21,15 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       </Link>
       <article className="rounded-xl border border-t-4 border-t-mustard bg-card p-5 sm:p-8">
         {children}
-        <section className="mt-6 border-t pt-5">
-          <h2 className="text-xl font-semibold text-brown">Contato</h2>
-          {contactEmail ? (
-            <a
-              className="inline-flex min-h-11 max-w-full items-center break-all underline underline-offset-4"
-              href={`mailto:${contactEmail}`}
-            >
-              {contactEmail}
-            </a>
-          ) : (
-            <p className="mt-2 text-muted-foreground">
+        <footer className="mt-6 space-y-2 border-t pt-2 text-sm text-muted-foreground">
+          <LegalLinks showContact />
+          {!contactEmail && (
+            <p>
               Para falar com a plataforma, solicite o contato a quem enviou seu
               convite para o piloto.
             </p>
           )}
-        </section>
-        <footer className="mt-5 text-sm text-muted-foreground">
-          Texto modelo. Recomenda-se revisão jurídica.
+          <p>Texto modelo. Recomenda-se revisão jurídica.</p>
         </footer>
       </article>
     </main>

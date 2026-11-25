@@ -14,7 +14,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 - **Cobranças.** Aulas pagas por hora geram cobranças ao serem realizadas. Confira valores a receber, em atraso e recebidos no mês, registre pagamentos de uma ou várias aulas e faça estornos.
 - **Configurações.** Ajuste o nome e a marca do espaço, escolha quando a semana começa e gerencie matérias e séries.
 
-A página inicial apresenta a plataforma. Consulte a [Política de Privacidade](src/app/(publico)/privacidade/page.tsx) e os [Termos de Uso](src/app/(publico)/termos/page.tsx) no código ou pelas rotas `/privacidade` e `/termos` da aplicação.
+A página inicial apresenta a plataforma. O rodapé da página inicial e das páginas públicas reúne o contato de privacidade e os links para a [Política de Privacidade](src/app/(publico)/privacidade/page.tsx) e os [Termos de Uso](src/app/(publico)/termos/page.tsx).
 
 ## Stack
 

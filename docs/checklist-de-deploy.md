@@ -34,6 +34,7 @@ order by t.tablename;
 | `NEXT_PUBLIC_SIGNUP_ENABLED` | `false` |
 | `NEXT_PUBLIC_SITE_URL` | Origem HTTPS definitiva da aplicação |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | Caixa de contato para o botão “Pedir convite” e as páginas públicas |
+| `NEXT_PUBLIC_PRIVACY_OFFICER_NAME` | Nome do encarregado exibido na política de privacidade |
 
 As chaves administrativas do Supabase e as credenciais SMTP ficam fora das variáveis públicas. A chave usada pelo Playwright pertence ao Supabase descartável do teste.
 
@@ -57,7 +58,7 @@ As chaves administrativas do Supabase e as credenciais SMTP ficam fora das vari�
 - [ ] Abrir `/entrar`, conferir que “Criar conta” está oculto e verificar o status HTTP 404 em `/criar-conta`, `/tema` e `/tema/alunos`.
 - [x] Convite testado em produção. Para repetir, enviar o convite em **Authentication → Users → Invite user** para uma caixa controlada pela equipe. Abrir o link em janela privativa, definir a senha e entrar novamente. Conferir que a tela **Hoje** abre no workspace da convidada.
 - [x] Recuperação de senha testada em produção. Para repetir, solicitar o link por `/recuperar-senha`, abrir a mensagem entregue pelo SMTP, definir outra senha e entrar novamente em janela privativa.
-- [ ] Em `/robots.txt` e `/sitemap.xml`, conferir a origem publicada. Abrir `/privacidade`, `/termos` e o botão “Pedir convite” e conferir o destino do contato.
+- [ ] Em `/robots.txt` e `/sitemap.xml`, conferir a origem publicada. Conferir os links e o contato no rodapé de `/`, `/privacidade` e `/termos`, o nome do encarregado na política e o destino do botão “Pedir convite”.
 - [ ] Conferir no GitHub que o secret scanning e a push protection estão ativos.
 
 ## Pendências após o lançamento
