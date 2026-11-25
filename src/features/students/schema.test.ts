@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { emptyStudentForm } from "./form-state";
-import { studentFormSchema, studentSchema } from "./schema";
+import {
+  studentFormSchema,
+  studentRegistrationFormSchema,
+  studentSchema,
+} from "./schema";
 
 describe("studentSchema", () => {
   it("preserva o valor em centavos e normaliza o nome", () => {
@@ -37,6 +41,38 @@ describe("studentSchema", () => {
       studentSchema.safeParse({ name: "Aluno A", hourly_rate: 100, ...fields })
         .success,
     ).toBe(false);
+  });
+});
+
+describe("autorização do responsável", () => {
+  const values = { ...emptyStudentForm, name: "Aluno A", hourly_rate: "80" };
+
+  it.each([false, undefined, null, "true", "2026-11-25"])(
+    "recusa o cadastro com confirmação %s",
+    (guardian_consent_confirmed) => {
+      const result = studentRegistrationFormSchema.safeParse({
+        ...values,
+        guardian_consent_confirmed,
+      });
+      expect(result.error?.issues[0].path).toEqual([
+        "guardian_consent_confirmed",
+      ]);
+    },
+  );
+
+  it("aceita confirmação explícita e descarta data enviada pelo cliente", () => {
+    const data = studentRegistrationFormSchema.parse({
+      ...values,
+      guardian_consent_confirmed: true,
+      guardian_consent_at: "2000-01-01",
+    });
+    expect(data.guardian_consent_confirmed).toBe(true);
+    expect(data).not.toHaveProperty("guardian_consent_at");
+    expect(data.student).not.toHaveProperty("guardian_consent_at");
+  });
+
+  it("permite editar o cadastro antigo sem registrar autorização", () => {
+    expect(studentFormSchema.safeParse(values).success).toBe(true);
   });
 });
 

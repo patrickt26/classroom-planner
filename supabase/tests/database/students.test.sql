@@ -17,13 +17,15 @@ values (:'ws_a', :'ws_a', 'Disciplina de teste'), (:'ws_b', :'ws_b', 'Disciplina
 -- Reutiliza o UUID de cada workspace como ID dos registros de teste desse espaço.
 create function pg_temp.fill_workspace(ws uuid) returns void language plpgsql as $$
 begin
-  insert into students (workspace_id, id, name, grade_id, hourly_rate) values (ws, ws, 'Aluno A', ws, 8050);
   insert into guardians (workspace_id, id, name) values (ws, ws, 'Responsável A');
   insert into student_guardians (workspace_id, student_id, guardian_id, relationship, is_financial_guardian)
   values (ws, ws, ws, 'Mãe', true);
   insert into student_subjects (workspace_id, student_id, subject_id) values (ws, ws, ws);
 end;
 $$;
+
+insert into students (workspace_id, id, name, grade_id, hourly_rate)
+values (:'ws_a', :'ws_a', 'Aluno A', :'ws_a', 8050), (:'ws_b', :'ws_b', 'Aluno B', :'ws_b', 8050);
 
 set local role authenticated;
 set local request.jwt.claim.sub = '06000000-0000-4000-8000-000000000002';

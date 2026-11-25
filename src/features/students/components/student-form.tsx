@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { recordGuardianConsent } from "../actions";
 import {
   initialStudentGuardian,
   type StudentFormState,
@@ -224,9 +225,38 @@ export function StudentForm({
           </div>
         </div>
         {requireGuardian && (
-          <RegistrationGuardian
-            state={state.guardian ?? initialStudentGuardian}
-          />
+          <>
+            <RegistrationGuardian
+              state={state.guardian ?? initialStudentGuardian}
+            />
+            <div key={state.attempt} className="grid gap-1">
+              <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
+                <input
+                  type="checkbox"
+                  name="guardian_consent_confirmed"
+                  required
+                  defaultChecked={values.guardian_consent_confirmed ?? false}
+                  className="size-4 shrink-0 accent-primary"
+                  {...fieldProps(
+                    "guardian_consent_confirmed",
+                    "guardian-consent-hint",
+                  )}
+                />
+                Tenho a autorização de um dos pais ou do responsável para
+                cadastrar estes dados
+              </label>
+              <p
+                id="guardian-consent-hint"
+                className="text-sm text-muted-foreground"
+              >
+                Explique ao responsável para que os dados serão usados.
+              </p>
+              <FieldError
+                name="guardian_consent_confirmed"
+                errors={errors?.guardian_consent_confirmed}
+              />
+            </div>
+          </>
         )}
         <div className="flex flex-wrap gap-3">
           <Button type="submit">
@@ -248,6 +278,24 @@ export function BackToStudents({ href = "/alunos" }: { href?: string }) {
         <ArrowLeft aria-hidden="true" /> Alunos
       </Link>
     </Button>
+  );
+}
+
+export function GuardianConsentForm({ studentId }: { studentId: string }) {
+  const [message, action, pending] = useActionState(
+    recordGuardianConsent.bind(null, studentId),
+    "",
+  );
+  return (
+    <form action={action} className="grid justify-items-start gap-2">
+      <p className="text-sm text-muted-foreground">
+        Autorização do responsável não registrada
+      </p>
+      <Button type="submit" variant="outline" disabled={pending}>
+        Registrar autorização
+      </Button>
+      <Alert variant="error" message={message} />
+    </form>
   );
 }
 
