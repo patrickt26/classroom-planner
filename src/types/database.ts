@@ -686,6 +686,28 @@ export type Database = {
           },
         ];
       };
+      terms_acceptances: {
+        Row: {
+          accepted_at: string;
+          id: string;
+          terms_version: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          accepted_at?: string;
+          id?: string;
+          terms_version: string;
+          user_id: string;
+        };
+        Update: {
+          accepted_at?: string;
+          id?: string;
+          terms_version?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       workspaces: {
         Row: {
           brand: string;
