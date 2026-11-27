@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { logout } from "@/features/auth/actions";
 import { AccountForm } from "@/features/auth/components/account-form";
+import { LogoutEverywhere } from "@/features/auth/components/logout-everywhere";
 import { CatalogSection } from "@/features/catalog/components/catalog-section";
 import { listCatalogItems } from "@/features/catalog/queries";
 import { LegalLinks } from "@/features/legal/components/legal-links";
@@ -59,6 +60,7 @@ export default async function SettingsPage() {
           <form action={logout}>
             <Button variant="outline">Sair</Button>
           </form>
+          <LogoutEverywhere />
           <footer className="border-t pt-2 text-muted-foreground">
             {acceptance && acceptedAt && (
               <p className="text-sm">

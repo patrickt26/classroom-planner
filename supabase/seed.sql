@@ -4,6 +4,7 @@ declare
   teacher_id uuid := '60000000-0000-4000-8000-000000000001';
   first_access_id uuid := '60000000-0000-4000-8000-000000000002';
   export_teacher_id uuid := '60000000-0000-4000-8000-000000000003';
+  sessions_teacher_id uuid := '60000000-0000-4000-8000-000000000004';
   export_ws uuid;
   ws uuid;
   workspace_time_zone text;
@@ -29,15 +30,17 @@ begin
   from (values
     (teacher_id, 'professora.exemplo@example.test'),
     (first_access_id, 'primeiro.acesso@example.test'),
-    (export_teacher_id, 'professora.exportacao@example.test')
+    (export_teacher_id, 'professora.exportacao@example.test'),
+    (sessions_teacher_id, 'professora.sessoes@example.test')
   ) as sample(id, email);
   insert into auth.identities (user_id, provider_id, provider, identity_data, created_at, updated_at)
   select id, id::text, 'email', jsonb_build_object('sub', id, 'email', email), now(), now()
-  from auth.users where id in (teacher_id, first_access_id, export_teacher_id);
+  from auth.users where id in (teacher_id, first_access_id, export_teacher_id, sessions_teacher_id);
 
   -- Mesma versão de src/features/legal/version.ts.
   insert into public.terms_acceptances (user_id, terms_version)
-  values (teacher_id, '2026-11-24'), (export_teacher_id, '2026-11-24');
+  values (teacher_id, '2026-11-24'), (export_teacher_id, '2026-11-24'),
+    (sessions_teacher_id, '2026-11-24');
 
   select workspace_id into strict export_ws from public.memberships where user_id = export_teacher_id;
   insert into public.students (workspace_id, name, hourly_rate, is_free, notes)

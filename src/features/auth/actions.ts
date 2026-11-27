@@ -151,6 +151,16 @@ export async function resetPassword(
       message:
         "Não foi possível salvar a senha. Use uma senha diferente ou solicite outro link.",
     };
+  try {
+    const { error: signOutError } = await client.auth.signOut({
+      scope: "others",
+    });
+    if (signOutError) throw signOutError;
+  } catch {
+    console.error(
+      "Não foi possível encerrar as outras sessões após redefinir a senha.",
+    );
+  }
   redirect("/aceitar-termos");
 }
 
@@ -159,4 +169,15 @@ export async function logout() {
   const { error } = await client.auth.signOut({ scope: "local" });
   if (error) throw new Error("Não foi possível sair. Tente novamente.");
   redirect("/entrar");
+}
+
+export async function logoutEverywhere(): Promise<FormFeedback> {
+  const client = await createClient();
+  const { error } = await client.auth.signOut({ scope: "global" });
+  if (error)
+    return {
+      variant: "error",
+      message: "Não foi possível sair de todos os aparelhos. Tente novamente.",
+    };
+  redirect("/entrar?aviso=sessoes-encerradas");
 }

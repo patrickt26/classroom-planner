@@ -13,6 +13,50 @@ function localAdmin() {
   });
 }
 
+test("professora confirma a saída global e revoga outra sessão", async ({
+  page,
+}) => {
+  const email = "professora.sessoes@example.test";
+  const password = "senha-de-teste";
+  const otherDevice = localAdmin();
+  const { data, error } = await otherDevice.auth.signInWithPassword({
+    email,
+    password,
+  });
+  expect(error).toBeNull();
+  if (!data.session) throw new Error("Falha ao criar a segunda sessão.");
+
+  await login(page, email, password);
+  await page.goto("/configuracoes");
+  const trigger = page.getByRole("button", {
+    name: "Sair de todos os aparelhos",
+  });
+  const dialog = page.getByRole("dialog", {
+    name: "Sair de todos os aparelhos?",
+  });
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Cancelar" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page).toHaveURL(/\/configuracoes$/);
+
+  await trigger.click();
+  await dialog.getByRole("button", { name: "Confirmar saída" }).click();
+  await expect(page).toHaveURL(/\/entrar\?aviso=sessoes-encerradas$/);
+  await expect(
+    page.getByText("Você saiu de todos os aparelhos."),
+  ).toBeVisible();
+  await page.goto("/configuracoes");
+  await expect(page).toHaveURL(/\/entrar(?:\?.*)?$/);
+
+  // O access token já emitido pode durar até expirar. A renovação deve falhar.
+  const renewal = await otherDevice.auth.refreshSession({
+    refresh_token: data.session.refresh_token,
+  });
+  expect(renewal.data.session).toBeNull();
+  expect(renewal.error?.status).toBe(400);
+});
+
 test("produção fecha o cadastro público e o mostruário", async ({
   page,
   request,

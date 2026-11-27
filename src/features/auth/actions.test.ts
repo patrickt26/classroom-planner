@@ -1,12 +1,21 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { login, recover, signup } from "./actions";
+import {
+  login,
+  logoutEverywhere,
+  recover,
+  resetPassword,
+  signup,
+} from "./actions";
 import { captchaError } from "./captcha";
 
 const auth = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
   resetPasswordForEmail: vi.fn(),
+  signOut: vi.fn(),
+  updateUser: vi.fn(),
 }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ auth }),
@@ -16,10 +25,13 @@ vi.mock("next/headers", () => ({
     async () => new Headers({ origin: "https://other.example.test" }),
   ),
 }));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+}));
 vi.mock("./signup-enabled", () => ({ signupEnabled: true }));
 
 const email = "professora@example.test";
-const password = "SenhaFicticia123";
+const password = "senha-ficticia-1";
 const confirmationUrl = "https://app.example.test/confirmar";
 const captchaToken = "token-ficticio";
 
@@ -32,9 +44,14 @@ beforeEach(() => {
   });
   auth.signUp.mockResolvedValue({ data: { session: null }, error: null });
   auth.resetPasswordForEmail.mockResolvedValue({ error: null });
+  auth.signOut.mockResolvedValue({ error: null });
+  auth.updateUser.mockResolvedValue({ error: null });
 });
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 
 const cases = [
   {
@@ -143,4 +160,62 @@ test("confirmationUrl aceita HTTP no desenvolvimento", async () => {
   expect(auth.resetPasswordForEmail).toHaveBeenCalledWith(email, {
     redirectTo: "http://localhost:3000/confirmar",
   });
+});
+
+function passwordForm() {
+  const form = new FormData();
+  form.set("password", password);
+  return form;
+}
+
+test("saída de todos os aparelhos usa escopo global e exibe aviso", async () => {
+  await logoutEverywhere();
+
+  expect(auth.signOut).toHaveBeenCalledExactlyOnceWith({ scope: "global" });
+  expect(redirect).toHaveBeenCalledWith("/entrar?aviso=sessoes-encerradas");
+});
+
+test("falha na saída global permite tentar novamente", async () => {
+  auth.signOut.mockResolvedValueOnce({ error: new Error("detalhe interno") });
+
+  await expect(logoutEverywhere()).resolves.toEqual({
+    variant: "error",
+    message: "Não foi possível sair de todos os aparelhos. Tente novamente.",
+  });
+  expect(redirect).not.toHaveBeenCalled();
+});
+
+test("redefinição de senha encerra apenas as outras sessões após salvar", async () => {
+  await resetPassword(null, passwordForm());
+
+  expect(auth.updateUser).toHaveBeenCalledExactlyOnceWith({
+    password,
+  });
+  expect(auth.signOut).toHaveBeenCalledExactlyOnceWith({ scope: "others" });
+  expect(auth.updateUser).toHaveBeenCalledBefore(auth.signOut);
+  expect(redirect).toHaveBeenCalledWith("/aceitar-termos");
+});
+
+test("falha ao salvar a senha preserva as sessões", async () => {
+  auth.updateUser.mockResolvedValueOnce({
+    error: new Error("falha ao salvar"),
+  });
+
+  await expect(resetPassword(null, passwordForm())).resolves.toMatchObject({
+    variant: "error",
+  });
+  expect(auth.signOut).not.toHaveBeenCalled();
+  expect(redirect).not.toHaveBeenCalled();
+});
+
+test("falha ao encerrar outras sessões registra aviso sem impedir a troca de senha", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  auth.signOut.mockResolvedValueOnce({ error: new Error("detalhe interno") });
+
+  await resetPassword(null, passwordForm());
+
+  expect(log).toHaveBeenCalledExactlyOnceWith(
+    "Não foi possível encerrar as outras sessões após redefinir a senha.",
+  );
+  expect(redirect).toHaveBeenCalledWith("/aceitar-termos");
 });
