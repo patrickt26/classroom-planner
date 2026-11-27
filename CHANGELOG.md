@@ -17,6 +17,7 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ### Alterado
 
+- Os links de confirmação de cadastro, convite e recuperação de senha apontam para o endereço configurado do app (#139).
 - Ao criar ou redefinir a senha, o app exige pelo menos 10 caracteres, com letras e números, conforme a regra do Supabase (#144).
 - A política de privacidade detalha os fornecedores, o contato do encarregado e o prazo de exclusão dos dados. O rodapé da página inicial e das páginas públicas reúne os termos, a política e o contato de privacidade (#117).
 

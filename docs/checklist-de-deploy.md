@@ -56,6 +56,7 @@ As chaves administrativas do Supabase e as credenciais SMTP ficam fora das vari�
 - [ ] Em **Authentication → Sign In / Providers → Email**, conferir o mínimo de 10 caracteres e o requisito **Letters and digits** (pelo menos uma letra e um número).
 - [ ] Conferir os limites de tentativas de login e de envio de e-mails.
 - [x] Templates colados em **Authentication → Email Templates** conforme a tabela abaixo. Preservar as variáveis, o token e o tipo de cada link ao atualizar os modelos. O convite usa a Site URL porque o envio pelo painel pode ocorrer sem uma URL de retorno. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
+- [ ] Atualizar os modelos de e-mail de confirmação e recuperação para o painel do Supabase (Authentication → Emails) e conferir que Redirect URLs não tem curinga. Preservar `SiteURL`, `TokenHash` e o tipo de cada link conforme os arquivos da tabela abaixo. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
 
 | Template no painel | Arquivo em `supabase/templates/` | Assunto |
 | --- | --- | --- |

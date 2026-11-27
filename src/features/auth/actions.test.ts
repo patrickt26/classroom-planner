@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { login, recover, signup } from "./actions";
 import { captchaError } from "./captcha";
@@ -11,7 +12,9 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ auth }),
 }));
 vi.mock("next/headers", () => ({
-  headers: async () => new Headers({ origin: "https://app.example.test" }),
+  headers: vi.fn(
+    async () => new Headers({ origin: "https://other.example.test" }),
+  ),
 }));
 vi.mock("./signup-enabled", () => ({ signupEnabled: true }));
 
@@ -22,6 +25,8 @@ const captchaToken = "token-ficticio";
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://app.example.test/");
+  vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
   auth.signInWithPassword.mockResolvedValue({
     error: { code: "invalid_credentials" },
   });
@@ -101,3 +106,41 @@ test.each(cases)(
     expect(await action(null, form(captchaToken))).toEqual(captchaError);
   },
 );
+
+test("confirmationUrl usa NEXT_PUBLIC_SITE_URL e ignora Origin", async () => {
+  vi.stubEnv("NODE_ENV", "production");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://app.example.test/");
+
+  await recover(null, form());
+
+  expect(auth.resetPasswordForEmail).toHaveBeenCalledWith(email, {
+    redirectTo: confirmationUrl,
+  });
+  expect(headers).not.toHaveBeenCalled();
+});
+
+test.each([
+  [undefined, "Configure NEXT_PUBLIC_SITE_URL"],
+  ["/relativa", "URL absoluta válida"],
+  ["http://app.example.test", "deve usar HTTPS"],
+])(
+  "confirmationUrl rejeita configuração de produção %s",
+  async (url, message) => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", url);
+
+    await expect(recover(null, form())).rejects.toThrow(message);
+    expect(auth.resetPasswordForEmail).not.toHaveBeenCalled();
+  },
+);
+
+test("confirmationUrl aceita HTTP no desenvolvimento", async () => {
+  vi.stubEnv("NODE_ENV", "development");
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000");
+
+  await recover(null, form());
+
+  expect(auth.resetPasswordForEmail).toHaveBeenCalledWith(email, {
+    redirectTo: "http://localhost:3000/confirmar",
+  });
+});
