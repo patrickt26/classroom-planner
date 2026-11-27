@@ -16,6 +16,7 @@ vi.mock("@supabase/ssr", () => ({
 beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost:54321");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-key");
+  vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
   getClaims.mockReset().mockResolvedValue({ data: null });
 });
 
@@ -70,6 +71,7 @@ test("forwards a fresh script nonce to Next.js and sends the same policy to the 
       ),
       "connect-src 'self' https://project.example.test wss://project.example.test",
       "img-src 'self' data: blob:",
+      "frame-src 'none'",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -79,6 +81,23 @@ test("forwards a fresh script nonce to Next.js and sends the same policy to the 
   const redirect = await proxy(request("/agenda"));
   expect(redirect.headers.get("content-security-policy")).toContain("'nonce-");
   expect(redirect.headers.get("content-security-policy")).not.toBe(policy);
+});
+
+test("allows Turnstile frames and forwards the script nonce when configured", async () => {
+  vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "chave-publica-ficticia");
+  const login = request("/entrar");
+  login.headers.set("x-nonce", "client-nonce");
+  const { headers } = await proxy(login);
+  const nonce = headers.get("x-middleware-request-x-nonce");
+  expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/);
+  const policy = headers.get("content-security-policy")?.split("; ");
+  expect(policy).toContain("frame-src https://challenges.cloudflare.com");
+  expect(
+    policy?.find((directive) => directive.startsWith("script-src ")),
+  ).toMatch(/^script-src 'self' 'nonce-[A-Za-z0-9+/]{22}==' 'strict-dynamic'/);
+  expect(
+    policy?.find((directive) => directive.startsWith("script-src ")),
+  ).toContain(`'nonce-${nonce}'`);
 });
 
 test("allows local Supabase and React debugging during development", async () => {

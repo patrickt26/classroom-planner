@@ -1,43 +1,121 @@
 import { headers } from "next/headers";
-import { afterEach, expect, test, vi } from "vitest";
-import { recover } from "./actions";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { login, recover, signup } from "./actions";
+import { captchaError } from "./captcha";
 
-const { resetPasswordForEmail } = vi.hoisted(() => ({
-  resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
+const auth = vi.hoisted(() => ({
+  signInWithPassword: vi.fn(),
+  signUp: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
 }));
-
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({ auth }),
+}));
 vi.mock("next/headers", () => ({
   headers: vi.fn(
     async () => new Headers({ origin: "https://other.example.test" }),
   ),
 }));
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { resetPasswordForEmail } }),
-}));
+vi.mock("./signup-enabled", () => ({ signupEnabled: true }));
 
-afterEach(() => {
-  vi.clearAllMocks();
-  vi.unstubAllEnvs();
+const email = "professora@example.test";
+const password = "SenhaFicticia123";
+const confirmationUrl = "https://app.example.test/confirmar";
+const captchaToken = "token-ficticio";
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://app.example.test/");
+  vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
+  auth.signInWithPassword.mockResolvedValue({
+    error: { code: "invalid_credentials" },
+  });
+  auth.signUp.mockResolvedValue({ data: { session: null }, error: null });
+  auth.resetPasswordForEmail.mockResolvedValue({ error: null });
 });
 
-function recoveryForm() {
-  const form = new FormData();
-  form.set("email", "professora@example.test");
-  return form;
+afterEach(() => vi.unstubAllEnvs());
+
+const cases = [
+  {
+    action: login,
+    method: auth.signInWithPassword,
+    args: (captcha: object) => [
+      Object.keys(captcha).length
+        ? { email, password, options: captcha }
+        : { email, password },
+    ],
+  },
+  {
+    action: signup,
+    method: auth.signUp,
+    args: (captcha: object) => [
+      {
+        email,
+        password,
+        options: { emailRedirectTo: confirmationUrl, ...captcha },
+      },
+    ],
+  },
+  {
+    action: recover,
+    method: auth.resetPasswordForEmail,
+    args: (captcha: object) => [
+      email,
+      { redirectTo: confirmationUrl, ...captcha },
+    ],
+  },
+];
+
+function form(token?: string) {
+  const data = new FormData();
+  data.set("email", email);
+  data.set("password", password);
+  if (token !== undefined) data.set("captchaToken", token);
+  return data;
 }
+
+test.each(cases)(
+  "$action.name forwards the CAPTCHA token when configured",
+  async ({ action, method, args }) => {
+    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "chave-publica-ficticia");
+    await action(null, form(captchaToken));
+    expect(method).toHaveBeenCalledExactlyOnceWith(...args({ captchaToken }));
+  },
+);
+
+test.each(cases)(
+  "$action.name ignores submitted tokens without configuration",
+  async ({ action, method, args }) => {
+    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "");
+    await action(null, form(captchaToken));
+    expect(method).toHaveBeenCalledExactlyOnceWith(...args({}));
+  },
+);
+
+test.each(cases)(
+  "$action.name handles missing, invalid and rejected tokens",
+  async ({ action, method }) => {
+    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "chave-publica-ficticia");
+    for (const token of [undefined, " ", "x".repeat(2049)]) {
+      expect(await action(null, form(token))).toEqual(captchaError);
+    }
+    expect(method).not.toHaveBeenCalled();
+
+    method.mockResolvedValue({ error: { code: "captcha_failed" } });
+    expect(await action(null, form(captchaToken))).toEqual(captchaError);
+  },
+);
 
 test("confirmationUrl usa NEXT_PUBLIC_SITE_URL e ignora Origin", async () => {
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://app.example.test/");
 
-  await recover(null, recoveryForm());
+  await recover(null, form());
 
-  expect(resetPasswordForEmail).toHaveBeenCalledWith(
-    "professora@example.test",
-    {
-      redirectTo: "https://app.example.test/confirmar",
-    },
-  );
+  expect(auth.resetPasswordForEmail).toHaveBeenCalledWith(email, {
+    redirectTo: confirmationUrl,
+  });
   expect(headers).not.toHaveBeenCalled();
 });
 
@@ -51,8 +129,8 @@ test.each([
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", url);
 
-    await expect(recover(null, recoveryForm())).rejects.toThrow(message);
-    expect(resetPasswordForEmail).not.toHaveBeenCalled();
+    await expect(recover(null, form())).rejects.toThrow(message);
+    expect(auth.resetPasswordForEmail).not.toHaveBeenCalled();
   },
 );
 
@@ -60,12 +138,9 @@ test("confirmationUrl aceita HTTP no desenvolvimento", async () => {
   vi.stubEnv("NODE_ENV", "development");
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000");
 
-  await recover(null, recoveryForm());
+  await recover(null, form());
 
-  expect(resetPasswordForEmail).toHaveBeenCalledWith(
-    "professora@example.test",
-    {
-      redirectTo: "http://localhost:3000/confirmar",
-    },
-  );
+  expect(auth.resetPasswordForEmail).toHaveBeenCalledWith(email, {
+    redirectTo: "http://localhost:3000/confirmar",
+  });
 });

@@ -8,6 +8,8 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ### Adicionado
 
+- Proteção contra robôs com Cloudflare Turnstile no login, na recuperação de senha e no cadastro (#140).
+
 - A professora aceita os Termos de uso e a Política de privacidade no primeiro acesso e quando a versão muda. A data e a versão do aceite ficam em Configurações (#118).
 - O cadastro de aluno exige a confirmação da autorização do responsável. A ficha mostra a data e permite registrar a autorização de alunos antigos (#119).
 - Em Configurações, a professora pode baixar um JSON com os dados do seu espaço e da conta e consultar o contato para pedir exclusão (#120).
