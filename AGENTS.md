@@ -73,6 +73,8 @@ Como o repositório é público, não escreva URLs de produção, referências d
 7. Registros pedagógicos (`lesson_notes`, `skill_records`, `observations`) **não são sobrescritos**: editar cria uma nova linha (`supersedes_id`).
 8. Após mudar o schema, regenere `src/types/database.ts`.
 
+Função SECURITY DEFINER nova exige atualizar a lista permitida em `security_catalog.test.sql` e justificar no PR.
+
 **Todo card que cria uma tabela ou um fluxo novo acrescenta dados fictícios de exemplo no `supabase/seed.sql`, no mesmo PR.**
 
 ### Código

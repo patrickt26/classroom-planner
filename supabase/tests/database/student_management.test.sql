@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(21);
+select plan(22);
 
 insert into auth.users (id) values
   ('07000000-0000-4000-8000-000000000001'),
@@ -120,6 +120,12 @@ select throws_ok(
     :'ws_b'
   ),
   '42501', null, 'A função exige uma professora do espaço na criação de aluno'
+);
+
+set local request.jwt.claim.sub = '07000000-0000-4000-8000-000000000002';
+select throws_ok(
+  format('select save_student(%L, %L, 100, false, %L, %L)', :'ws_a', 'Nome alterado', '{}', :'student_a'),
+  '42501', 'teacher_required', 'Outra professora não edita aluno do primeiro espaço'
 );
 
 select * from finish();
