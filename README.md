@@ -7,6 +7,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 ## O que o app faz hoje
 
 - **Acesso por convite.** Após definir a senha, a professora aceita os Termos de uso e a Política de privacidade para entrar no espaço. O app solicita novo aceite quando a versão muda. A data e a versão aceitas ficam em Configurações. A professora pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
+- **Sessões.** Em **Configurações → Conta**, use **Sair de todos os aparelhos** para revogar todas as sessões. Ao redefinir a senha, o app encerra as outras sessões e mantém o acesso no aparelho usado para redefini-la. Nos outros aparelhos, um token de acesso já emitido pode continuar válido até expirar.
 - **Hoje.** Veja as aulas do dia, abra o planejamento direto pelo cartão da aula e confira os registros, as reposições e as cobranças pendentes.
 - **Alunos e responsáveis.** Confirme a autorização do responsável ao cadastrar um aluno. Na ficha, consulte a data da autorização, registre-a para alunos antigos e acompanhe o histórico de aulas. Você também pode buscar, editar e arquivar alunos e manter os vínculos com responsáveis.
 - **Agenda.** Agende aulas avulsas ou semanais em vários dias, filtre por aluno, veja avisos de conflito de horários e agende reposições.
@@ -53,6 +54,8 @@ Abra [localhost:3000](http://localhost:3000) para ver a apresentação do app. E
 O seed cria as datas de exemplo em relação ao dia, à semana e ao mês em que é aplicado.
 
 Para testar o primeiro acesso, entre com `primeiro.acesso@example.test` e a mesma senha fictícia. Essa conta começa com o aceite pendente. A conta principal já aceitou a versão vigente.
+
+Para testar a saída de todos os aparelhos, entre com `professora.sessoes@example.test` e a mesma senha fictícia em duas sessões separadas.
 
 - **Hoje:** aulas no dia da carga e pendências de registro, reposição e cobrança.
 - **Alunos:** quatro fichas fictícias com responsáveis vinculados, incluindo um responsável compartilhado. A linha do tempo mostra exemplos de falta, reposição realizada e registro pós-aula. Abra o registro para consultar o histórico de edições.

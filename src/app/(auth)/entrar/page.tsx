@@ -26,6 +26,11 @@ export default async function Page({
             message:
               "Entre com uma conta de professora para acessar este espaço.",
           }
-        : null;
+        : aviso === "sessoes-encerradas"
+          ? {
+              variant: "success",
+              message: "Você saiu de todos os aparelhos.",
+            }
+          : null;
   return <AuthScreen mode="login" notice={notice} />;
 }
