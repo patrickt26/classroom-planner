@@ -3,6 +3,7 @@ import { Alert, type FormFeedback } from "@/components/ui/alert";
 import { LegalLinks } from "@/features/legal/components/legal-links";
 import { platformName } from "@/lib/platform";
 import { login, recover, resetPassword, signup } from "../actions";
+import { PASSWORD_MIN_LENGTH } from "../schema";
 import { signupEnabled } from "../signup-enabled";
 import { AccountForm } from "./account-form";
 
@@ -14,10 +15,10 @@ const email = {
 } as const;
 const newPassword = {
   name: "password",
-  label: "Nova senha (mínimo de 8 caracteres)",
+  label: `Nova senha (mínimo de ${PASSWORD_MIN_LENGTH} caracteres, com letras e números)`,
   type: "password",
   autoComplete: "new-password",
-  minLength: 8,
+  minLength: PASSWORD_MIN_LENGTH,
 } as const;
 const screens = {
   login: {

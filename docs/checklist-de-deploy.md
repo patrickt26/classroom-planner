@@ -45,7 +45,8 @@ As chaves administrativas do Supabase e as credenciais SMTP ficam fora das vari�
 
 - [ ] Em URL Configuration, definir **Site URL** como a origem HTTPS da aplicação, sem barra final. Em **Redirect URLs**, cadastrar a URL exata dessa origem seguida de `/confirmar`.
 - [x] Cadastro aberto desativado em produção. O acesso ao piloto é por convite.
-- [ ] Conferir senha mínima de oito caracteres e os limites de tentativas de login e de envio de e-mails. O captcha é opcional para este piloto por convite.
+- [ ] Em **Authentication → Sign In / Providers → Email**, conferir o mínimo de 10 caracteres e o requisito **Letters and digits** (pelo menos uma letra e um número).
+- [ ] Conferir os limites de tentativas de login e de envio de e-mails. O captcha é opcional para este piloto por convite.
 - [x] Templates colados em **Authentication → Email Templates** conforme a tabela abaixo. Preservar as variáveis, o token e o tipo de cada link ao atualizar os modelos. O convite usa a Site URL porque o envio pelo painel pode ocorrer sem uma URL de retorno. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
 
 | Template no painel | Arquivo em `supabase/templates/` | Assunto |

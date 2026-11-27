@@ -15,6 +15,7 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ### Alterado
 
+- Ao criar ou redefinir a senha, o app exige pelo menos 10 caracteres, com letras e números, conforme a regra do Supabase (#144).
 - A política de privacidade detalha os fornecedores, o contato do encarregado e o prazo de exclusão dos dados. O rodapé da página inicial e das páginas públicas reúne os termos, a política e o contato de privacidade (#117).
 
 ## [1.0.0] - 2026-11-24
