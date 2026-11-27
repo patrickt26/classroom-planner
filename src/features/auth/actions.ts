@@ -3,7 +3,9 @@
 import { redirect } from "next/navigation";
 import type { FormFeedback } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
+import { captchaError } from "./captcha";
 import {
+  captchaTokenSchema,
   emailSchema,
   loginSchema,
   passwordRequirements,
@@ -11,6 +13,12 @@ import {
   signupSchema,
 } from "./schema";
 import { signupEnabled } from "./signup-enabled";
+
+function captchaOptions(form: FormData) {
+  if (!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) return {};
+  const token = captchaTokenSchema.safeParse(form.get("captchaToken"));
+  return token.success ? { captchaToken: token.data } : null;
+}
 
 function confirmationUrl() {
   const development = process.env.NODE_ENV === "development";
@@ -44,8 +52,14 @@ export async function login(
       variant: "error",
       message: "Informe um e-mail válido e sua senha.",
     };
+  const captcha = captchaOptions(form);
+  if (!captcha) return captchaError;
   const client = await createClient();
-  const { error } = await client.auth.signInWithPassword(input.data);
+  const { error } = await client.auth.signInWithPassword({
+    ...input.data,
+    ...(captcha.captchaToken ? { options: captcha } : {}),
+  });
+  if (error?.code === "captcha_failed") return captchaError;
   if (error)
     return {
       variant: "error",
@@ -69,12 +83,15 @@ export async function signup(
       variant: "error",
       message: `Informe um e-mail válido e uma senha de ${passwordRequirements}.`,
     };
+  const captcha = captchaOptions(form);
+  if (!captcha) return captchaError;
   const emailRedirectTo = confirmationUrl();
   const client = await createClient();
   const { data, error } = await client.auth.signUp({
     ...input.data,
-    options: { emailRedirectTo },
+    options: { emailRedirectTo, ...captcha },
   });
+  if (error?.code === "captcha_failed") return captchaError;
   if (error)
     return {
       variant: "error",
@@ -94,11 +111,15 @@ export async function recover(
   const email = emailSchema.safeParse(form.get("email"));
   if (!email.success)
     return { variant: "error", message: "Informe um e-mail válido." };
+  const captcha = captchaOptions(form);
+  if (!captcha) return captchaError;
   const redirectTo = confirmationUrl();
   const client = await createClient();
   const { error } = await client.auth.resetPasswordForEmail(email.data, {
     redirectTo,
+    ...captcha,
   });
+  if (error?.code === "captcha_failed") return captchaError;
   if (error)
     return {
       variant: "error",

@@ -18,3 +18,4 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 export const signupSchema = loginSchema.extend({ password: passwordSchema });
+export const captchaTokenSchema = z.string().trim().min(1).max(2048);

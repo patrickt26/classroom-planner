@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Alert, type FormFeedback } from "@/components/ui/alert";
 import { LegalLinks } from "@/features/legal/components/legal-links";
@@ -54,7 +55,7 @@ const screens = {
     submit: "Salvar nova senha",
   },
 };
-export function AuthScreen({
+export async function AuthScreen({
   mode,
   notice,
 }: {
@@ -62,6 +63,11 @@ export function AuthScreen({
   notice?: FormFeedback;
 }) {
   const { title, ...form } = screens[mode];
+  const siteKey =
+    mode === "reset" ? undefined : process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const captcha = siteKey
+    ? { siteKey, nonce: (await headers()).get("x-nonce") ?? undefined }
+    : undefined;
   return (
     <>
       <header className="space-y-1">
@@ -69,7 +75,7 @@ export function AuthScreen({
         <h1 className="text-3xl font-bold text-brown">{title}</h1>
       </header>
       {notice && <Alert {...notice} />}
-      <AccountForm {...form} />
+      <AccountForm {...form} captcha={captcha} />
       <nav className="grid text-center text-sm font-medium underline underline-offset-4">
         {mode === "login" ? (
           <>

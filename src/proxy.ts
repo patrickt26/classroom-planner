@@ -21,7 +21,9 @@ export async function proxy(request: NextRequest) {
     pathname === "/nova-senha" ||
     pathname === "/nova-senha/";
 
-  const policy = contentSecurityPolicy(randomBytes(16).toString("base64"));
+  const nonce = randomBytes(16).toString("base64");
+  const policy = contentSecurityPolicy(nonce);
+  request.headers.set("x-nonce", nonce);
   request.headers.set("Content-Security-Policy", policy);
   const response = await updateSession(request, requiresSession);
   response.headers.set("Content-Security-Policy", policy);
