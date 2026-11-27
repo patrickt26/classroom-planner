@@ -784,6 +784,10 @@ export type Database = {
         };
         Returns: boolean;
       };
+      current_terms_version: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       delete_catalog_item: {
         Args: {
           catalog_table: string;
@@ -810,6 +814,7 @@ export type Database = {
         Args: { weeks?: number };
         Returns: undefined;
       };
+      has_current_terms: { Args: Record<PropertyKey, never>; Returns: boolean };
       has_lesson_conflict: {
         Args: {
           excluded_lesson_id?: string;

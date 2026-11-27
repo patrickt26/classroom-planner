@@ -72,6 +72,7 @@ Como o repositório é público, não escreva URLs de produção, referências d
 6. Toda mudança de schema é uma **nova migração** em `supabase/migrations/`. Nunca edite uma migração que já foi mesclada na `main`.
 7. Registros pedagógicos (`lesson_notes`, `skill_records`, `observations`) **não são sobrescritos**: editar cria uma nova linha (`supersedes_id`).
 8. Após mudar o schema, regenere `src/types/database.ts`.
+   Ao mudar a versão dos termos, atualize `legalVersion` em `src/features/legal/version.ts` e redefina `public.current_terms_version()` em uma nova migração no mesmo PR.
 
 **Todo card que cria uma tabela ou um fluxo novo acrescenta dados fictícios de exemplo no `supabase/seed.sql`, no mesmo PR.**
 

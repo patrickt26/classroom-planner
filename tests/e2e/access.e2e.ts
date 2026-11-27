@@ -67,7 +67,7 @@ test("professora convidada define a senha pelo e-mail e entra em uma nova sessã
   await login(page, email, password);
 });
 
-test("conta com aceite antigo precisa aceitar a versão vigente antes de abrir o espaço", async ({
+test("a API rejeita uma versão antiga e a tela exige o aceite vigente", async ({
   page,
 }) => {
   const admin = localAdmin();
@@ -91,8 +91,8 @@ test("conta com aceite antigo precisa aceitar a versão vigente antes de abrir o
           user_id: data.user.id,
           terms_version: "anterior",
         })
-      ).error,
-    ).toBeNull();
+      ).error?.code,
+    ).toBe("42501");
 
     await page.goto("/entrar");
     await page.getByLabel("E-mail").fill(email);

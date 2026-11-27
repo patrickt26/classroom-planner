@@ -6,7 +6,7 @@ O Marco 1, **O dia a dia**, está concluído e o app está no ar. A versão **1.
 
 ## O que o app faz hoje
 
-- **Acesso por convite.** Após definir a senha, a professora aceita os Termos de uso e a Política de privacidade para entrar no espaço. O app solicita novo aceite quando a versão muda. A data e a versão aceitas ficam em Configurações. A professora pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
+- **Acesso por convite.** Após definir a senha, a professora aceita os Termos de uso e a Política de privacidade para entrar no espaço. O app e o banco exigem o aceite da versão vigente. A data e a versão aceitas ficam em Configurações. A professora pode recuperar a senha por e-mail. Os e-mails de autenticação seguem a identidade visual do app.
 - **Hoje.** Veja as aulas do dia, abra o planejamento direto pelo cartão da aula e confira os registros, as reposições e as cobranças pendentes.
 - **Alunos e responsáveis.** Confirme a autorização do responsável ao cadastrar um aluno. Na ficha, consulte a data da autorização, registre-a para alunos antigos e acompanhe o histórico de aulas. Você também pode buscar, editar e arquivar alunos e manter os vínculos com responsáveis.
 - **Agenda.** Agende aulas avulsas ou semanais em vários dias, filtre por aluno, veja avisos de conflito de horários e agende reposições.
@@ -72,9 +72,11 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o aceite inicial e de uma nova versão dos termos, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje, o fluxo de cadastro de aluno até o pagamento da aula e a exportação isolada dos dados de duas professoras fictícias.
+O Playwright sobe e encerra o servidor do build de produção. A suíte cobre o convite por e-mail, o aceite inicial e a rejeição de um aceite fora da versão vigente pela API, o acesso com cadastro público fechado, o atalho de planejamento na tela Hoje, o fluxo de cadastro de aluno até o pagamento da aula e a exportação isolada dos dados de duas professoras fictícias.
 
 ### Migrações e tipos
+
+A função `public.current_terms_version()` fornece ao banco a versão vigente dos termos usada para validar o aceite. Ao alterar essa versão, atualize também `src/features/legal/version.ts`.
 
 Após criar uma migração, recrie o banco local, rode os testes pgTAP e regenere os tipos do schema `public`. O reset descarta os dados locais e reaplica o seed.
 

@@ -35,9 +35,10 @@ begin
   select id, id::text, 'email', jsonb_build_object('sub', id, 'email', email), now(), now()
   from auth.users where id in (teacher_id, first_access_id, export_teacher_id);
 
-  -- Mesma versão de src/features/legal/version.ts.
+  -- A conta de primeiro acesso fica com o aceite pendente.
   insert into public.terms_acceptances (user_id, terms_version)
-  values (teacher_id, '2026-11-24'), (export_teacher_id, '2026-11-24');
+  values (teacher_id, public.current_terms_version()),
+    (export_teacher_id, public.current_terms_version());
 
   select workspace_id into strict export_ws from public.memberships where user_id = export_teacher_id;
   insert into public.students (workspace_id, name, hourly_rate, is_free, notes)

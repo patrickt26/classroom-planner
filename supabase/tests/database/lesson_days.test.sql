@@ -3,8 +3,13 @@ create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 select plan(22);
 
-insert into auth.users (id) values ('10000000-0000-4000-8000-000000000061'),
-  ('10000000-0000-4000-8000-000000000062');
+with test_users as (
+  insert into auth.users (id) values ('10000000-0000-4000-8000-000000000061'),
+    ('10000000-0000-4000-8000-000000000062')
+  returning id
+)
+insert into public.terms_acceptances (user_id, terms_version)
+select id, public.current_terms_version() from test_users;
 select workspace_id as ws from memberships where user_id = '10000000-0000-4000-8000-000000000061' \gset
 select workspace_id as other_ws from memberships where user_id = '10000000-0000-4000-8000-000000000062' \gset
 select date_trunc('week', now() at time zone 'America/Sao_Paulo')::date + 8 as tue \gset
