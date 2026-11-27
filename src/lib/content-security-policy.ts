@@ -20,6 +20,9 @@ export function contentSecurityPolicy(nonce?: string) {
     "style-src 'self' 'unsafe-inline'",
     `connect-src ${connections.join(" ")}`,
     "img-src 'self' data: blob:",
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && nonce
+      ? "frame-src https://challenges.cloudflare.com"
+      : "frame-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
     "base-uri 'self'",

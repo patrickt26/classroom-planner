@@ -41,13 +41,22 @@ order by t.tablename;
 
 As chaves administrativas do Supabase e as credenciais SMTP ficam fora das variáveis públicas. A chave usada pelo Playwright pertence ao Supabase descartável do teste.
 
+## Proteção contra robôs
+
+1. No painel do Cloudflare Turnstile, crie um widget em modo **Invisível** ou **Gerenciado** e autorize o hostname da aplicação.
+2. Na Vercel, configure a chave pública do widget em `NEXT_PUBLIC_TURNSTILE_SITE_KEY` no ambiente **Production**.
+3. Faça o deploy e confirme que a versão publicada carrega o widget.
+4. Só depois do deploy, no Supabase, abra **Authentication → Attack Protection → Enable Captcha protection → Turnstile**, cole a chave secreta e salve. Ativar a proteção antes do deploy bloqueia o login.
+5. Teste o login e a recuperação de senha, incluindo o recebimento do e-mail e a redefinição pelo link.
+
 ## Supabase Auth e e-mail
 
 - [ ] Em URL Configuration, definir **Site URL** como a origem HTTPS da aplicação, sem barra final. Em **Redirect URLs**, cadastrar a URL exata dessa origem seguida de `/confirmar`.
 - [x] Cadastro aberto desativado em produção. O acesso ao piloto é por convite.
 - [ ] Em **Authentication → Sign In / Providers → Email**, conferir o mínimo de 10 caracteres e o requisito **Letters and digits** (pelo menos uma letra e um número).
-- [ ] Conferir os limites de tentativas de login e de envio de e-mails. O captcha é opcional para este piloto por convite.
-- [ ] Copiar os modelos de e-mail do repositório para o painel do Supabase (Authentication → Emails) e conferir que Redirect URLs não tem curinga. Preservar `SiteURL`, `TokenHash` e o tipo de cada link conforme os arquivos da tabela abaixo. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
+- [ ] Conferir os limites de tentativas de login e de envio de e-mails.
+- [x] Templates colados em **Authentication → Email Templates** conforme a tabela abaixo. Preservar as variáveis, o token e o tipo de cada link ao atualizar os modelos. O convite usa a Site URL porque o envio pelo painel pode ocorrer sem uma URL de retorno. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
+- [ ] Atualizar os modelos de e-mail de confirmação e recuperação para o painel do Supabase (Authentication → Emails) e conferir que Redirect URLs não tem curinga. Preservar `SiteURL`, `TokenHash` e o tipo de cada link conforme os arquivos da tabela abaixo. [Templates do Supabase Auth](https://supabase.com/docs/guides/auth/auth-email-templates)
 
 | Template no painel | Arquivo em `supabase/templates/` | Assunto |
 | --- | --- | --- |
