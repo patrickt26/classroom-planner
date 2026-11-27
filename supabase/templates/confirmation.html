@@ -20,9 +20,9 @@
                 <h1 style="margin: 0 0 16px; color: #8B3B08; font-size: 24px; line-height: 30px;">Confirme seu e-mail</h1>
                 <p style="margin: 0 0 8px;">Olá!</p>
                 <p style="margin: 0 0 20px;">Confirme seu endereço de e-mail para concluir o cadastro no Classroom Planner.</p>
-                <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup" style="display: inline-block; padding: 12px 16px; background-color: #2F4366; border-radius: 8px; color: #FFFFFF; font-weight: bold; line-height: 20px; text-align: center; text-decoration: none;">Confirmar cadastro</a>
+                <a href="{{ .SiteURL }}/confirmar?token_hash={{ .TokenHash }}&amp;type=signup" style="display: inline-block; padding: 12px 16px; background-color: #2F4366; border-radius: 8px; color: #FFFFFF; font-weight: bold; line-height: 20px; text-align: center; text-decoration: none;">Confirmar cadastro</a>
                 <p style="margin: 20px 0 4px; font-size: 14px; line-height: 20px;">Você também pode copiar e colar este link no navegador:</p>
-                <p style="margin: 0 0 16px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; word-break: break-all;">{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=signup</p>
+                <p style="margin: 0 0 16px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; word-break: break-all;">{{ .SiteURL }}/confirmar?token_hash={{ .TokenHash }}&amp;type=signup</p>
                 <p style="margin: 0; font-size: 14px; line-height: 20px;">Este link expira em 1 hora e só pode ser usado uma vez. Se você não esperava este e-mail, pode ignorá-lo.</p>
               </td>
             </tr>

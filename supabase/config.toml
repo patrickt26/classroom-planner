@@ -41,6 +41,7 @@ enabled = true
 minimum_password_length = 10
 password_requirements = "letters_digits"
 site_url = "http://localhost:3000"
+# Mantenha apenas URLs exatas de confirmação, sem curingas.
 additional_redirect_urls = ["http://localhost:3000/confirmar", "http://127.0.0.1:3000/confirmar"]
 
 [auth.email]

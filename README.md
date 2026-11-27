@@ -40,6 +40,8 @@ pnpm exec supabase status
 
 Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_SUPABASE_URL` com `API_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` com `PUBLISHABLE_KEY` da instância local. Para exibir o contato de privacidade localmente, use um endereço fictício, como `privacidade@example.test`, em `NEXT_PUBLIC_CONTACT_EMAIL`. O Studio e o Analytics estão desativados na configuração local.
 
+Para os e-mails de autenticação, mantenha `NEXT_PUBLIC_SITE_URL` alinhada com a **Site URL** do Supabase. O app usa `http://localhost:3000` por padrão no desenvolvimento. Fora do desenvolvimento, configure uma URL HTTPS para cadastro e recuperação de senha.
+
 ```sh
 pnpm dev
 ```
