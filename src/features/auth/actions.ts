@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { FormFeedback } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/server";
@@ -13,10 +12,26 @@ import {
 } from "./schema";
 import { signupEnabled } from "./signup-enabled";
 
-async function confirmationUrl() {
-  const origin = (await headers()).get("origin");
-  if (!origin) throw new Error("Origem do formulário indisponível.");
-  return new URL("/confirmar", origin).href;
+function confirmationUrl() {
+  const development = process.env.NODE_ENV === "development";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (development ? "http://localhost:3000" : undefined);
+  if (!siteUrl) throw new Error("Configure NEXT_PUBLIC_SITE_URL.");
+
+  let url: URL;
+  try {
+    url = new URL(siteUrl);
+  } catch {
+    throw new Error("NEXT_PUBLIC_SITE_URL deve ser uma URL absoluta válida.");
+  }
+
+  if (url.protocol !== "https:" && !(development && url.protocol === "http:")) {
+    throw new Error(
+      "NEXT_PUBLIC_SITE_URL deve usar HTTPS fora do desenvolvimento.",
+    );
+  }
+  return new URL("/confirmar", url.origin).href;
 }
 
 export async function login(
@@ -54,10 +69,11 @@ export async function signup(
       variant: "error",
       message: `Informe um e-mail válido e uma senha de ${passwordRequirements}.`,
     };
+  const emailRedirectTo = confirmationUrl();
   const client = await createClient();
   const { data, error } = await client.auth.signUp({
     ...input.data,
-    options: { emailRedirectTo: await confirmationUrl() },
+    options: { emailRedirectTo },
   });
   if (error)
     return {
@@ -78,9 +94,10 @@ export async function recover(
   const email = emailSchema.safeParse(form.get("email"));
   if (!email.success)
     return { variant: "error", message: "Informe um e-mail válido." };
+  const redirectTo = confirmationUrl();
   const client = await createClient();
   const { error } = await client.auth.resetPasswordForEmail(email.data, {
-    redirectTo: await confirmationUrl(),
+    redirectTo,
   });
   if (error)
     return {
