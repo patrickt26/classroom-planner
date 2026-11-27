@@ -38,6 +38,8 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
+minimum_password_length = 10
+password_requirements = "letters_digits"
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["http://localhost:3000/confirmar", "http://127.0.0.1:3000/confirmar"]
 

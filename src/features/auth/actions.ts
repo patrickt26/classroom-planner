@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   emailSchema,
   loginSchema,
+  passwordRequirements,
   passwordSchema,
   signupSchema,
 } from "./schema";
@@ -51,7 +52,7 @@ export async function signup(
   if (!input.success)
     return {
       variant: "error",
-      message: "Informe um e-mail válido e uma senha de 8 a 72 bytes.",
+      message: `Informe um e-mail válido e uma senha de ${passwordRequirements}.`,
     };
   const client = await createClient();
   const { data, error } = await client.auth.signUp({
@@ -102,7 +103,7 @@ export async function resetPassword(
   if (!password.success)
     return {
       variant: "error",
-      message: "Use uma senha de pelo menos 8 caracteres e até 72 bytes.",
+      message: `Use uma senha de ${passwordRequirements}.`,
     };
   const client = await createClient();
   const { error } = await client.auth.updateUser({ password: password.data });
