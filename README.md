@@ -46,6 +46,8 @@ pnpm dev
 
 Abra [localhost:3000](http://localhost:3000) para ver a apresentação do app. Em [Entrar](http://localhost:3000/entrar), use a conta fictícia do seed, `professora.exemplo@example.test`, com a senha local `senha-de-teste`.
 
+Deixe `NEXT_PUBLIC_TURNSTILE_SITE_KEY` vazia no ambiente local e no CI. Em produção, o Cloudflare Turnstile protege o login, a recuperação de senha e o cadastro após a ativação no Supabase. A ordem de ativação está no [checklist de deploy](docs/checklist-de-deploy.md#proteção-contra-robôs).
+
 ### O que explorar com o seed
 
 O seed cria as datas de exemplo em relação ao dia, à semana e ao mês em que é aplicado.
