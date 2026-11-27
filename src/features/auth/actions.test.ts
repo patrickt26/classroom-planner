@@ -31,7 +31,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("./signup-enabled", () => ({ signupEnabled: true }));
 
 const email = "professora@example.test";
-const password = "SenhaFicticia123";
+const password = "senha-ficticia-1";
 const confirmationUrl = "https://app.example.test/confirmar";
 const captchaToken = "token-ficticio";
 
@@ -164,7 +164,7 @@ test("confirmationUrl aceita HTTP no desenvolvimento", async () => {
 
 function passwordForm() {
   const form = new FormData();
-  form.set("password", "senha-ficticia-123");
+  form.set("password", password);
   return form;
 }
 
@@ -189,7 +189,7 @@ test("redefinição de senha encerra apenas as outras sessões após salvar", as
   await resetPassword(null, passwordForm());
 
   expect(auth.updateUser).toHaveBeenCalledExactlyOnceWith({
-    password: "senha-ficticia-123",
+    password,
   });
   expect(auth.signOut).toHaveBeenCalledExactlyOnceWith({ scope: "others" });
   expect(auth.updateUser).toHaveBeenCalledBefore(auth.signOut);
