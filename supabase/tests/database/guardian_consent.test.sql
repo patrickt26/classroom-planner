@@ -3,9 +3,14 @@ create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 select plan(17);
 
-insert into auth.users (id) values
-  ('11900000-0000-4000-8000-000000000001'),
-  ('11900000-0000-4000-8000-000000000002');
+with test_users as (
+  insert into auth.users (id) values
+    ('11900000-0000-4000-8000-000000000001'),
+    ('11900000-0000-4000-8000-000000000002')
+  returning id
+)
+insert into public.terms_acceptances (user_id, terms_version)
+select id, public.current_terms_version() from test_users;
 select workspace_id as ws from memberships where user_id = '11900000-0000-4000-8000-000000000001' \gset
 select workspace_id as other_ws from memberships where user_id = '11900000-0000-4000-8000-000000000002' \gset
 insert into students (workspace_id, id, name, hourly_rate, guardian_consent_at) values

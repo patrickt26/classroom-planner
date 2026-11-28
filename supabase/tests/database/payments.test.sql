@@ -11,7 +11,12 @@ select no_plan();
 \set second '60000000-0000-4000-8000-000000000017'
 \set third '70000000-0000-4000-8000-000000000017'
 
-insert into auth.users (id) values (:'teacher'), (:'other_teacher'), (:'student_user'), (:'guardian_user');
+with test_users as (
+  insert into auth.users (id) values (:'teacher'), (:'other_teacher'), (:'student_user'), (:'guardian_user')
+  returning id
+)
+insert into public.terms_acceptances (user_id, terms_version)
+select id, public.current_terms_version() from test_users;
 select workspace_id as ws from memberships where user_id = :'teacher' \gset
 select workspace_id as other_ws from memberships where user_id = :'other_teacher' \gset
 insert into memberships (workspace_id, user_id, role)
