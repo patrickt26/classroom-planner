@@ -30,7 +30,7 @@ export async function recordPayment(
     lessonIds: form.getAll("lessonId"),
     paidOn: form.get("paidOn"),
     method: form.get("method"),
-    note: form.get("note"),
+    note: form.get("note") ?? "",
   });
   if (!parsed.success)
     return "Confira as aulas selecionadas e os dados do pagamento.";
@@ -47,6 +47,8 @@ export async function recordPayment(
   });
   if (error?.code === "22007")
     return "Escolha uma data entre a última aula selecionada e hoje.";
+  if (error?.message === "student_anonymized")
+    return "Para um aluno removido, registre o pagamento com a observação em branco.";
   if (error?.code === "P0001")
     return "As cobranças pendentes mudaram. Atualize a página e confira a seleção.";
   if (error) return "Não foi possível registrar o pagamento. Tente novamente.";

@@ -6,7 +6,7 @@ type ExportTable = keyof Database["public"]["Tables"];
 const tables = {
   students: {
     columns:
-      "workspace_id,id,name,birth_date,school,grade_id,notes,hourly_rate,is_free,guardian_consent_at,archived_at,created_at,updated_at",
+      "workspace_id,id,name,birth_date,school,grade_id,notes,hourly_rate,is_free,guardian_consent_at,archived_at,anonymized_at,created_at,updated_at",
     order: ["id"],
   },
   guardians: {

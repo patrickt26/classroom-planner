@@ -13,8 +13,15 @@ const notices = {
   salvo: "Alterações salvas.",
   arquivado: "Aluno arquivado.",
   reativado: "Aluno reativado.",
+  excluido: "Dados do aluno excluídos.",
 };
-const noticeSchema = z.enum(["cadastrado", "salvo", "arquivado", "reativado"]);
+const noticeSchema = z.enum([
+  "cadastrado",
+  "salvo",
+  "arquivado",
+  "reativado",
+  "excluido",
+]);
 
 export const metadata = { title: "Alunos | Planejamento de aulas" };
 
@@ -154,14 +161,16 @@ export default async function StudentsPage({
                       : `${formatReais.format(student.hourly_rate / 100)} / hora`}
                   </p>
                 </div>
-                <Button variant="ghost" asChild>
-                  <Link
-                    href={`/alunos/${student.id}/editar`}
-                    aria-label={`Editar ${student.name}`}
-                  >
-                    <Pencil aria-hidden="true" /> Editar
-                  </Link>
-                </Button>
+                {!student.anonymized_at && (
+                  <Button variant="ghost" asChild>
+                    <Link
+                      href={`/alunos/${student.id}/editar`}
+                      aria-label={`Editar ${student.name}`}
+                    >
+                      <Pencil aria-hidden="true" /> Editar
+                    </Link>
+                  </Button>
+                )}
               </li>
             );
           })}

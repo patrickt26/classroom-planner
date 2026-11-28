@@ -1,8 +1,10 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { FormFeedback } from "@/components/ui/alert";
 import {
   guardianFormSchema,
   guardianLinkSchema,
@@ -10,7 +12,11 @@ import {
 import { requireTeacherWorkspace } from "@/features/workspace/queries";
 import { createClient } from "@/lib/supabase/server";
 import type { StudentFormState, StudentFormValues } from "./form-state";
-import { studentFormSchema, studentRegistrationFormSchema } from "./schema";
+import {
+  studentErasureSchema,
+  studentFormSchema,
+  studentRegistrationFormSchema,
+} from "./schema";
 
 const registrationGuardianSchema = z.discriminatedUnion("mode", [
   guardianLinkSchema.extend({
@@ -187,19 +193,48 @@ export async function changeStudentStatus(
   const workspace = await requireTeacherWorkspace();
   const client = await createClient();
   const archive = input.data.status === "arquivar";
-  const query = client
-    .from("students")
-    .update({ archived_at: archive ? new Date().toISOString() : null })
-    .eq("workspace_id", workspace.workspace_id)
-    .eq("id", input.data.id);
-  const { error } = await (archive
-    ? query.is("archived_at", null)
-    : query.not("archived_at", "is", null));
-  if (error)
+  const { data, error } = await client.rpc("set_student_archived", {
+    target_workspace_id: workspace.workspace_id,
+    target_student_id: input.data.id,
+    archive,
+  });
+  if (error || !data)
     return "Não foi possível alterar a situação do aluno. Tente novamente.";
   redirect(
     archive
       ? "/alunos?situacao=arquivados&aviso=arquivado"
       : "/alunos?aviso=reativado",
   );
+}
+
+export async function eraseStudent(
+  id: string,
+  _: FormFeedback,
+  form: FormData,
+): Promise<FormFeedback> {
+  const input = studentErasureSchema.safeParse({ id, name: form.get("name") });
+  if (!input.success)
+    return { variant: "error", message: "Confira o nome do aluno." };
+  const { workspace_id } = await requireTeacherWorkspace();
+  const client = await createClient();
+  const { error } = await client
+    .rpc("erase_student_data", {
+      target_workspace_id: workspace_id,
+      target_student_id: input.data.id,
+    })
+    .setHeader(
+      "x-student-name-sha256",
+      createHash("sha256").update(input.data.name).digest("hex"),
+    );
+  if (error) {
+    const message =
+      error.message === "student_name_mismatch"
+        ? "O nome digitado precisa ser igual ao da ficha atual. Confira o cadastro."
+        : error.message === "archived_student_required"
+          ? "A exclusão exige um aluno arquivado."
+          : "Não foi possível excluir os dados do aluno. Tente novamente.";
+    return { variant: "error", message };
+  }
+  revalidatePath("/", "layout");
+  redirect("/alunos?situacao=arquivados&aviso=excluido");
 }

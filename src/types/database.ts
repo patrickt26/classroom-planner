@@ -588,6 +588,7 @@ export type Database = {
       };
       students: {
         Row: {
+          anonymized_at: string | null;
           archived_at: string | null;
           birth_date: string | null;
           created_at: string;
@@ -604,6 +605,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          anonymized_at?: string | null;
           archived_at?: string | null;
           birth_date?: string | null;
           created_at?: string;
@@ -619,6 +621,7 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
+          anonymized_at?: string | null;
           archived_at?: string | null;
           birth_date?: string | null;
           created_at?: string;
@@ -796,6 +799,10 @@ export type Database = {
         Args: { target_lesson_id: string; target_workspace_id: string };
         Returns: string;
       };
+      erase_student_data: {
+        Args: { target_student_id: string; target_workspace_id: string };
+        Returns: Json;
+      };
       generate_recurrence: {
         Args: {
           r: Omit<
@@ -926,6 +933,14 @@ export type Database = {
         Args: {
           new_start: string;
           original_id: string;
+          target_workspace_id: string;
+        };
+        Returns: boolean;
+      };
+      set_student_archived: {
+        Args: {
+          archive: boolean;
+          target_student_id: string;
           target_workspace_id: string;
         };
         Returns: boolean;

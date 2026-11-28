@@ -61,6 +61,18 @@ export default async function StudentPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const student = await getStudent((await params).id);
+  if (student.anonymized_at) {
+    return (
+      <div>
+        <BackToStudents href="/alunos?situacao=arquivados" />
+        <h1 className="text-3xl font-bold text-brown">{student.name}</h1>
+        <p className="mt-2">Cadastro anonimizado a pedido do responsável.</p>
+        <Button asChild variant="link" className="mt-2">
+          <Link href="/cobrancas">Ver cobranças</Link>
+        </Button>
+      </div>
+    );
+  }
   const filters = await searchParams;
   const { workspace_id, time_zone } = await requireTeacherWorkspace();
   const today = localLessonDateTime(new Date(), time_zone).slice(0, 10);
@@ -280,6 +292,21 @@ export default async function StudentPage({
           <StudentGuardians studentId={student.id} params={filters} />
         </div>
       </div>
+      {archived && (
+        <section
+          aria-labelledby="exclusao"
+          className="grid justify-items-start gap-2 border-t pt-4"
+        >
+          <h2 id="exclusao" className="font-bold">
+            Exclusão de dados
+          </h2>
+          <Button asChild variant="ghost" className="text-destructive">
+            <Link href={`/alunos/${student.id}/excluir`}>
+              Excluir dados do aluno
+            </Link>
+          </Button>
+        </section>
+      )}
     </div>
   );
 }

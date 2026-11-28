@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 const nameSchema = z.string().trim().min(1);
+export const studentErasureSchema = z.object({
+  id: z.uuid(),
+  name: z.string().min(1),
+});
 export const gradeSchema = z.object({ name: nameSchema });
 export const subjectSchema = z.object({ name: nameSchema });
 

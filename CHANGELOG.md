@@ -8,6 +8,7 @@ O app segue o versionamento semântico. A versão MAIOR sobe quando algo deixa d
 
 ### Adicionado
 
+- A professora pode excluir os dados de um aluno arquivado a pedido do responsável. As cobranças e os pagamentos ficam no histórico como “Aluno removido” (#142).
 - Em Configurações, a professora pode sair de todos os aparelhos. Ao redefinir a senha, o app encerra as outras sessões e mantém a atual (#145).
 - Proteção contra robôs com Cloudflare Turnstile no login, na recuperação de senha e no cadastro (#140).
 

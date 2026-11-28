@@ -5,6 +5,7 @@ declare
   first_access_id uuid := '60000000-0000-4000-8000-000000000002';
   export_teacher_id uuid := '60000000-0000-4000-8000-000000000003';
   sessions_teacher_id uuid := '60000000-0000-4000-8000-000000000004';
+  erasure_teacher_id uuid := '60000000-0000-4000-8000-000000000005';
   export_ws uuid;
   ws uuid;
   workspace_time_zone text;
@@ -31,16 +32,17 @@ begin
     (teacher_id, 'professora.exemplo@example.test'),
     (first_access_id, 'primeiro.acesso@example.test'),
     (export_teacher_id, 'professora.exportacao@example.test'),
-    (sessions_teacher_id, 'professora.sessoes@example.test')
+    (sessions_teacher_id, 'professora.sessoes@example.test'),
+    (erasure_teacher_id, 'professora.exclusao@example.test')
   ) as sample(id, email);
   insert into auth.identities (user_id, provider_id, provider, identity_data, created_at, updated_at)
   select id, id::text, 'email', jsonb_build_object('sub', id, 'email', email), now(), now()
-  from auth.users where id in (teacher_id, first_access_id, export_teacher_id, sessions_teacher_id);
+  from auth.users where id in (teacher_id, first_access_id, export_teacher_id, sessions_teacher_id, erasure_teacher_id);
 
   -- Mesma versão de src/features/legal/version.ts.
   insert into public.terms_acceptances (user_id, terms_version)
-  values (teacher_id, '2026-11-24'), (export_teacher_id, '2026-11-24'),
-    (sessions_teacher_id, '2026-11-24');
+  values (teacher_id, '2026-11-27'), (export_teacher_id, '2026-11-27'),
+    (sessions_teacher_id, '2026-11-27'), (erasure_teacher_id, '2026-11-27');
 
   select workspace_id into strict export_ws from public.memberships where user_id = export_teacher_id;
   insert into public.students (workspace_id, name, hourly_rate, is_free, notes)
@@ -267,5 +269,12 @@ begin
 
   perform public.record_payment(ws, previous_month_payer, array[previous_month_paid_lesson],
     previous_month_start + 1, 'pix', 'Pagamento do mês anterior.');
+
+  -- Archived example for the teacher's walkthrough and screenshots.
+  insert into public.students (workspace_id, id, name, hourly_rate, archived_at)
+  values (ws, '14200000-0000-4000-8000-000000000001', 'Aluno do pedido de exclusão', 8000, now());
+  insert into public.student_guardians (workspace_id, student_id, guardian_id, relationship)
+  select ws, '14200000-0000-4000-8000-000000000001', id, 'Tutor'
+  from public.guardians where workspace_id = ws and name = 'Responsável D';
 end;
 $$;
