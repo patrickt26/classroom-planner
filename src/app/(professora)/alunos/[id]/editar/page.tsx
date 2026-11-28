@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { changeStudentStatus, saveStudent } from "@/features/students/actions";
 import {
   BackToStudents,
@@ -15,6 +16,7 @@ export default async function EditStudentPage({
 }) {
   const { id } = await params;
   const student = await getStudent(id);
+  if (student.anonymized_at) redirect(`/alunos/${student.id}`);
   const subjectIds = student.student_subjects.map(
     ({ subject_id }) => subject_id,
   );

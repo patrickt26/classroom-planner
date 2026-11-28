@@ -20,6 +20,7 @@ import { methodLabels } from "../schema";
 export function PaymentForm({
   id,
   name,
+  anonymized = false,
   charges,
   today,
   month,
@@ -27,6 +28,7 @@ export function PaymentForm({
 }: {
   id: string;
   name: string;
+  anonymized?: boolean;
   charges: PendingCharge[];
   today: string;
   month?: string;
@@ -152,15 +154,17 @@ export function PaymentForm({
               </Select>
             </label>
           </div>
-          <label className="grid gap-1 font-medium">
-            Observação (opcional)
-            <textarea
-              name="note"
-              rows={2}
-              maxLength={1000}
-              className="rounded-lg border border-input p-2"
-            />
-          </label>
+          {!anonymized && (
+            <label className="grid gap-1 font-medium">
+              Observação (opcional)
+              <textarea
+                name="note"
+                rows={2}
+                maxLength={1000}
+                className="rounded-lg border border-input p-2"
+              />
+            </label>
+          )}
           {error && (
             <p role="alert" className="text-destructive">
               {error}

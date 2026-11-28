@@ -40,14 +40,14 @@ export async function getPendingCharges(
   const client = await createClient();
   const groups = new Map<
     string,
-    { id: string; name: string; charges: PendingCharge[] }
+    { id: string; name: string; anonymized: boolean; charges: PendingCharge[] }
   >();
   let cursor: string | undefined;
   for (;;) {
     const query = client
       .from("charges")
       .select(
-        "lesson_id, student_id, amount_cents, lessons!inner(starts_at, subjects!lessons_workspace_id_subject_id_fkey(name), students!lessons_workspace_id_student_id_fkey(name))",
+        "lesson_id, student_id, amount_cents, lessons!inner(starts_at, subjects!lessons_workspace_id_subject_id_fkey(name), students!lessons_workspace_id_student_id_fkey(name, anonymized_at))",
       )
       .eq("workspace_id", workspaceId)
       .is("payment_id", null)
@@ -63,6 +63,7 @@ export async function getPendingCharges(
       const group = groups.get(row.student_id) ?? {
         id: row.student_id,
         name: row.lessons.students.name,
+        anonymized: row.lessons.students.anonymized_at !== null,
         charges: [],
       };
       const local = localLessonDateTime(

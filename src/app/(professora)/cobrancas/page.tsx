@@ -129,7 +129,7 @@ export default async function ChargesPage({
               Nenhuma cobrança pendente.
             </p>
           )}
-          {groups.map(({ id, name, charges }) => (
+          {groups.map(({ id, name, anonymized, charges }) => (
             <article
               key={id}
               className="grid gap-4 rounded-xl border bg-card p-4 sm:p-5"
@@ -154,6 +154,7 @@ export default async function ChargesPage({
                 key={charges.map((c) => c.lessonId).join(",")}
                 id={id}
                 name={name}
+                anonymized={anonymized}
                 charges={charges}
                 today={today}
                 month={monthParam}

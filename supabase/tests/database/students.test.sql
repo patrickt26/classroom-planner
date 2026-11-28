@@ -54,10 +54,9 @@ select throws_ok(format('insert into student_guardians (workspace_id, student_id
 select throws_ok(format('insert into student_subjects (workspace_id, student_id, subject_id) values (%1$L, %1$L, %1$L)', :'ws_b'),
   '42501', null, 'Recusa vínculo com disciplina em outro espaço');
 
-with changed as (update students set archived_at = now() where workspace_id = :'ws_b' returning id)
-select is(count(*), 0::bigint, 'A professora não arquiva alunos de outro espaço') from changed;
-with changed as (update students set archived_at = now() where workspace_id = :'ws_a' returning id)
-select is(count(*), 1::bigint, 'A professora arquiva seu aluno') from changed;
+select throws_ok(format('select set_student_archived(%1$L, %1$L, true)', :'ws_b'),
+  '42501', 'teacher_required', 'A professora não arquiva alunos de outro espaço');
+select ok(set_student_archived(:'ws_a', :'ws_a', true), 'A professora arquiva seu aluno');
 with removed as (delete from student_subjects where workspace_id = :'ws_b' returning student_id)
 select is(count(*), 0::bigint, 'A professora não remove disciplinas de outro espaço') from removed;
 

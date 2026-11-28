@@ -75,7 +75,7 @@ test("professora convidada define a senha pelo e-mail e entra em uma nova sessã
 }) => {
   const admin = localAdmin();
   const email = `professora-${randomUUID()}@example.test`;
-  const password = `Senha-ficticia-1-${randomUUID()}`;
+  const password = "senha-ficticia-1";
   const { error } = await admin.auth.admin.inviteUserByEmail(email);
   expect(error).toBeNull();
 
@@ -116,7 +116,7 @@ test("conta com aceite antigo precisa aceitar a versão vigente antes de abrir o
 }) => {
   const admin = localAdmin();
   const email = `professora-${randomUUID()}@example.test`;
-  const password = `Senha-ficticia-1-${randomUUID()}`;
+  const password = "senha-ficticia-1";
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,

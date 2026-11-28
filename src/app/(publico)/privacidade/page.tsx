@@ -107,12 +107,16 @@ export default function PrivacyPage() {
               ativa.
             </li>
             <li>
-              Apagamos os dados em até 30 dias após o pedido de exclusão ou o
-              encerramento da conta.
+              Quando o responsável pede a exclusão dos dados de um aluno, a
+              professora apaga os dados pessoais e pedagógicos em até 30 dias.
+              As cobranças e os pagamentos ficam anonimizados pelo prazo
+              necessário ao cumprimento das obrigações legais.
             </li>
             <li>
-              A professora deve baixar antes os dados que precisar guardar por
-              obrigação própria, como registros de cobrança.
+              Apagamos os dados da conta e do espaço em até 30 dias após o
+              pedido de exclusão da conta ou seu encerramento. Antes de
+              encerrá-la, a professora deve baixar os dados que precisar guardar
+              por obrigação própria, como registros de cobrança.
             </li>
             <li>
               As cópias de segurança e os logs técnicos expiram conforme o ciclo
